@@ -9,7 +9,7 @@
 import glob
 
 ## Load config file
-configfile: "config.advanced.yaml"
+configfile: "config.yaml"
 ## Used for FASTQC
 READS=["R1", "R2"]
 READS2=["1", "2"]
@@ -512,12 +512,12 @@ rule gatk_depth_of_coverage:
 
 rule multiQC:
 	input:
-		expand("qc/depth/{sample}.sample_interval_summary",sample = SAMPLES),
-		expand("qc/depth/{sample}.sample_cumulative_coverage_counts",sample = SAMPLES),
-		expand("qc/depth/{sample}.sample_cumulative_coverage_proportions",sample = SAMPLES),
-		expand("qc/depth/{sample}.sample_interval_statistics",sample = SAMPLES),
-		expand("qc/depth/{sample}.sample_statistics",sample = SAMPLES),
-		expand("qc/depth/{sample}.sample_summary",sample = SAMPLES),
+		expand("QC/depth/{sample}.sample_interval_summary",sample = SAMPLES),
+		expand("QC/depth/{sample}.sample_cumulative_coverage_counts",sample = SAMPLES),
+		expand("QC/depth/{sample}.sample_cumulative_coverage_proportions",sample = SAMPLES),
+		expand("QC/depth/{sample}.sample_interval_statistics",sample = SAMPLES),
+		expand("QC/depth/{sample}.sample_statistics",sample = SAMPLES),
+		expand("QC/depth/{sample}.sample_summary",sample = SAMPLES),
 		html=expand("QC/fastp/{sample}.html", sample = SAMPLES),
 		rawBam=expand("QC/samtools_stats/{sample}.raw.txt", sample = SAMPLES),
 		conBam=expand("QC/samtools_stats/{sample}.con.recalib.txt", sample = SAMPLES),
