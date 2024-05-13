@@ -104,7 +104,7 @@ rule fastq_screen:
 		mem=config["fastqScreenMem"],
 	threads: 8
 	log:
-		"logs/fastq_screen/{sample}.log"
+		"logs/fastq_screen/{sample}.{read}.log"
 	wrapper:
 	    "v3.10.2/bio/fastq_screen"
 
