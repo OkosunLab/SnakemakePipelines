@@ -1,0 +1,541 @@
+##########################################################
+##
+## Snakefile for the processing of UMI based DNA seq
+##
+## Written by: Findlay Bewicke-Copley
+## Date: 13-05-2024
+##########################################################
+
+import glob
+
+## Load config file
+configfile: "config.advanced.yaml"
+## Used for FASTQC
+READS=["R1", "R2"]
+READS2=["1", "2"]
+## Dynamically file all the sample IDs
+## First build the search string
+search="%s/{sample}_S{number}_{lane}_R1_001.fastq.gz" % config["rawFolder"]
+## Then find all the samples
+SAMPLES = set(glob_wildcards(search).sample)
+
+##########################################################
+## Functions
+##########################################################
+
+## Find all FASTQ files of a specific read given the sample ID
+
+def get_R1(wildcards):
+	files = glob.glob('{}/{}*R1*.fastq.gz'.format(config["rawFolder"], wildcards.sample))
+	files.sort()
+	return files
+
+def get_R2(wildcards):
+	files = glob.glob('{}/{}*R3*.fastq.gz'.format(config["rawFolder"], wildcards.sample))
+	files.sort()
+	return files
+
+def get_UMI(wildcards):
+	files = glob.glob('{}/{}*R2*.fastq.gz'.format(config["rawFolder"], wildcards.sample))
+	files.sort()
+	return files
+
+ 
+## Find all FASTQ files given the sample ID and read ID
+
+def get_fastq_from_sample_read(wildcards):
+	files = glob.glob('FASTQ_Raw/Combined/{}*{}*.fastq.gz'.format(wildcards.sample, wildcards.read))
+	return files
+
+
+##########################################################
+## RULES
+##########################################################
+
+## One rule to run them all
+
+rule all:
+	input:
+		expand("Alignment/{sample}.con.recalib.bam", sample = SAMPLES),
+		"QC/MultiQC/multiqc_report.html"
+
+##########################################################
+## QC and file manuipulation
+##########################################################
+
+## If samples are across multiple lanes this will combine them
+## If not it will just copy the files into FASTQ_Raw/Combined
+## These will be temporary files
+## the combined files will be removed after use
+rule combine_fastqs:
+	input:
+		R1 = get_R1,
+		R2 = get_R2,
+		UMI = get_UMI
+	output:
+		R1_out=temp("FASTQ_Raw/Combined/{sample}.R1.combined.fastq.gz"),
+		R2_out=temp("FASTQ_Raw/Combined/{sample}.R2.combined.fastq.gz"),
+		UMI_out=temp("FASTQ_Raw/Combined/{sample}.UMI.combined.fastq.gz")
+	params:
+		mem=config["combineMem"],
+	log:
+		"logs/combine_fastq/{sample}.log"
+	threads: 1
+	shell:
+		"""
+		cat {input.R1} > {output.R1_out}
+		cat {input.R2} > {output.R2_out}
+		cat {input.UMI} > {output.UMI_out} 
+		"""
+
+## FASTQ screen does a little alignment with a small number of reads from numerous genomes
+## tests for contaminants
+
+rule fastq_screen:
+	input: 
+		"FASTQ_Raw/Combined/{sample}.{read}.combined.fastq.gz"
+	output:
+		txt="QC/fastq_screen/{sample}.{read}.fastq_screen.txt",
+		png="QC/fastq_screen/{sample}.{read}.fastq_screen.png"
+	params:
+		fastq_screen_config="/data/BCI-OkosunLab/Ref/FASTQ_Screen/fastq_screen.conf",
+		subset=100000,
+		aligner='bowtie2'
+	threads: 8
+	wrapper:
+	    "v3.10.2/bio/fastq_screen"
+
+## FASTP is a tool for QC and trimming of FASTQ files.
+
+rule fastp:
+	input:
+		sample=["FASTQ_Raw/Combined/{sample}.R1.combined.fastq.gz", "FASTQ_Raw/Combined/{sample}.R2.combined.fastq.gz"]
+	output:
+		trimmed=["FASTQ_fastp/{sample}.1.fastq.gz", "FASTQ_fastp/{sample}.2.fastq.gz"],
+		# Unpaired reads separately
+		unpaired1="FASTQ_fastp/{sample}.u1.fastq.gz",
+		unpaired2="FASTQ_fastp/{sample}.u2.fastq.gz",
+		failed="FASTQ_fastp/{sample}.failed.fastq.gz",
+		html="QC/fastp/{sample}.html",
+		json="QC/fastp/{sample}.json"
+	log:
+		"logs/fastp/pe/{sample}.log"
+	params:
+		## It should detect the adapters but can add them here too
+		## These are the TruSeq adapters
+		## adapters="--adapter_sequence AGATCGGAAGAGCACACGTCTGAACTCCAGTCA --adapter_sequence_r2 AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT",
+		## g removes poly g
+		## detect adapter for pe should work out what the adapters are.
+		extra="-g --detect_adapter_for_pe",
+		mem=config["fastpMem"]
+	threads: 1 
+	wrapper:
+		"v3.4.1/bio/fastp"
+
+rule fastqc:
+	input:
+		"FASTQ_Raw/Combined/{sample}.{read}.combined.fastq.gz"
+	output:
+		html="QC/fastqc/{sample}_{read}.html",
+		zip="QC/fastqc/{sample}_{read}_fastqc.zip"
+	params:
+		extra = "--quiet",
+		mem=config["fastpMem"]
+	log:
+		"logs/fastqc/{sample}_{read}.log"
+	threads: 1
+	resources:
+		mem_mb = 1024,
+	wrapper:
+		"v3.3.6/bio/fastqc"
+
+rule fastqc_fastp:
+	input:
+		"FASTQ_fastp/{sample}.{read}.fastq.gz"
+	output:
+		html="QC/fastqc_fastp/{sample}_{read}.html",
+		zip="QC/fastqc_fastp/{sample}_{read}_fastqc.zip"
+	params:
+		extra = "--quiet",
+		mem=config["fastpMem"]
+	log:
+		"logs/fastqc_fastp/{sample}_{read}.log"
+	threads: 1
+	resources:
+		mem_mb = 1024,
+	wrapper:
+		"v3.3.6/bio/fastqc"
+
+
+rule fastqc_fastp_run:
+	input:
+		html=expand("QC/fastqc_fastp/{sample}_{read}_posttrim.html", sample = SAMPLES, read = READS2),
+		zip=expand("QC/fastqc_fastp/{sample}_{read}_posttrim.fastqc.zip", sample = SAMPLES, read = READS2)
+	output:
+		"QC/MultiQC/multiqc_report.html",
+	conda:
+		"envs/multiqc.yaml"
+	params:
+		mem = "4G"
+	log:
+		"logs/multiqc/multiqc.fastp.log",
+	threads: 1
+	shell:
+		"""
+		multiqc -o QC/MultiQC/ \
+			-n Multiqc.post.fastp \
+			-f QC/fastqc_fastp/
+		"""
+
+
+
+rule trim_galore_pe:
+	input:
+		["FASTQ_Raw/Combined/{sample}.R1.combined.fastq.gz", "FASTQ_Raw/Combined/{sample}.R2.combined.fastq.gz"],
+	output:
+		fasta_fwd="FASTQ_Trim/{sample}_trimmed_R1.fq.gz",
+		report_fwd="QC/trim_galore/{sample}_R1_trimming_report.txt",
+		fasta_rev="FASTQ_Trim/{sample}_trimmed_R2.fq.gz",
+		report_rev="QC/trim_galore/{sample}_R2_trimming_report.txt",
+	threads: 1
+	params:
+		extra="--illumina --gzip --retain_unpaired",
+		mem=config["trimMem"]
+	log:
+		"logs/trim_galore/{sample}.log",
+	wrapper:
+		"v3.4.0/bio/trim_galore/pe"
+
+
+rule fastqc_post_trim:
+	input:
+		"FASTQ_Trim/{sample}_trimmed_{read}.fq.gz",
+	output:
+		html="QC/fastqc_trimmed/{sample}_{read}_trimmed.html",
+		zip="QC/fastqc_trimmed/{sample}_{read}_trimmed_fastqc.zip"
+	params:
+		extra = "--quiet",
+		mem=config["fastpMem"]
+	log:
+		"logs/fastqc_trimmed/{sample}_{read}_trimmed.log"
+	threads: 1
+	resources:
+		mem_mb = 1024,
+	wrapper:
+		"v3.3.6/bio/fastqc"
+
+
+##########################################################
+## Alignment
+##########################################################
+
+rule bwa_mem:
+	input:
+		R1="FASTQ_fastp/{sample}.1.fastq.gz",
+		R2="FASTQ_fastp/{sample}.2.fastq.gz",
+		idx=config["bwa_index"],
+	output:
+		temp("Alignment/{sample}.raw.bam")
+	log:
+		"logs/bwa_mem/{sample}.log",
+	params:
+		extra=r"-R '@RG\tID:{sample}\tSM:{sample}\tPL:Illumina'",
+		sorting="samtools",  # Can be 'none', 'samtools' or 'picard'.
+		sort_order="coordinate",  # Can be 'queryname' or 'coordinate'.
+		sort_extra="",  # Extra args for samtools/picard.
+		mem=config["bwaMem"],
+	threads: config["bwaThreads"]
+	conda:
+		"envs/bwa.yaml"
+	shell:
+		"""
+		bwa mem -t {threads} -M {input.idx} \
+			{params.extra} \
+			{input.R1} {input.R2} |
+			samtools view -Sbh - > {output}
+		"""
+
+## Alignment QC
+
+rule samtools_stats_raw:
+	input:
+		bam="Alignment/{sample}.raw.bam"
+	output:
+		"QC/samtools_stats/{sample}.raw.txt",
+	params:
+		extra="",  # Optional: extra arguments.
+		mem=config["samtoolsStatMem"]
+	threads: 1
+	log:
+		"logs/samtools_stats/{sample}.log",
+	wrapper:
+		"v3.9.0/bio/samtools/stats"
+
+##########################################################
+## FGBIO UMI section
+##########################################################
+
+rule annotate_bam:
+	input:
+		bam="Alignment/{sample}.raw.bam",
+		umi="FASTQ_Raw/Combined/{sample}.UMI.combined.fastq.gz",
+	output:
+		temp("Alignment/{sample}.fg.bam"),
+	log:
+		"logs/fgbio/annotate_bam/{sample}.log",
+	params:
+		mem=config["fgbioMem"],
+		javaMem=config["fgbioJavaMem"],
+	conda:
+		"envs/fgbio.yaml",
+	shell:
+		"""
+		fgbio {params.javaMem} -XX:+AggressiveOpts -XX:+AggressiveHeap AnnotateBamWithUmis \
+			-i {input.bam} \
+			-f {input.umi} \
+			-o {output}
+		"""
+
+rule sort_UMI_bam:
+	input:
+		"Alignment/{sample}.fg.bam"
+	output:
+		temp("Alignment/{sample}.fgsort.bam"),
+	log:
+		"logs/fgbio/sort_bam/{sample}.log",
+	params:
+		mem=config["fgbioMem"],
+		javaMem = config["fgbioJavaMem"]
+	conda:
+		"envs/fgbio.yaml"
+	threads: 1
+	shell:
+		"""
+		fgbio {params.javaMem} -XX:+AggressiveOpts -XX:+AggressiveHeap SortBam \
+			-i {input} \
+			-s Queryname \
+			-o {output}
+		"""
+
+rule set_mate_info:
+	input:
+		"Alignment/{sample}.fgsort.bam"
+	output:
+		temp("Alignment/{sample}.fgmate.bam")
+	log:
+		"logs/fgbio/set_mate/{sample}.log"
+	conda:
+		"envs/fgbio.yaml"
+	params:
+		mem=config["fgbioMem"],
+		javaMem = config["fgbioJavaMem"]
+	threads: 1
+	shell:
+		"""
+		fgbio {params.javaMem} -XX:+AggressiveOpts -XX:+AggressiveHeap SetMateInformation \
+			-i {input} \
+			-o {output}
+		"""
+
+rule group_reads:
+	input:
+		"Alignment/{sample}.fgmate.bam"
+	output:
+		bam=temp("Alignment/{sample}.fggrp.bam"),
+		qc="QC/fgbio/{sample}.family_size_histogram.txt"
+	log:
+		"logs/fgbio/group_reads/{sample}.log"
+	params:
+		mem=config["fgbioMem"],
+		javaMem = config["fgbioJavaMem"]
+	conda:
+		"envs/fgbio.yaml"
+	threads: 1
+	shell:
+		"""
+		fgbio {params.javaMem} -XX:+AggressiveOpts -XX:+AggressiveHeap GroupReadsByUmi \
+			-i {input} \
+			-f {output.qc} \
+			-s adjacency \
+			-o {output.bam}
+		"""
+
+rule call_consensus:
+	input:
+		"Alignment/{sample}.fggrp.bam"
+	output:
+		temp("Alignment/{sample}.fgcon.bam")
+	log:
+		"logs/fgbio/call_consensus/{sample}.log"
+	conda:
+		"envs/fgbio.yaml"
+	params:
+		mem=config["fgbioMem"],
+		javaMem = config["fgbioJavaMem"]
+	threads: 1
+	shell:
+		"""
+		fgbio {params.javaMem} -XX:+AggressiveOpts -XX:+AggressiveHeap CallMolecularConsensusReads \
+			-i {input} \
+			-o {output} \
+			-M 1
+		"""
+
+##########################################################
+## Consensus Construction
+##########################################################
+
+rule consensus_fastq:
+	input:
+		"Alignment/{sample}.fgcon.bam"
+	output:
+		R1="FASTQ_Con/{sample}.con.R1.fastq.gz",
+		R2="FASTQ_Con/{sample}.con.R2.fastq.gz"
+	log:
+		"logs/samtools/separate/{sample}.separate.log",
+	params:
+		sort="-m 4G",
+		fastq="-n",
+		mem=config["consensusFastqMem"],
+	## Remember, this is the number of samtools' additional threads. 
+	## At least 2 threads have to be requested on cluster sumbission. 
+	## This value - 2 will be sent to samtools sort -@ argument.
+	threads: 3
+	wrapper:
+		"v3.4.0/bio/samtools/fastq/separate"
+
+rule bwa_mem_consensus:
+	input:
+		R1="FASTQ_Con/{sample}.con.R1.fastq.gz",
+		R2="FASTQ_Con/{sample}.con.R2.fastq.gz",
+		idx=config["bwa_index"]
+	output:
+		temp("Alignment/{sample}.con.bam")
+	log:
+		"logs/bwa_mem_consensus/{sample}.log",
+	params:
+		extra=r"-R '@RG\tID:{sample}\tSM:{sample}\tPL:Illumina'",
+		sorting="samtools",  # Can be 'none', 'samtools' or 'picard'.
+		sort_order="coordinate",  # Can be 'queryname' or 'coordinate'.
+		sort_extra="",  # Extra args for samtools/picard.
+		mem=config["bwaMem"],
+	threads: config["bwaThreads"]
+	conda:
+		"envs/bwa.yaml"
+	shell:
+		"""
+		bwa mem -t {threads} -M {input.idx} \
+			{params.extra} \
+			{input.R1} {input.R2} |
+			samtools view -Sbh - > {output}
+		"""
+
+rule gatk_baserecalibrator:
+	input:
+		bam="Alignment/{sample}.con.bam",
+		ref=config["reference"],
+		dict=config["dict"],
+		known=config["knownsites"],
+	output:
+		recal_table=temp("Alignment/{sample}.con.grp"),
+	log:
+		"logs/gatk/baserecalibrator/{sample}.log",
+	params:
+		extra="",  # optional
+		java_opts="",  # optional
+		mem=config["gatkMem"]
+	resources:
+		mem_mb=1024,
+	threads: 1
+	wrapper:
+		"v3.8.0/bio/gatk/baserecalibrator"
+
+rule gatk_applybqsr:
+	input:
+		bam="Alignment/{sample}.con.bam",
+		ref=config["reference"],
+		dict=config["dict"],
+		recal_table="Alignment/{sample}.con.grp",
+	output:
+		bam="Alignment/{sample}.con.recalib.bam",
+	log:
+		"logs/gatk/gatk_applybqsr/{sample}.log",
+	params:
+		extra="",  # optional
+		java_opts="",  # optional
+		mem=config["gatkMem"],
+		embed_ref=True,  # embed the reference in cram output
+	resources:
+		mem_mb=1024,
+	threads: 1
+	wrapper:
+		"v3.8.0/bio/gatk/applybqsr"
+
+rule samtools_stats_con:
+	input:
+		bam="Alignment/{sample}.con.recalib.bam"
+	output:
+		"QC/samtools_stats/{sample}.con.recalib.txt",
+	params:
+		extra="",  # Optional: extra arguments.
+		mem=config["samtoolsStatMem"]
+	threads: 1
+	log:
+		"logs/samtools_stats/{sample}.con.recalib.log",
+	wrapper:
+		"v3.9.0/bio/samtools/stats"
+
+rule gatk_depth_of_coverage:
+	input:
+		bam="Alignment/{sample}.con.recalib.bam",
+		fasta=config["reference"],
+	output:
+		multiext(
+			"QC/depth/{sample}",
+			"",
+			".sample_interval_summary",
+			".sample_cumulative_coverage_counts",
+			".sample_cumulative_coverage_proportions",
+			".sample_interval_statistics",
+			".sample_statistics",
+			".sample_summary",
+		),
+	log:
+		"logs/gatk/depthofcoverage/{sample}.log",
+	params:
+		extra="",
+		java_opts="",
+	resources:
+		mem_mb=1024,
+	wrapper:
+		"v3.9.0/bio/gatk/depthofcoverage"
+
+rule multiQC:
+	input:
+		expand("qc/depth/{sample}.sample_interval_summary",sample = SAMPLES),
+		expand("qc/depth/{sample}.sample_cumulative_coverage_counts",sample = SAMPLES),
+		expand("qc/depth/{sample}.sample_cumulative_coverage_proportions",sample = SAMPLES),
+		expand("qc/depth/{sample}.sample_interval_statistics",sample = SAMPLES),
+		expand("qc/depth/{sample}.sample_statistics",sample = SAMPLES),
+		expand("qc/depth/{sample}.sample_summary",sample = SAMPLES),
+		html=expand("QC/fastp/{sample}.html", sample = SAMPLES),
+		rawBam=expand("QC/samtools_stats/{sample}.raw.txt", sample = SAMPLES),
+		conBam=expand("QC/samtools_stats/{sample}.con.recalib.txt", sample = SAMPLES),
+		UMIQC=expand("QC/fgbio/{sample}.family_size_histogram.txt", sample = SAMPLES),
+		txt=expand("QC/fastq_screen/{sample}.{read}.fastq_screen.txt", sample = SAMPLES, read = READS),
+	output:
+		"QC/MultiQC/multiqc_report.html",
+	conda:
+		"envs/multiqc.yaml"
+	params:
+		mem = "4G"
+	log:
+		"logs/multiqc/multiqc.log",
+	threads: 1
+	shell:
+		"""
+		multiqc -o QC/MultiQC/ \
+			-n multiqc_report \
+			-f QC
+		"""
+

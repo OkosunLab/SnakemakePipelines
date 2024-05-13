@@ -1,0 +1,30 @@
+samples:
+##########################################
+## Genomes
+##########################################
+reference:
+        /data/home/hfx472/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta
+dict:
+        /data/home/hfx472/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.dict
+knownsites:
+        /data/home/hfx472/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.dbsnp138.vcf,
+        /data/home/hfx472/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/1000G_phase1.snps.high_confidence.hg38.vcf.gz.tbi,
+        /data/home/hfx472/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz.tbi
+bwa_index:
+        /data/home/hfx472/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta
+##########################################
+## Raw file location
+##########################################
+rawFolder:
+        /data/BCI-OkosunLab/Raw_Data/20240425_Okosun_JB_GC-WH-10999_AITL/FASTQ_Raw/
+## Memory
+combineMem: 8G
+trimMem: 8G
+bwaMem: 16G
+bwaThreads: 8
+fgbioMem: 26G
+fgbioJavaMem: -Xmx24g
+consensusFastqMem: 8G
+gatkMem: 16G
+samtoolsStatMem: 8G
+fastpMem: 8G
