@@ -1,5 +1,9 @@
 # SnakemakePipelines
 OkosunLab pipelines built using the snakemake workflow language
+
+## Pipeline Library:
+
 Pipeline | info
 --- | --- 
-foo | bar
+UMI.Consensus.Calling | Pipeline for calling variants from UMI marked DNA-seq
+
