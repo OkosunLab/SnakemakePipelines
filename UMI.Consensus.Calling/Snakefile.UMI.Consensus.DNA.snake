@@ -103,6 +103,8 @@ rule fastq_screen:
 		aligner='bowtie2',
 		mem=config["fastqScreenMem"],
 	threads: 8
+	log:
+		"logs/fastq_screen/{sample}.log"
 	wrapper:
 	    "v3.10.2/bio/fastq_screen"
 
