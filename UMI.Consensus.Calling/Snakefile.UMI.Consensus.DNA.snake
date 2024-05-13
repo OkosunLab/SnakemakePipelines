@@ -100,7 +100,8 @@ rule fastq_screen:
 	params:
 		fastq_screen_config="/data/BCI-OkosunLab/Ref/FASTQ_Screen/fastq_screen.conf",
 		subset=100000,
-		aligner='bowtie2'
+		aligner='bowtie2',
+		mem=config["fastqScreenMem"],
 	threads: 8
 	wrapper:
 	    "v3.10.2/bio/fastq_screen"

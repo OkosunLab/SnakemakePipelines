@@ -30,3 +30,4 @@ consensusFastqMem: 8G
 gatkMem: 16G
 samtoolsStatMem: 8G
 fastpMem: 8G
+fastqScreenMem: 8G
