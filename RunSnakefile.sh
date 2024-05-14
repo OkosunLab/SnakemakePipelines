@@ -33,7 +33,7 @@ while [ "$1" != "" ]; do
 		-d | --dag )		DAG=1
 					;;
 		-e | --extra )		shift
-					EXTRA=$1
+					EXTRA=$@
 					;;
 		-h | --help )		echo -e "
 A script for running OkosunLab snakemake files on apocrita (should work on almost any SGE based system too)
@@ -41,11 +41,12 @@ Written by: Findlay Bewicke-Copley
 Last Updated: 01/05/2024
 
 Options:
--n | --dry-run		Run a dry run of the script
+-n | --dry-run		Run a dry run of the script (default: off)
 -s | --snake-file	Provide the snakefile name (default: $Snakefile)
--j | --jobs		Number of concurrent jobs to run
--t | --target		Target file/rule
--d | --dag		Print the dag and exit 
+-j | --jobs		Number of concurrent jobs to run (default: 1)
+-t | --target		Target file/rule (default: none)
+-d | --dag		Print the dag and exit (default: off)
+-e | --extra		Takes all remaining arguments and passes them to snakemake (MUST BE LAST)
 -h | --help		Display this message and exit
 "
 					exit 1
