@@ -38,11 +38,12 @@ I have written a little wrapper for the snakemake command that includes the corr
 
 Short | Long | Purpose
 --- | --- | ---
--n | --dry-run | Run a dry run of the script
--s | --snake-file | Provide the snakefile name (default: Snakefile)
--j | --jobs | Number of concurrent jobs to run
--t | --target | target file/rule
--d | --dag | Print the dag and exit 
+-n | --dry-run | Run a dry run of the script (default: off)
+-s | --snake-file | Provide the snakefile name (default: $Snakefile)
+-j | --jobs | Number of concurrent jobs to run (default: 1)
+-t | --target | Target file/rule (default: none)
+-d | --dag | Print the dag and exit (default: off)
+-e | --extra | Takes all remaining arguments and passes them to snakemake (MUST BE LAST)
 -h | --help | Display this message and exit
 
 My suggestion is to symlink this command in your ~/.local/bin/ so you can call it from anywhere on the system.
