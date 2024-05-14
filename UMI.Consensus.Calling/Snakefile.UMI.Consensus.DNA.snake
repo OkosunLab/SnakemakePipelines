@@ -9,7 +9,7 @@
 import glob
 
 ## Load config file
-configfile: "config.yaml"
+configfile: "UMI.Consensus.DNA.config.yaml"
 ## Used for FASTQC
 READS=["R1", "R2"]
 READS2=["1", "2"]
