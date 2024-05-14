@@ -38,7 +38,7 @@ reference | Reference genome
 dict | dictionary for that reference genome
 knownsites | High quality SNP/indel calls
 bwa_index | location of index for BWA
-intervals | /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/all.chromosomes.regions.list
+intervals | list of intervals for depth of coverage to look over
 rawFolder | folder containing the raw fastq files
 **Memory Options** | 
 combineMem | Memory used for combining fastqs (don't need much)
