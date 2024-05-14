@@ -430,7 +430,7 @@ rule bwa_mem_consensus:
 		bwa mem -t {threads} -M {input.idx} \
 			{params.extra} \
 			{input.R1} {input.R2} |
-			samtools view -Sbh - > {output}
+			samtools sort -@{threads} -o {output} -
 		"""
 
 rule gatk_baserecalibrator:
@@ -474,6 +474,22 @@ rule gatk_applybqsr:
 	wrapper:
 		"v3.8.0/bio/gatk/applybqsr"
 
+
+rule samtools_index:
+	input:
+		"Alignment/{sample}.con.recalib.bam"
+	output:
+		"Alignment/{sample}.con.recalib.bam.bai",
+	log:
+		"logs/samtools_index/{sample}.log",
+	params:
+		extra="",  # optional params string
+		mem=config["samtoolsStatMem"]
+	threads: 4  # This value - 1 will be sent to -@
+	wrapper:
+		"v3.10.2/bio/samtools/index"
+	
+
 rule samtools_stats_con:
 	input:
 		bam="Alignment/{sample}.con.recalib.bam"
@@ -490,9 +506,10 @@ rule samtools_stats_con:
 
 rule gatk_depth_of_coverage:
 	input:
-		bam="Alignment/{sample}.con.recalib.bam",
+		bam="Alignment/{sample}.con.recalib.bam",	
 		fasta=config["reference"],
-		intervals=config["intervals"]
+		intervals=config["intervals"],
+		idx="Alignment/{sample}.con.recalib.bam.bai"
 	output:
 		multiext(
 			"QC/depth/{sample}",
@@ -513,7 +530,7 @@ rule gatk_depth_of_coverage:
 	resources:
 		mem_mb=config["gatkRunMem"],
 	wrapper:
-		"v3.9.0/bio/gatk/depthofcoverage"
+		"v3.10.2/bio/gatk/depthofcoverage"
 
 rule multiQC:
 	input:
