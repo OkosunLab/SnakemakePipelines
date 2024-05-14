@@ -44,7 +44,8 @@ Options:
 -n | --dry-run		Run a dry run of the script
 -s | --snake-file	Provide the snakefile name (default: $Snakefile)
 -j | --jobs		Number of concurrent jobs to run
--t | --target		target file/rule 
+-t | --target		Target file/rule
+-d | --dag		Print the dag and exit 
 -h | --help		Display this message and exit
 "
 					exit 1
