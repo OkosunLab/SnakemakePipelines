@@ -5,7 +5,7 @@ OkosunLab pipelines built using the snakemake workflow management system
 
 Pipeline | info
 --- | --- 
-UMI.Consensus.Calling | Pipeline for calling variants from UMI marked DNA-seq
+[UMI.Consensus.Calling](https://github.com/OkosunLab/SnakemakePipelines/tree/main/UMI.Consensus.Calling) | Pipeline for calling variants from UMI marked DNA-seq
 
 ## Tutorial
 
