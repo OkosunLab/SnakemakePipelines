@@ -1,5 +1,5 @@
 # SnakemakePipelines
-OkosunLab pipelines built using the snakemake workflow language
+OkosunLab pipelines built using the snakemake workflow management system
 
 ## Pipeline Library:
 
