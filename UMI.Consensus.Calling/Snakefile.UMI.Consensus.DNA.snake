@@ -492,6 +492,7 @@ rule gatk_depth_of_coverage:
 	input:
 		bam="Alignment/{sample}.con.recalib.bam",
 		fasta=config["reference"],
+		intervals=config["intervals"]
 	output:
 		multiext(
 			"QC/depth/{sample}",
