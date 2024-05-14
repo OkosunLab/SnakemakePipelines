@@ -448,7 +448,7 @@ rule gatk_baserecalibrator:
 		java_opts="",  # optional
 		mem=config["gatkMem"]
 	resources:
-		mem_mb=1024,
+		mem_mb=config["gatkRunMem"],
 	threads: 1
 	wrapper:
 		"v3.8.0/bio/gatk/baserecalibrator"
@@ -469,7 +469,7 @@ rule gatk_applybqsr:
 		mem=config["gatkMem"],
 		embed_ref=True,  # embed the reference in cram output
 	resources:
-		mem_mb=1024,
+		mem_mb=config["gatkRunMem"],
 	threads: 1
 	wrapper:
 		"v3.8.0/bio/gatk/applybqsr"
@@ -508,8 +508,9 @@ rule gatk_depth_of_coverage:
 	params:
 		extra="",
 		java_opts="",
+		mem=config["gatkMem"]
 	resources:
-		mem_mb=1024,
+		mem_mb=config["gatkRunMem"],
 	wrapper:
 		"v3.9.0/bio/gatk/depthofcoverage"
 
