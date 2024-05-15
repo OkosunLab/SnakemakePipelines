@@ -10,43 +10,11 @@ import glob
 
 ## Load config file
 configfile: "Mutect2.Variant.Calling.yaml"
-## Used for FASTQC
-READS=["R1", "R2"]
-READS2=["1", "2"]
 ## Dynamically file all the sample IDs
 ## First build the search string
-search="%s/{sample}_S{number}_{lane}_R1_001.fastq.gz" % config["AlignedFiles"]
+search="Alignment/{sample}.con.recalib.bam"
 ## Then find all the samples
 SAMPLES = set(glob_wildcards(search).sample)
-
-##########################################################
-## Functions
-##########################################################
-
-## Find all FASTQ files of a specific read given the sample ID
-
-def get_R1(wildcards):
-	files = glob.glob('{}/{}*R1*.fastq.gz'.format(config["rawFolder"], wildcards.sample))
-	files.sort()
-	return files
-
-def get_R2(wildcards):
-	files = glob.glob('{}/{}*R3*.fastq.gz'.format(config["rawFolder"], wildcards.sample))
-	files.sort()
-	return files
-
-def get_UMI(wildcards):
-	files = glob.glob('{}/{}*R2*.fastq.gz'.format(config["rawFolder"], wildcards.sample))
-	files.sort()
-	return files
-
- 
-## Find all FASTQ files given the sample ID and read ID
-
-def get_fastq_from_sample_read(wildcards):
-	files = glob.glob('FASTQ_Raw/Combined/{}*{}*.fastq.gz'.format(wildcards.sample, wildcards.read))
-	return files
-
 
 ##########################################################
 ## RULES
@@ -56,8 +24,7 @@ def get_fastq_from_sample_read(wildcards):
 
 rule all:
 	input:
-		expand("Alignment/{sample}.con.recalib.bam", sample = SAMPLES),
-		"QC/MultiQC/multiqc_report.html"
+		vcf=expand("VCF/{sample}.snvs.mutect.filtered.vcf", sample = SAMPLES),
 
 ##########################################################
 ## QC and file manuipulation
@@ -105,11 +72,12 @@ rule gatk_calculate_contamination:
 		tumor="Counts/{sample}.summaries.table",
 	output:
 		"Counts/{sample}.contamination.table",
+		"Counts/{sample}.segmentation.tsv"
 	threads: 
 		config["mutect2Threads"]
 	params:
 		mem=config["gatkMem"],
-		extra="-tumor-segmentation Counts/{sample}segmentation.tsv"
+		extra="-tumor-segmentation Counts/{sample}.segmentation.tsv"
 	resources:
 		mem_mb=config["gatkRunMem"]
 	log:
@@ -139,14 +107,14 @@ rule gatk_filtermutectcalls_complete:
 		ref=config["reference"],
 		bam="Alignment/{sample}.con.recalib.bam",
 		contamination="Counts/{sample}.contamination.table",
-		segmentation="Counts/{sample}segmentation.tsv", 
+		segmentation="Counts/{sample}.segmentation.tsv", 
 		f1r2="Counts/{sample}.f1r2.tar.gz"
 	output:
 		vcf="VCF/{sample}.snvs.mutect.filtered.vcf",
 	log:
 		"logs/gatk_filter/{sample}.filter.snvs.log",
 	params:
-		mem=config["gatkMem"]
+		mem=config["gatkMem"],
 		extra="--max-alt-allele-count 3",
 		java_opts="",
 	resources:

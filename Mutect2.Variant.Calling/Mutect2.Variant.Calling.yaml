@@ -22,6 +22,6 @@ pon:
 rawFolder:
         /data/BCI-OkosunLab/Raw_Data/20240425_Okosun_JB_GC-WH-10999_AITL/FASTQ_Raw/
 ## Memory
-mutect2Threads: 8
+mutect2Threads: 1
 gatkMem: 16G
 gatkRunMem: 12288
