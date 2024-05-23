@@ -24,7 +24,9 @@ SAMPLES = set(glob_wildcards(search).sample)
 
 rule all:
 	input:
+		## "QC/MultiQC/VCF.html",
 		vcf=expand("VCF/{sample}.snvs.mutect.filtered.vcf", sample = SAMPLES),
+		vcfstat=expand("QC/vcf/{sample}.filtered.stats.txt", sample = SAMPLES)
 
 ##########################################################
 ## QC and file manuipulation
@@ -62,6 +64,7 @@ rule gatk_get_pileup_summaries:
 		mem=config["gatkMem"]
 	resources:
 		mem_mb=config["gatkRunMem"]
+	threads: 1
 	log:
 		"logs/gatk_pileup/{sample}.summary.log",
 	wrapper:
@@ -72,7 +75,6 @@ rule gatk_calculate_contamination:
 		tumor="Counts/{sample}.summaries.table",
 	output:
 		"Counts/{sample}.contamination.table",
-		"Counts/{sample}.segmentation.tsv"
 	threads: 
 		config["mutect2Threads"]
 	params:
@@ -80,10 +82,18 @@ rule gatk_calculate_contamination:
 		extra="-tumor-segmentation Counts/{sample}.segmentation.tsv"
 	resources:
 		mem_mb=config["gatkRunMem"]
+	threads: 1
 	log:
 		"logs/gatk_contam/{sample}.contamination.log",
 	wrapper:
 		"v3.10.2/bio/gatk/calculatecontamination"
+
+rule calc_contam_is_written_poorly:
+	input:
+		"Counts/{sample}.contamination.table",
+	output:
+		"Counts/{sample}.segmentation.tsv",
+	
 
 rule gatk_learnreadorientationmodel:
 	input:
@@ -96,6 +106,7 @@ rule gatk_learnreadorientationmodel:
 		mem=config["gatkMem"]
 	resources:
 		mem_mb=config["gatkRunMem"]
+	threads: 1
 	log:
 		"logs/gatk_oreintation/{sample}.learnreadorientationbias.log",
 	wrapper:
@@ -108,11 +119,13 @@ rule gatk_filtermutectcalls_complete:
 		bam="Alignment/{sample}.con.recalib.bam",
 		contamination="Counts/{sample}.contamination.table",
 		segmentation="Counts/{sample}.segmentation.tsv", 
-		f1r2="Counts/{sample}.f1r2.tar.gz"
+		f1r2="Counts/{sample}.artifacts_prior.tar.gz"
 	output:
+		"VCF/{sample}.snvs.mutect.filtered.vcf.idx",
 		vcf="VCF/{sample}.snvs.mutect.filtered.vcf",
 	log:
 		"logs/gatk_filter/{sample}.filter.snvs.log",
+	threads: 1
 	params:
 		mem=config["gatkMem"],
 		extra="--max-alt-allele-count 3",
@@ -121,3 +134,36 @@ rule gatk_filtermutectcalls_complete:
 		mem_mb=config["gatkRunMem"]
 	wrapper:
 		"v3.10.2/bio/gatk/filtermutectcalls"
+
+rule bcf_stats:
+	input:
+		"VCF/{sample}.snvs.mutect.filtered.vcf",	
+	output:
+		"QC/vcf/{sample}.filtered.stats.txt",
+	log:
+		"logs/bcftools_stat/{sample}.log",
+	params:
+		mem=config["BCFtoolsMem"],
+	threads: 1
+	wrapper:
+		"v3.10.2/bio/bcftools/stats"
+
+rule annovar:
+	input:
+		"VCF/{sample}.snvs.mutect.filtered.vcf",
+	output:
+		""
+	log:
+		"log/annovar/{sample}.log"
+	params:
+		mem=config["AnnovarMem"]
+	threads: 1
+	shell:
+		"""
+		ml annovar
+		
+		"""
+
+
+
+

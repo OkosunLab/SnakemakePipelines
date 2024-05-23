@@ -11,11 +11,13 @@ knownsites:
         /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
         ]
 gnomad:
-        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/small_exac_common_3.hg38.vcf.gz
+        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/af-only-gnomad.hg38.vcf.gz
+        ## This is Exac 
+        ## /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/small_exac_common_3.hg38.vcf.gz
 intervals:
         /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/all.chromosomes.regions.list
 pon:
-       /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/1000g_pon.hg38.vcf.gz
+        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/1000g_pon.hg38.vcf.gz
 ##########################################
 ## Raw file location
 ##########################################
@@ -23,5 +25,5 @@ rawFolder:
         /data/BCI-OkosunLab/Raw_Data/20240425_Okosun_JB_GC-WH-10999_AITL/FASTQ_Raw/
 ## Memory
 mutect2Threads: 1
-gatkMem: 16G
-gatkRunMem: 12288
+gatkMem: 26G
+gatkRunMem: 24576
