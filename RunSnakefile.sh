@@ -15,6 +15,7 @@ DAG=0
 target=""
 ## Extra options?
 EXTRA=""
+dagFile="dag.svg"
 ###################################
 
 while [ "$1" != "" ]; do
@@ -32,6 +33,9 @@ while [ "$1" != "" ]; do
 					;;
 		-d | --dag )		DAG=1
 					;;
+		-f | --dag-file )	shift
+					dagFile=$1
+					;;
 		-e | --extra )		shift
 					EXTRA=$@
 					;;
@@ -46,6 +50,7 @@ Options:
 -j | --jobs		Number of concurrent jobs to run (default: 1)
 -t | --target		Target file/rule (default: none)
 -d | --dag		Print the dag and exit (default: off)
+-f | --dag-file		The file name for the dag (default: dag.svg)
 -e | --extra		Takes all remaining arguments and passes them to snakemake (MUST BE LAST)
 -h | --help		Display this message and exit
 "
@@ -58,8 +63,10 @@ done
 if [ $DAG -eq 1 ]; 
 then
 	snakemake --dag \
+		$target \
+		$EXTRA \
 		-s $Snakefile  | 
-		dot -Tsvg > dag.svg
+		dot -Tsvg > $dagFile
 else
 	snakemake \
 		$Dry \
