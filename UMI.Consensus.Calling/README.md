@@ -25,10 +25,7 @@ This pipeline will run from unaligned fastq files to recalibrated consensus bam 
 5. samtools is used to convert this bam file back into a consensus fastq file.
 6. Consensus fastq files are aligned to the reference geneome (set in the config file) using bwa mem.
    1. The resulting file is coordinate sorted by samtools
-8. gatk is used for base recalibration.
-   1. The final bam file is indexed by samtools
-   2. samtools flagstat extracts the alignment stats from the raw bam.
-10. multiqc collects all the QC metrics from the pipeline.
+7. multiqc collects all the QC metrics from the pipeline.
 
 ## Config options
 
