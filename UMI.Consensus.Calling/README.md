@@ -1,4 +1,4 @@
-# UMI consensus calling
+# UMI consensus alignment
 
 Jump to section:
 1. [Overview](#overview)
@@ -10,6 +10,8 @@ Jump to section:
 This pipeline will run from unaligned fastq files to recalibrated consensus bam files.
 
 ### Pipeline steps
+
+![Rulegraph for UMI consensus alignment](Consensus.Alignment.pipeline.svg)
 
 1. Quality Check
 	1. fastp is used to check the raw fastq files as well as running adapter and quality trimming.
