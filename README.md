@@ -7,10 +7,10 @@ OkosunLab pipelines built using the snakemake workflow management system
 ## Contents
 
 1. [Pipeline Library](#Pipeline-Library)
-1. [Tutorial](#Tutorial)
-  1. [Setup](#Setup)
-  2. [Running The Pipeline](#Running-The-Pipeline)
-    1. [Job Submission Setup](#Job-Submission-Setup)
+2. 1. [Tutorial](#Tutorial)
+   2. [Setup](#Setup)
+   3.   [Running The Pipeline](#Running-The-Pipeline)
+      4.   [Job Submission Setup](#Job-Submission-Setup)
 
 ## Pipeline Library:
 
