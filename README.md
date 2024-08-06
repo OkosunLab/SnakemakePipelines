@@ -6,11 +6,11 @@ OkosunLab pipelines built using the snakemake workflow management system
 
 ## Contents
 
-1. [Pipeline Library](#PipelineLibrary)
+1. [Pipeline Library](#Pipeline-Library)
 2. [Tutorial](#Tutorial)
   1. [Setup](#Setup)
-  2. [Running The Pipeline](#RunningThePipeline)
-    1. [Job Submission Setup](#JobSubmissionSetup)
+  2. [Running The Pipeline](#Running-The-Pipeline)
+    1. [Job Submission Setup](#Job-Submission-Setup)
 
 ## Pipeline Library:
 
@@ -80,7 +80,7 @@ RunSnakefile.sh -s pipeline.name.snake -j 100 -n
 RunSnakefile.sh -s pipeline.name.snake -j 100
 ```
 
-#### Job submission setup
+#### Job Submission Setup
 
 For those interested we are dymanically creating job scripts using this command:
 
