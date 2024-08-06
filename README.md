@@ -14,12 +14,16 @@ Pipeline | info
 
 ## Tutorial
 
+### Setup
+
 First you will need to create a copy of the snakemake environment. You only need to do this once and it will be able to handle all your snakemake pipelines.
 
 ```bash
 ml anaconda3
 conda env create -n snakemake -f /data/BCI-OkosunLab/Environments/anaconda3/20240513.snakemake.8.11.3.yml
 ```
+
+### Running The pipeline
 
 Copy a version of the current pipeline, config.yaml and envs folder into your project directory. This ensures we have a copy of the exact pipeline you ran to generate your data, in case the pipeline is updated.
 
@@ -31,6 +35,8 @@ Open a screen session and navigate to your project directory:
 screen -S snakemake.projectname
 cd /Project/Directory/Goes/Here
 ```
+
+**N.B:** Screen is a linux program that lets you have a "detachable" session. You can use it to keep things running even when you completely logout of a linux computer. **IMPORTANT** Do not use it to run compute jobs on front end - You still have to abide by the general server etiquette whilst using screen. We will be using it to run the snakemake pipeline, but this doesn't require a lot of overhead as it will be submitting jobs for each rule in the pipeline.
 
 Load your snakemake environment:
 
@@ -65,3 +71,21 @@ RunSnakefile.sh -s pipeline.name.snake -j 100 -n
 ## Proper run if now happy
 RunSnakefile.sh -s pipeline.name.snake -j 100
 ```
+
+#### Job submission setup
+
+For those interested we are dymanically creating job scripts using this command:
+
+```bash
+"qsub -V -l h_rt=240:0:0 -l h_vmem={params.mem} -pe smp {threads} -j y -cwd -o {log}.jobscript"
+```
+Args | Notes
+--- | ---
+-V | Is vital as this preserves the loaded conda module - without this you cannont use conda to load software (I have not been able to find another way to submit jobs with a module automatically loaded yet.
+-l h_rt | Currently I am asking for the max time (240 hours or 10 days) I need to parameterise this so we can use the config to set this.
+-l h_vmem | we set the required memory in the params section of the rule using the key mem (hence {params.mem})
+-pe smp {threads} | take the number of threads from the rule.
+-j y | join stdev and sterr
+-cwd | work on the current working directory
+-o {log}.jobscript | store the output of stdev and sterr in the same place as the snakemake log just with the suffix .jobscript
+
