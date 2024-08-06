@@ -25,7 +25,7 @@ The SV caller Manta is run first to generate candidate indels for Strelka2. Thes
 
 *Samtools version: 1.20*\
 *Varscan2 version: 2.4.6*
----
+
 Pileup files are created using Samtools. The snakemake wrapper for this ONLY allows gzipped outputs, but varscan somatic fails if given compressed pileup files. The gunzip intermediate step ungzips the pileup file so Varscan can run on it. varscan is then run in somatic mode with the following option to generate a VCF file instead of Varscan's default output:
 
 ```bash
