@@ -16,9 +16,9 @@ OkosunLab pipelines built using the snakemake workflow management system
 
 Pipeline | info
 --- | --- 
-[Alignment With Recalibration](https://github.com/OkosunLab/SnakemakePipelines/tree/main/Alignment.With.Recalibration) | Pipeline for aligning DNAseq reads from illumina sequencing and running GATK pre-processing
-[Alignment UMI Consensus Calling](https://github.com/OkosunLab/SnakemakePipelines/tree/main/UMI.Consensus.Calling) | Pipeline for aligning reads from UMI tagged data
-[Tumour Normal Variant Calling](https://github.com/OkosunLab/SnakemakePipelines/tree/main/Tumour.Normal.Variant.Calling) | Pipeline for calling variants from matched tumour normal bam files
+[Alignment with recalibration](https://github.com/OkosunLab/SnakemakePipelines/tree/main/Alignment.With.Recalibration) | Pipeline for aligning DNAseq reads from illumina sequencing and running GATK pre-processing
+[Alignment with UMI consensus calling](https://github.com/OkosunLab/SnakemakePipelines/tree/main/UMI.Consensus.Calling) | Pipeline for aligning reads from UMI tagged data
+[Tumour normal variant calling](https://github.com/OkosunLab/SnakemakePipelines/tree/main/Tumour.Normal.Variant.Calling) | Pipeline for calling variants from matched tumour normal bam files
 
 ## Tutorial
 
