@@ -7,10 +7,10 @@ OkosunLab pipelines built using the snakemake workflow management system
 ## Contents
 
 1. [Pipeline Library](#PipelineLibrary)
-## Tutorial
-### Setup
-### Running The pipeline
-#### Job submission setup
+2. [Tutorial](#Tutorial)
+  1. [Setup](#Setup)
+  2. [Running The Pipeline](#RunningThePipeline)
+    1. [Job Submission Setup](#JobSubmissionSetup)
 
 ## Pipeline Library:
 
@@ -31,7 +31,7 @@ ml anaconda3
 conda env create -n snakemake -f /data/BCI-OkosunLab/Environments/anaconda3/20240513.snakemake.8.11.3.yml
 ```
 
-### Running The pipeline
+### Running The Pipeline
 
 Copy a version of the current pipeline, config.yaml and envs folder into your project directory. This ensures we have a copy of the exact pipeline you ran to generate your data, in case the pipeline is updated.
 
