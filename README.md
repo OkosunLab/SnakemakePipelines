@@ -1,8 +1,16 @@
-# SnakemakePipelines
+# Snakemake Pipelines
 
 ## UNDER DEVELOPMENT
 
 OkosunLab pipelines built using the snakemake workflow management system
+
+## Contents
+
+1. [Pipeline Library](#PipelineLibrary)
+## Tutorial
+### Setup
+### Running The pipeline
+#### Job submission setup
 
 ## Pipeline Library:
 
