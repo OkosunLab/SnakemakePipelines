@@ -2,7 +2,10 @@
 
 ## Contents
 
-1. [Overview](#Config-options)
+1. [Overview](#Overview-of-the-pipeline)
+  1. [Variant Calling](#Variant-Calling)
+  2. [Annotation](#Annotation)
+3. [Config Options](#Config-options)
 
 This snakemake pipeline takes a sample sheet of matched tumour/normal samples and run a selection of somatic variant calling pipelines. 
 
