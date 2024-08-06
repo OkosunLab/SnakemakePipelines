@@ -6,19 +6,29 @@ This snakemake pipeline takes a sample sheet of matched tumour/normal samples an
 
 ![Pipeline overview](somatic.variant.calling.svg)
 
-## Mutect2
+## [Mutect2](https://gatk.broadinstitute.org/hc/en-us/articles/27007991962907-Mutect2)
+
+*version: 4.5.0.0*
 
 GATK's somatic caller
 
-## Strelka2
+## [Strelka2](https://github.com/Illumina/strelka)
+
+*version: 2.9.10*
 
 The SV caller Manta is run first to generate candidate indels for Strelka2
 
-## Varscan2
+## [Varscan2](http://dkoboldt.github.io/varscan/)
+
+*version: 2.4.6*
 
 Pileup files are created using samtools. The snakemake wrapper for this ONLY allows gzipped outputs, but varscan somatic fails if given compressed pileup files. The gunzip intermediate step ungzips the pileup file so Varscan can run on it.
 
-## Fourth caller
+## [VarDict](https://github.com/AstraZeneca-NGS/VarDict)
+
+*version: 1.8.3*
+
+VarDict is run in paried mode on the Bam files directly.
 
 # Annotation
 
