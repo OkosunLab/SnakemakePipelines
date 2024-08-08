@@ -11,7 +11,7 @@ This snakemake pipeline takes a sample sheet of matched tumour/normal samples an
 
 # Overview of the pipeline:
 
-![Pipeline overview](somatic.variant.calling.svg)
+![Pipeline overview](Tumour.Normal.Variant.Calling.svg)
 
 ## Variant Calling
 
