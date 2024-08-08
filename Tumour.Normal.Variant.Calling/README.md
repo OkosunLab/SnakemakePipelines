@@ -21,6 +21,13 @@ This snakemake pipeline takes a sample sheet of matched tumour/normal samples an
 
 GATK's somatic caller is used as per their best practices workflow. *Mutect2* is run to generate the VCF file. Simultaneously *GetPileupSummaries* is run, the output of which is fed into *CalculateContamination*. *CalculateContamination* creates a contamination table as well as segmentation information. Because the wrapper for this doesn't allow you to tell snakemake that the segmentation file is generated in this rule there is another rule called *cleanup_calc_contamination* the sole purpose of this is to recognise that calculate contamination has finished (because the contamination table has been generated) and have the segmentation file as an output (**N.B.** this step doesn't generate anything, but without it snakemake doesn't know where the segmentation file is generated). *LearnReadOrientationModel* is run generating the artifacts prior file. These files are all then fed into *FilterMutectCalls*, generating the final vcf file ready for annotation.
 
+*FilterMutectCalls* is run with the option:
+
+```bash
+--max-alt-allele-count 3
+```
+This stops it from labelling **all** multiallelic variants as multiallelic in te FILTER column, meaning they are removed when subsetting by PASS.
+
 ### [Strelka2](https://github.com/Illumina/strelka)
 
 *Manta version: 1.6.0*\
