@@ -26,7 +26,7 @@ GATK's somatic caller is used as per their best practices workflow. *Mutect2* is
 ```bash
 --max-alt-allele-count 3
 ```
-This stops it from labelling **all** multiallelic variants as multiallelic in te FILTER column, meaning they are removed when subsetting by PASS.
+This stops it from labelling **all** multiallelic variants as multiallelic in the FILTER column, meaning they are removed when subsetting by PASS.
 
 ### [Strelka2](https://github.com/Illumina/strelka)
 
@@ -47,6 +47,8 @@ Pileup files are created using Samtools. The snakemake wrapper for this ONLY all
 ``` 
 
 ### [VarDict](https://github.com/AstraZeneca-NGS/VarDict)
+
+***Due to issues with the output of VarDict this is not currently implemented***
 
 *VarDict version: 1.8.3*
 
