@@ -11,7 +11,7 @@ This pipeline will run from unaligned fastq files to recalibrated consensus bam 
 
 ### Pipeline steps
 
-![Rulegraph for UMI consensus alignment](Consensus.Alignment.pipeline.svg)
+![Rulegraph for UMI consensus alignment](Alignment.With.UMI.Collapsing.svg)
 
 1. Quality Check
 	1. fastp is used to check the raw fastq files as well as running adapter and quality trimming.
