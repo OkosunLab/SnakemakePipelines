@@ -11,7 +11,7 @@ This pipeline will run from unaligned fastq files to duplicate marked, recalibra
 
 ### Pipeline steps
 
-![Rulegraph for BWA alignment and GATK preprocessing](Alignment.Recalibration.pipeline.svg)
+![Rulegraph for BWA alignment and GATK preprocessing](Alignment.With.Recalibration.svg)
 
 
 1. Quality Check
