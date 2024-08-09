@@ -75,7 +75,7 @@ This stops it from labelling **all** multiallelic variants as multiallelic in th
 
 VarDict is run in paried mode on the Bam files directly. 
 
-**N.B.** Vardict will also call large structural variants. These are denoted by <DEL>, <INS>, <DUP> and  <INV>. These will not be annotated with VEP.
+**N.B.** Vardict will also call large structural variants. These are denoted by \<DEL\>, \<INS\>, \<DUP\> and \<INV\>. These will not be annotated with VEP.
 
 ## Annotation
 
