@@ -13,18 +13,18 @@ This pipeline will run from unaligned fastq files to duplicate marked, recalibra
 
 ## QC
 
-*fastp version: 0*
-*fastq screen version: 0*
+*fastp version: 0.23.4*\
+*fastq screen version: 0.15.3*
 
 1. **[fastp](https://github.com/OpenGene/fastp)** is used to check the raw fastq files as well as running adapter and quality trimming.
 2. **[fastq_screen](https://www.bioinformatics.babraham.ac.uk/projects/fastq_screen/)** screens the raw fastq for reads aligning to other genomes.
 
 ## Alignment
 
-*bwa version: 0*
-*GATK version: 4.5.0*
-*samtools version: 0*
-*multiQC version: 0*
+*bwa version: 0.7.17*\
+*GATK version: 4.5.0*\
+*samtools version: 1.19.2-0*\
+*multiQC version: 1.21-0*\
 
 1. Trimmed fastq files are aligned to the reference geneome (set in the config file) using **[bwa mem](https://github.com/lh3/bwa)**.
 2. **[Picard markduplicates](https://gatk.broadinstitute.org/hc/en-us/articles/21905036102043-MarkDuplicates-Picard)** (GATK) is used to mark potential PCR duplicates
