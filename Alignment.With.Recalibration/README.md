@@ -2,7 +2,8 @@
 
 Jump to section:
 1. [Overview](#overview)
-	1. [Pipeline steps](#pipeline-steps)
+	1. [Quality Control](#Quality-Control)
+	2. [Alignment](#Alignment)
 1. [Config Options](#config-options)
 
 # Overview
@@ -11,7 +12,7 @@ This pipeline will run from unaligned fastq files to duplicate marked, recalibra
 
 ![Rulegraph for BWA alignment and GATK preprocessing](Alignment.With.Recalibration.svg)
 
-## QC
+## Quality Control
 
 *fastp version: 0.23.4*\
 *fastq screen version: 0.15.3*
