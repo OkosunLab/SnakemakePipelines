@@ -58,7 +58,7 @@ I have written a little wrapper for the snakemake command that includes the corr
 Short | Long | Purpose
 --- | --- | ---
 -n | --dry-run | Run a dry run of the script (default: off)
--s | --snake-file | Provide the snakefile name (default: $Snakefile)
+-s | --snake-file | Provide the snakefile name (default: Snakefile)
 -j | --jobs | Number of concurrent jobs to run (default: 1)
 -t | --target | Target file/rule (default: none)
 -d | --dag | Print the dag and exit (default: off)
