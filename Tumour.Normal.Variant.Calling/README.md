@@ -42,20 +42,30 @@ This stops it from labelling **all** multiallelic variants as multiallelic in th
 ### [Strelka2](https://github.com/Illumina/strelka)
 
 *Manta version: 1.6.0*\
-*Strelka2 version: 2.9.10*
+*Strelka2 version: 2.9.10*\
+*BCFtools version: 1.20-0*
 
-The SV caller Manta is run first to generate candidate indels for Strelka2. These are passed to Strelka2 as in the best practices.
+1. The SV caller Manta is run first to generate candidate indels for Strelka2. These are passed to Strelka2 as in the best practices.
+2. Strelka2 is run to generate anv and indel VCF files.
+3. These fiels are merged into one VCF file with BCFtools
+
 
 ### [Varscan2](http://dkoboldt.github.io/varscan/)
 
 *Samtools version: 1.20*\
-*Varscan2 version: 2.4.6*
+*Varscan2 version: 2.4.6*\
+*BCFtools version: 1.20-0*
 
-Pileup files are created using Samtools. The snakemake wrapper for this ONLY allows gzipped outputs, but varscan somatic fails if given compressed pileup files. The gunzip intermediate step ungzips the pileup file so Varscan can run on it. varscan is then run in somatic mode with the following option to generate a VCF file instead of Varscan's default output:
+1. Pileup files are created using Samtools. The snakemake wrapper for this ONLY allows gzipped outputs, but varscan somatic fails if given compressed pileup files.
+2. The gunzip intermediate step ungzips the pileup file so Varscan can run on it.
+3. Varscan is then run in somatic mode with the following option to generate a VCF file instead of Varscan's default output:
 
 ```bash
 --output-vcf 1
 ``` 
+4. BCFtools is used to merge the snp and indel files
+   1. This step requires bgziped VCF files, so first BCFtools is used to bgzip and index the snv and indel outputs from varscan
+   2. The files are merged
 
 ### [VarDict](https://github.com/AstraZeneca-NGS/VarDict)
 
