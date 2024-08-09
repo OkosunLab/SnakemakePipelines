@@ -73,9 +73,9 @@ This stops it from labelling **all** multiallelic variants as multiallelic in th
 
 *VarDict version: 1.8.3*
 
-VarDict is run in paried mode on the Bam files directly. 
+VarDict is run in paried mode on the Bam files directly, producing the VCF file.
 
-**N.B.** Vardict will also call large structural variants. These are denoted by \<DEL\>, \<INS\>, \<DUP\> and \<INV\>. These will not be annotated with VEP.
+**N.B.** Vardict will also call large structural variants (>1000bp). These are denoted by \<DEL\>, \<INS\>, \<DUP\> and \<INV\>. These will not be annotated with VEP.
 
 ## Annotation
 
@@ -99,3 +99,6 @@ Here BCFtools is used to annotate the variant calls with the COSMIC ID from a pr
 **N.B.** As these calls were manually downloaded you should double check your annotated IDs to make sure they have been processed correctly. They will also not match *all* of the "EXISTING VARIANTS" called by VEP as some of these will be called with the wrong allele.
 
 # Config options:
+Option | Default | Note
+--- | --- | ---
+
