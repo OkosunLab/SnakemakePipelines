@@ -11,6 +11,8 @@ Jobs=1
 Dry=""
 ## Create a DAG?
 DAG=0
+## Create a rulegraph
+RULEGRAPH=0
 ## Target rule/file?
 target=""
 ## Extra options?
@@ -33,6 +35,8 @@ while [ "$1" != "" ]; do
 					;;
 		-d | --dag )		DAG=1
 					;;
+		-r | --rulegraph )	RULEGRAPH=1
+					;;
 		-f | --dag-file )	shift
 					dagFile=$1
 					;;
@@ -50,6 +54,7 @@ Options:
 -j | --jobs		Number of concurrent jobs to run (default: 1)
 -t | --target		Target file/rule (default: none)
 -d | --dag		Print the dag and exit (default: off)
+-r | --rulegraph	Print the rule graph and exit (default: off)
 -f | --dag-file		The file name for the dag (default: dag.svg)
 -e | --extra		Takes all remaining arguments and passes them to snakemake (MUST BE LAST)
 -h | --help		Display this message and exit
@@ -64,6 +69,12 @@ if [ $DAG -eq 1 ];
 then
 	snakemake --dag \
 		$target \
+		$EXTRA \
+		-s $Snakefile  | 
+		dot -Tsvg > $dagFile
+elif [ $RULEGRAPH -eq 1 ]; then 
+	snakemake --rulegraph \
+		-F \
 		$EXTRA \
 		-s $Snakefile  | 
 		dot -Tsvg > $dagFile
