@@ -7,7 +7,7 @@
       1. [Mutect2](#Mutect2)
       2. [Strelka2](#Strelka2)
       3. [Varscan2](#Varscan2)
-      4. [VarDict](#VarDict) (UNDER CONSTRUCTION)
+      4. [VarDict](#VarDict)
    3. [Annotation](#Annotation)
       1. [Normalisation](#Normalisation)
       2. [Annotation](#Annotation)
@@ -59,11 +59,11 @@ Pileup files are created using Samtools. The snakemake wrapper for this ONLY all
 
 ### [VarDict](https://github.com/AstraZeneca-NGS/VarDict)
 
-***Due to issues with the output of VarDict this is not currently implemented***
-
 *VarDict version: 1.8.3*
 
-VarDict is run in paried mode on the Bam files directly.
+VarDict is run in paried mode on the Bam files directly. 
+
+**N.B.** Vardict will also call large structural variants. These are denoted by <DEL>, <INS>, <DUP> and  <INV>. These will not be annotated with VEP.
 
 ## Annotation
 
