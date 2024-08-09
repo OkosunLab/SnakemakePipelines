@@ -19,9 +19,13 @@ This snakemake pipeline takes a sample sheet of matched tumour/normal samples an
 
 *GATK version: 4.5.0.0*
 
-GATK's somatic caller is used as per their best practices workflow. *Mutect2* is run to generate the VCF file. Simultaneously *GetPileupSummaries* is run, the output of which is fed into *CalculateContamination*. *CalculateContamination* creates a contamination table as well as segmentation information. Because the wrapper for this doesn't allow you to tell snakemake that the segmentation file is generated in this rule there is another rule called *cleanup_calc_contamination* the sole purpose of this is to recognise that calculate contamination has finished (because the contamination table has been generated) and have the segmentation file as an output (**N.B.** this step doesn't generate anything, but without it snakemake doesn't know where the segmentation file is generated). *LearnReadOrientationModel* is run generating the artifacts prior file. These files are all then fed into *FilterMutectCalls*, generating the final vcf file ready for annotation.
-
-*FilterMutectCalls* is run with the option:
+1. GATK's somatic caller is used as per their best practices workflow. *Mutect2* is run to generate the VCF file. 
+2. Simultaneously *GetPileupSummaries* is run, the output of which is fed into *CalculateContamination*. 
+3. *CalculateContamination* creates a contamination table as well as segmentation information.
+   1. Because the wrapper for this doesn't allow you to tell snakemake that the segmentation file is generated in this rule there is another rule called *cleanup_calc_contamination* the sole purpose of this is to recognise that calculate contamination has finished (because the contamination table has been generated) and have the segmentation file as an output (**N.B.** this step doesn't generate anything, but without it snakemake doesn't know where the segmentation file is generated).
+4. *LearnReadOrientationModel* is run generating the artifacts prior file.
+5. These files are all then fed into *FilterMutectCalls*, generating the final vcf file ready for annotation.
+6. *FilterMutectCalls* is run with the option:
 
 ```bash
 --max-alt-allele-count 3
