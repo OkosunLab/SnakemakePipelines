@@ -4,7 +4,14 @@
 
 1. [Overview](#Overview-of-the-pipeline)
    1. [Variant Calling](#Variant-Calling)
-   2. [Annotation](#Annotation)
+      1. [Mutect2](#Mutect2)
+      2. [Strelka2](#Strelka2)
+      3. [Varscan2](#Varscan2)
+      4. [VarDict](#VarDict)
+   3. [Annotation](#Annotation)
+      1. [Normalisation](#Normalisation)
+      2. [Annotation](#Annotation)
+      3. [A note on COSMIC annotation](#COSMIC-annotation)
 4. [Config Options](#Config-options)
 
 This snakemake pipeline takes a sample sheet of matched tumour/normal samples and run a selection of somatic variant calling pipelines. 
