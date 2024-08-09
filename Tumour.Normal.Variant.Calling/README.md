@@ -57,7 +57,7 @@ This stops it from labelling **all** multiallelic variants as multiallelic in th
 *BCFtools version: 1.20-0*
 
 1. Pileup files are created using Samtools.
-   1. This is done with the normal file being the first entry then the tumour
+   1. This is done with the normal file being the first entry then the tumour, as per the user manual.
    2. **N.B** The snakemake wrapper for this ONLY allows gzipped outputs, but varscan somatic fails if given compressed pileup files.
 3. The gunzip intermediate step ungzips the pileup file so Varscan can run on it.
 4. Varscan is then run in somatic mode with the following option to generate a VCF file instead of Varscan's default output:
