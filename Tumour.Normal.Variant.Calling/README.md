@@ -46,8 +46,8 @@ This stops it from labelling **all** multiallelic variants as multiallelic in th
 *BCFtools version: 1.20-0*
 
 1. The SV caller Manta is run first to generate candidate indels for Strelka2. These are passed to Strelka2 as in the best practices.
-2. Strelka2 is run to generate anv and indel VCF files.
-3. These fiels are merged into one VCF file with BCFtools
+2. Strelka2 is run to generate snv and indel VCF files.
+3. These files are merged into one VCF file with BCFtools
 
 
 ### [Varscan2](http://dkoboldt.github.io/varscan/)
