@@ -7,7 +7,7 @@ Jump to section:
 
 ## Overview
 
-This pipeline will run from unaligned fastq files to consensus bam files.
+This pipeline will run from unaligned fastq files to consensus bam files using UMIs.
 
 ### Pipeline steps
 
