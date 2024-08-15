@@ -16,6 +16,7 @@ bwa_index:
         /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta
 intervals:
         /data/BCI-OkosunLab/Ref/GRCh38/Nonacus_Exome_GRCh38/Nonacus_Exome_GRCh38_covered.chr.bed
+
 ##########################################
 ## Raw file location
 ##########################################
@@ -34,19 +35,40 @@ sampleString:
         "{sample}_S{number}_{lane}_R1_001.fastq.gz"
 
 ##########################################
-## file stuff
+## Resources
 ##########################################
 
-## Memory
+## MultiQC
+multiqcMem: 4G
+multiqcThreads: 1
+
+## combine fastqs
 combineMem: 8G
+combineThread: 1
+
+## Mark Duplicates
 markDupsMem: 8G
-trimMem: 8G
+markDupsThreads: 1
+
+## Alignment
 bwaMem: 4G
 bwaThreads: 8
-consensusFastqMem: 8G
+
+## GATK
 gatkMem: 16G
 gatkRunMem: 12288
+gatkThreads: 1
+
+## Samtools
 samtoolsStatMem: 8G
+samtoolsStatThreads: 1
 samtoolsIdxMem: 8G
+samtoolsIdxThreads: 4
+
+## fastp
 fastpMem: 24G
+fastpThreads: 1
+
+## fastq_screen
 fastqScreenMem: 8G
+fastqScreenThreads: 8

@@ -61,10 +61,11 @@ rule multiQC:
 	conda:
 		"envs/multiqc.yaml"
 	params:
-		mem = "4G"
+		mem = config["multiqcMem"]
 	log:
 		"logs/multiqc/multiqc.log",
-	threads: 1
+	threads: 
+		config["multiqcThreads"]
 	shell:
 		"""
 		multiqc -o QC/MultiQC/ \
@@ -91,7 +92,8 @@ rule combine_fastqs:
 		mem=config["combineMem"],
 	log:
 		"logs/combine_fastq/{sample}.log"
-	threads: 1
+	threads: 
+		config["combineThreads"] 
 	shell:
 		"""
 		cat {input.R1} > {output.R1_out}
@@ -112,11 +114,13 @@ rule fastq_screen:
 		subset=100000,
 		aligner='bowtie2',
 		mem=config["fastqScreenMem"],
-	threads: 8
+	threads: 
+		config["fastqScreenThreads"]
 	log:
 		"logs/fastq_screen/{sample}.{read}.log"
 	wrapper:
-	 "v4.0.0/bio/fastq_screen"
+		## the up to date version of this wrapper is blacklisted as it doesn't generate the png
+		"v3.10.2/bio/fastq_screen"
 
 ## FASTP is a tool for QC and trimming of FASTQ files.
 
@@ -141,7 +145,8 @@ rule fastp:
 		## detect adapter for pe should work out what the adapters are.
 		extra="-g --detect_adapter_for_pe",
 		mem=config["fastpMem"]
-	threads: 1 
+	threads: 
+		config["fastpThreads"] 
 	wrapper:
 		"v4.0.0/bio/fastp"
 
@@ -165,7 +170,8 @@ rule bwa_mem:
 		sort_order="coordinate",  # Can be 'queryname' or 'coordinate'.
 		sort_extra="",  # Extra args for samtools/picard.
 		mem=config["bwaMem"],
-	threads: config["bwaThreads"]
+	threads: 
+		config["bwaThreads"]
 	conda:
 		"envs/bwa.yaml"
 	shell:
@@ -185,6 +191,8 @@ rule markduplicates_bam:
 		metrics="QC/markDups/{sample}.metrics.txt",
 	log:
 		"logs/dedup_bam/{sample}.log",
+	threads: 
+		config["markDupsThreads"]
 	params:
 		mem=config["markDupsMem"]
 	resources:
@@ -209,7 +217,8 @@ rule gatk_baserecalibrator:
 		mem=config["gatkMem"]
 	resources:
 		mem_mb=config["gatkRunMem"],
-	threads: 1
+	threads: 
+		config["gatkThreads"]
 	wrapper:
 		"v4.0.0/bio/gatk/baserecalibrator"
 
@@ -231,7 +240,8 @@ rule gatk_applybqsr:
 		embed_ref=True,  # embed the reference in cram output
 	resources:
 		mem_mb=config["gatkRunMem"],
-	threads: 1
+	threads: 
+		config["gatkThreads"]
 	wrapper:
 		"v4.0.0/bio/gatk/applybqsr"
 
@@ -246,7 +256,8 @@ rule samtools_index:
 	params:
 		extra="",  # optional params string
 		mem=config["samtoolsStatMem"]
-	threads: 4  # This value - 1 will be sent to -@
+	threads: 
+		config["samtoolsIdxThreads"] # This value - 1 will be sent to -@
 	wrapper:
 		"v4.0.0/bio/samtools/index"
 	
@@ -259,7 +270,8 @@ rule samtools_stats:
 	params:
 		extra="",  # Optional: extra arguments.
 		mem=config["samtoolsStatMem"]
-	threads: 1
+	threads:
+		config["samtoolsStatThreads"]
 	log:
 		"logs/samtools_stats/{sample}.log",
 	wrapper:
@@ -292,7 +304,8 @@ rule gatk_depth_of_coverage:
 		mem=config["gatkMem"]
 	resources:
 		mem_mb=config["gatkRunMem"],
-	threads: 1
+	threads: 
+		config["gatkThreads"]
 	conda:
 		"envs/gatk4.yaml"
 	shell: 
