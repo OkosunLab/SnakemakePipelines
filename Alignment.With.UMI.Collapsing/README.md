@@ -73,7 +73,7 @@ Option | Description | Default| Notes
 --- | --- | --- | ---
 reference | reference fasta | /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta |
 bwa_index | index for BWA | /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta |
-intervals | bed file of targeted positions | /data/home/hfx472/BCI-OkosunLab/Ed/Ref/Bed-Files/PCNSL_ctDNA_panel_v6/PCNSL_ctDNA_panel_v6_covered.bed |
+intervals | bed file of targeted positions | /data/BCI-OkosunLab/Ed/Ref/Bed-Files/PCNSL_ctDNA_panel_v6/PCNSL_ctDNA_panel_v6_covered.bed |
 rawFolder | location of raw files | FASTQ_Raw |
 sampleString | string to target the samples (change this to sample sheet) | "{sample}_S{number}_{lane}_R1_001.fastq.gz" |
 consensusReads | minimum number of reads to call consensus from (1 is low, but OK with high complexity libraries) | 1 |
