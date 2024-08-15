@@ -1,6 +1,6 @@
 # BWA alignment and GATK preprocessing
 
-Jump to section:
+## Contents
 1. [Overview](#overview)
 	1. [Quality Control](#Quality-Control)
 	2. [Alignment](#Alignment)
@@ -35,7 +35,7 @@ Staphylococcus aureus | NCTC 8325 | NCBI
 
 *bwa version: 0.7.17*\
 *GATK version: 4.5.0*\
-*samtools version: 1.19.2-0*\
+*samtools version: 1.20*\
 *multiQC version: 1.21-0*
 
 1. Trimmed fastq files are aligned to the reference geneome (set in the config file) using **[bwa mem](https://github.com/lh3/bwa)**.
@@ -48,7 +48,7 @@ Staphylococcus aureus | NCTC 8325 | NCBI
 7. **[MultiQC](https://multiqc.info/)** collects all the QC metrics from the pipeline.
 
 
-## Config options
+# Config options
 
 Option | Notes
 --- | ---

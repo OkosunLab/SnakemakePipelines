@@ -1,15 +1,13 @@
 # UMI consensus alignment
 
-Jump to section:
+## Contents
 1. [Overview](#overview)
 	1. [Pipeline steps](#pipeline-steps)
 1. [Config Options](#config-options)
 
-## Overview
+# Overview
 
 This pipeline will run from unaligned fastq files to consensus bam files using UMIs.
-
-### Pipeline steps
 
 ![Rulegraph for UMI consensus alignment](Alignment.With.UMI.Collapsing.svg)
 
@@ -29,7 +27,7 @@ This pipeline will run from unaligned fastq files to consensus bam files using U
    1. The resulting file is coordinate sorted by samtools
 7. multiqc collects all the QC metrics from the pipeline.
 
-## Config options
+# Config options
 
 Option | Notes
 --- | ---
