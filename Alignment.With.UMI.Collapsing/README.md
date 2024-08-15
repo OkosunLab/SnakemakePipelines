@@ -11,7 +11,7 @@
 
 # Overview
 
-This pipeline will run from unaligned fastq files to consensus bam files using UMIs.
+This pipeline will run from unaligned fastq files to consensus bam files using UMIs. First the samples are aligned to the genome. Then UMIs are added to identify PCR duplicates. These are then collapsed into consensus reads which should 1. remove all true PCR duplicates and 2. help to reduce the error of the reads by building the consensus of the duplicate reads. These consensus reads are converted back to fastq format prior to being aligned once again against the reference genome.
 
 ## Pipeline Steps
 
