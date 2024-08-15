@@ -123,6 +123,42 @@ normal | normal bam file
 normalID | ID for the normal bam (see above)
 
 # Config options:
-Option | Default | Note
---- | --- | ---
+Option | description | Default | Note
+--- | --- | --- | ---
+reference | Reference fasta | /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta |
+gnomad | gnomad variant calls | /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/af-only-gnomad.hg38.vcf.gz | 
+intervals | intervals for your calls (bedfile) | /data/BCI-OkosunLab/Ref/GRCh38/Nonacus_Exome_GRCh38/Nonacus_Exome_GRCh38_covered.chr.bed |
+pon | panel of normals | /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/1000g_pon.hg38.vcf.gz |
+SampleSheet | sheet of sample information (see above) | Sample.Sheet.tsv |
+callers | which variant callers to run | \[Mutect2, Strelka2, Varscan2, Vardict\] | 
+vepCache | Location for VEP cache download | /data/BCI-OkosunLab/Ref/GRCh38/vep/cache |
+vepSpecies | species | homo_sapiens | 
+vepBuild | genome version | GRCh38 |
+vepRelease | ensembl release | 112 | 
+bcftoolsVCF | Cosmic VCF file |  /data/BCI-OkosunLab/Ref/GRCh38/COSMIC/Cosmic_Genome.Targeted.NonCoding.Merged._Normal_v100_GRCh38.chr.vcf.gz |
+multiqcThreads | threads | 1 |
+multiqcMem | memory | 4G |
+prepThreads | threads | 1 |
+prepMem | memory | 8G
+mutect2Threads | threads | 1 |
+gatkMem | memory | 24G | 
+gatkRunMem | memory (passed to gatk) | 22000 | 
+mantaThreads | threads | 2 | 
+mantaMem | memory | 10G | 
+mantaMemMB | memory (passed to mamba) | 8195 | 
+strelkaThreads | threads | 1 | 
+strelkaMem | memory | 24G |
+bcftoolsThreads | threads | 1 | 
+bcftoolsMem | memory | 8G |
+bcftoolsMemFloat | memory (passed to bcftools) | 7168
+laatvThreads | threads | 1 |
+vepThreads | threads | 4 |
+vepMem | memory | 8G |
+vardictThreads | threads | 1 |
+VarDictMem | memory | 24G |
+varscanThreads | threads | 1 |
+varscanMem | memory | 8G |
+varscanResMem | memory (passed to varscan) | 7168
+pileupThreads | threads | 1 |
+pileupMem | memory | 8G |
 
