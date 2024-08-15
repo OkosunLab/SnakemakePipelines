@@ -1,0 +1,533 @@
+##########################################################
+##
+## Snakefile for calling variants using multiple callers
+##
+## Written by: Findlay Bewicke-Copley
+## Date: 13-05-2024
+##
+## Callers Avaliable:
+## Mutect2
+## Strelka2
+## Varscan2
+## VarDict
+##########################################################
+
+import glob
+
+## Load config file
+configfile: "Tumour.Normal.Variant.Calling.yaml"
+
+## get the callers chosen in the config file.
+CALLERS = config["callers"]
+
+##########################################################
+## Load samples from the sample sheet.
+##########################################################
+
+## Load Sample Sheet
+sampleFile = open("Sample.Sheet.tsv").readlines()
+## Take the first line as a header
+header = sampleFile.pop(0).rstrip().split("\t")
+## Generate sample dictionary
+sampleSheet = {}
+## Run through the sample file and create a dictionary
+for line in sampleFile:
+	## Remove whitespace and split on tabs
+	line = line.rstrip().split("\t")
+	## zip the line info (values) and the header (keys) to generate a dictionary
+	rv = dict(zip(header, line))
+	## if the sample name isn't in the dictionary keys:
+	if not rv["sample"] in sampleSheet.keys():
+		## Add it and attach the dictionary
+		## N.B. "sample" needs to be unique
+		sampleSheet[rv["sample"]] = rv
+	## If there are multiple samples
+	else:
+		## Raise and error and complain about it.
+		raise Exception("Sorry, please make sure the sample column is unique")
+## set the value of SAMPLES to sampleSheet.keys()
+## This could be replaced throughout the file BUT SAMPLES is easier to type ....
+SAMPLES = sampleSheet.keys()
+
+##########################################################
+## RULES
+##########################################################
+
+## This rule requires all steps have been run, so is the default rule
+## MultiQC all reports.
+rule multiQC:
+	input:
+		vcfstat=expand("QC/vcf/{sample}.{caller}.final.stats.txt", caller = CALLERS, sample = SAMPLES),
+		VEPstats=expand("QC/vcf/{sample}.{caller}.summary.html", caller = CALLERS, sample = SAMPLES)
+	output:
+		"QC/MultiQC/VCF_multiqc_report.html"
+	conda:
+		"envs/multiqc.yaml"
+	params:
+		mem=config["multiqcMem"]
+	log:
+		"logs/multiqc/multiqc.log"
+	threads: 
+		config["multiqcThreads"]
+	shell:
+		"""
+		multiqc -o QC/MultiQC/ \
+			-n VCF_multiqc_report \
+			-f QC/vcf/
+		"""
+
+##########################################################
+## Prep-Vep References
+##########################################################
+
+## VEP needs to have it's data downloaded before use
+## This only needs to be run if we don't have the data you want
+
+rule get_vep_cache:
+	output:
+		directory(config["vepCache"]),
+	params:
+		species=config["vepSpecies"],
+		build=config["vepBuild"],
+		release=config["vepRelease"],
+		mem=config["prepMem"],
+	threads: 
+		config["prepThreads"]
+	log:
+		"logs/vep/cache.log",
+	cache: 
+		"omit-software"
+	wrapper:
+		"v4.0.0/bio/vep/cache"
+
+rule download_vep_plugins:
+	output:
+		directory("/data/BCI-OkosunLab/Ref/GRCh38/vep/plugins")
+	params:
+		release=config["vepRelease"],
+		mem=config["prepMem"],
+	threads: 
+		config["prepThreads"]
+	wrapper:
+		"v4.0.0/bio/vep/plugins"
+
+##########################################################
+## GATK Mutect2 pipeline
+##########################################################
+
+## Basic run of Mutect2
+## Provide both T/N files and specify which is normal in the call.
+rule gatk_mutect2:
+	input:
+		map=lambda w: [sampleSheet[w.sample]["tumour"], sampleSheet[w.sample]["normal"]],
+		fasta=config["reference"],
+		pon=config["pon"],
+	output:
+		vcf="VCF/Mutect2/{sample}.raw.vcf",
+		f1r2="VCF/Mutect2/{sample}.f1r2.tar.gz"
+	threads:
+		config["mutect2Threads"]
+	params:
+		mem=config["gatkMem"],
+		extra=lambda w: "-normal-sample {}".format(sampleSheet[w.sample]["normalID"])
+	resources:
+		mem_mb=config["gatkRunMem"]
+	log:
+		"logs/mutect2/{sample}.log"
+	wrapper:
+		"v4.0.0/bio/gatk/mutect"
+
+## The next few wrappers generate files for filtering
+## Get the pileups for calc contam
+rule gatk_get_pileup_summaries:
+	input:
+		bam=lambda w: sampleSheet[w.sample]["tumour"],
+		variants=config["gnomad"],
+		intervals=config["intervals"]
+	output:
+		"VCF/Mutect2/{sample}.summaries.table",
+	threads:
+		config["mutect2Threads"]
+	params:
+		mem=config["gatkMem"]
+	resources:
+		mem_mb=config["gatkRunMem"]
+	log:
+		"logs/gatk_pileup/{sample}.summary.log"
+	wrapper:
+		"v4.0.0/bio/gatk/getpileupsummaries"
+
+## Generate contamination table as well as segmentation files
+rule gatk_calculate_contamination:
+	input:
+		tumor="VCF/Mutect2/{sample}.summaries.table",
+	output:
+		"VCF/Mutect2/{sample}.contamination.table",
+	threads:
+		config["mutect2Threads"]
+	params:
+		mem=config["gatkMem"],
+		extra="-tumor-segmentation VCF/Mutect2/{sample}.segmentation.tsv"
+	resources:
+		mem_mb=config["gatkRunMem"]
+	log:
+		"logs/gatk_contam/{sample}.contamination.log"
+	wrapper:
+		"v4.0.0/bio/gatk/calculatecontamination"
+
+## The wrapper above doesn't let you set the segmentation as an output.
+## So step just adds it as an output so snakemake knows how to create it.
+rule cleanup_calc_contamination:
+	input:
+		"VCF/Mutect2/{sample}.contamination.table",
+	output:
+		"VCF/Mutect2/{sample}.segmentation.tsv",
+
+## GATK learn read orinentation model for filtering
+rule gatk_learnreadorientationmodel:
+	input:
+		f1r2="VCF/Mutect2/{sample}.f1r2.tar.gz",
+	output:
+		"VCF/Mutect2/{sample}.artifacts_prior.tar.gz",
+	threads: 
+		config["mutect2Threads"]
+	params:
+		mem=config["gatkMem"]
+	resources:
+		mem_mb=config["gatkRunMem"]
+	log:
+		"logs/gatk_oreintation/{sample}.learnreadorientationbias.log",
+	wrapper:
+		"v4.0.0/bio/gatk/learnreadorientationmodel"
+
+## Filter the Mutect2 calls.
+## Here we also allow some multi allelic sites through 
+## These are set as multiallelic in FILTER by default
+rule gatk_filtermutectcalls_complete:
+	input:
+		vcf="VCF/Mutect2/{sample}.raw.vcf",
+		ref=config["reference"],
+		contamination="VCF/Mutect2/{sample}.contamination.table",
+		segmentation="VCF/Mutect2/{sample}.segmentation.tsv",
+		f1r2="VCF/Mutect2/{sample}.artifacts_prior.tar.gz"
+	output:
+		"VCF/Mutect2/{sample}.final.vcf.idx",
+		vcf="VCF/Mutect2/{sample}.final.vcf",
+	log:
+		"logs/gatk_filter/{sample}.filter.log",
+	threads: 
+		config["mutect2Threads"]
+	params:
+		mem=config["gatkMem"],
+		extra="--max-alt-allele-count 3",
+		java_opts="",
+	resources:
+		mem_mb=config["gatkRunMem"]
+	wrapper:
+		"v4.0.0/bio/gatk/filtermutectcalls"
+
+
+##########################################################
+## Strelka2 pipeline
+##########################################################
+
+## First run MANTA for SV and indel candidates
+rule Manta:
+	input:
+		tumour=lambda w: sampleSheet[w.sample]["tumour"],
+		normal=lambda w: sampleSheet[w.sample]["normal"],
+		ref=config["reference"],
+	output:
+		run_dir=directory("VCF/Manta/{sample}"),
+	conda:
+		"envs/manta.yaml"
+	params:
+		mem = config["mantaMem"],
+		extra_cfg="",  # optional
+		extra_run="",  # optional
+	log:
+		"logs/manta/{sample}.log",
+	threads: 
+		config["mantaThreads"]
+	resources:
+		mem_mb=config["mantaMemMB"],
+	shell:
+		"""
+		configManta.py --normalBam {input.normal} \
+			--tumorBam {input.tumour} \
+			--referenceFasta {input.ref} \
+			--runDir {output.run_dir}
+		python2 {output.run_dir}/runWorkflow.py --jobs {threads} --memGb 8
+		"""
+
+## Then run Strelka2.
+rule Strelka2:
+	input:
+		tumor=lambda w: sampleSheet[w.sample]["tumour"],
+		normal=lambda w: sampleSheet[w.sample]["normal"],
+		fasta=config["reference"],
+		manta="VCF/Manta/{sample}",
+	output:
+		# Strelka output - can be directory or full file path
+		directory("VCF/Strelka2/{sample}"),
+	threads: 
+		config["strelkaThreads"]
+	params:
+		config_extra="--indelCandidates VCF/Manta/{sample}/results/variants/candidateSmallIndels.vcf.gz",
+		run_extra="",
+		mem=config["strelkaMem"],
+	log:
+		"logs/strelka2/{sample}.log",
+	wrapper:
+		"v4.0.0/bio/strelka/somatic"
+
+## Merge Strelka2 output
+rule Merge_Strelka2:
+	input:
+		"VCF/Strelka2/{sample}"
+	output:
+		"VCF/Strelka2/{sample}.final.vcf",
+	threads: 
+		config["bcftoolsThreads"]
+	params:
+		mem = config["bcftoolsMem"]
+	conda:
+		"envs/bcftools.yaml"
+	log:
+		"logs/BCFtools/Concat/Strelka/{sample}.log"
+	shell:
+		"""
+		bcftools concat -a \
+			{input}/results/variants/somatic.indels.vcf.gz \
+			{input}/results/variants/somatic.snvs.vcf.gz |
+		bcftools sort -o {output} -
+		"""
+
+##########################################################
+## VarDict 
+##########################################################
+
+## Run VarDict
+rule VarDict:
+	input:
+		reference=config["reference"],
+		regions=config["intervals"],
+		bam=lambda w: sampleSheet[w.sample]["tumour"],
+		normal=lambda w: sampleSheet[w.sample]["normal"],
+	output:
+		vcf=temp("VCF/VarDict/{sample}.final.vcf"),
+	params:
+		extra="",
+		mem=config["VarDictMem"],
+	threads: 
+		config["vardictThreads"]
+	log:
+		"logs/VarDict/{sample}.call.log",
+	wrapper:
+		"v4.0.0/bio/vardict"
+
+##########################################################
+## VarScan 
+##########################################################
+
+## generate pileup files for Varscan
+rule PileupForVarscan:
+	input:
+		bam=lambda w: [sampleSheet[w.sample]["normal"], sampleSheet[w.sample]["tumour"]],
+		reference_genome=config["reference"],
+	output:
+		temp("VCF/Varscan2/{sample}.normal.tumor.mpileup.gz"),
+	log:
+		 "logs/samtools/mpileup/{sample}.log",
+	threads: 
+		config["pileupThreads"]
+	params:
+		mem=config["pileupMem"],
+		extra="-d 10000 -B",  # optional
+	wrapper:
+		"v4.0.0/bio/samtools/mpileup"
+
+## Despite claiming it can handel gzipped files ....
+## The Varscan wrapper doesn't seem to be able to handel gzipped files
+## And the pileup wrapper can't be told not to gzip them
+## So this step is needed
+rule UnzipPileup:
+	input:
+		"VCF/Varscan2/{sample}.normal.tumor.mpileup.gz",
+	output:
+		temp("VCF/Varscan2/{sample}.normal.tumor.mpileup"),
+	threads: 
+		config["pileupThreads"]
+	params:
+		mem = config["pileupMem"]
+	shell:
+		"""
+		gunzip {input}
+		"""
+## Run Varscan on the unzipped pileups
+rule Varscan:
+	input:
+		mpileup="VCF/Varscan2/{sample}.normal.tumor.mpileup"
+	output:
+		snp = "VCF/Varscan2/{sample}.snp.vcf",
+		indel = "VCF/Varscan2/{sample}.indel.vcf"
+	message:
+		 "Calling somatic variants {wildcards.sample}"
+	threads: 
+		config["varscanThreads"]
+	log:
+		"logs/Varscan/{sample}.call.log"
+	resources:
+		mem_mb=config["varscanResMem"]
+	params:
+		extra = "--output-vcf 1",
+		mem=config["varscanMem"]
+	wrapper:
+		"v4.0.0/bio/varscan/somatic"
+
+## Merge Varscan output
+## BCFtools complains about them not being bgzipped (lord have mercy)
+## So first, bgzip both files with bcftools
+## Generate indexes
+## Then merge and sort the files
+rule Merge_Varscan:
+	input:
+		snp = "VCF/Varscan2/{sample}.snp.vcf",
+		indel = "VCF/Varscan2/{sample}.indel.vcf"
+	output:
+		merge="VCF/Varscan2/{sample}.final.vcf",
+		snp=temp("VCF/Varscan2/{sample}.snp.vcf.gz"),
+		snpidx=temp("VCF/Varscan2/{sample}.snp.vcf.gz.tbi"),
+		indel=temp("VCF/Varscan2/{sample}.indel.vcf.gz"),
+		indelidx=temp("VCF/Varscan2/{sample}.indel.vcf.gz.tbi")
+	threads: 
+		config["bcftoolsThreads"] 
+	params:
+		mem=config["bcftoolsMem"]
+	conda:
+		"envs/bcftools.yaml"
+	log:
+		"logs/BCFtools/Concat/Varscan/{sample}.log"
+	shell:
+		"""
+		bcftools view -Oz -o {output.snp} {input.snp}
+		bcftools view -Oz -o {output.indel} {input.indel}
+		tabix -f {output.snp}
+		tabix -f {output.indel}
+		bcftools concat -a \
+			{output.snp} \
+			{output.indel} |
+		bcftools sort -o {output.merge} -
+		"""
+##########################################################
+# Annotation Pipeline 
+##########################################################
+
+## Left align indels and split multi allelic sites
+rule gatk_leftalignandtrimvariants:
+	input:
+		vcf="VCF/{caller}/{sample}.final.vcf",
+		ref=config["reference"],
+	output:
+		vcf="VCF/{caller}/{sample}.final.split.vcf",
+	log:
+		"logs/gatk_laatv/{sample}.{caller}.leftalignandtrimvariants.log",
+	threads: 
+		config["laatvThreads"]
+	params:
+		mem=config["gatkMem"],
+		extra="--split-multi-allelics", # optional
+		java_opts="",  # optional
+	resources:
+		mem_mb=config["gatkRunMem"],
+	wrapper:
+		"v4.0.0/bio/gatk/leftalignandtrimvariants"
+
+## I have seen one VCF file lose its sorting after this
+## An indel was split into a SNP and the rest of the indel
+## This messed up it's POS column and it now appeared before a variant with a lower POS 
+## This makes sure that won't happen
+rule bcftools_sort:
+	input:
+		"VCF/{caller}/{sample}.final.split.vcf",
+	output:
+		"VCF/{caller}/{sample}.final.split.sort.vcf",
+	log:
+		"logs/bcftools/sort/{sample}.{caller}.log",
+	params:
+		uncompressed_bcf=False,
+		extras="",
+		mem=config["bcftoolsMem"]
+	threads:
+		config["bcftoolsThreads"]
+	resources:
+		mem_mb=config["bcftoolsMemFloat"]
+	wrapper:
+		"v4.0.0/bio/bcftools/sort"
+
+## Annotate variants with VEP using custom pick order
+## This was selected to first prioritise canonical transcripts, then functional ones
+## TODO make the --pick_order a config option
+rule annotate_variants_vep:
+	input:
+		calls="VCF/{caller}/{sample}.final.split.sort.vcf",
+		cache=config["vepCache"], 
+		plugins="/data/BCI-OkosunLab/Ref/GRCh38/vep/plugins",
+	output:
+		calls="VCF/{caller}/VEP/{sample}.annotated.vcf.gz",
+		stats="QC/vcf/{sample}.{caller}.summary.html",
+	params:
+		plugins=["LoFtool"],
+		extra="--everything \
+			--flag_pick \
+			--pick_order mane_select,mane_plus_clinical,canonical,biotype,rank,tsl,appris,ccds,length \
+			--check_existing --compress_output bgzip",	
+		mem=config["vepMem"]
+	log:
+		"logs/vep/{sample}.{caller}.annotate.log",
+	threads: config["vepThreads"]
+	wrapper:
+		"v4.0.0/bio/vep/annotate"
+
+## Annotate variants with COSMIC vcf file (VEP doesn't do allele matching)
+rule annotate_with_cosmic_vcf:
+	input:
+		calls="VCF/{caller}/VEP/{sample}.annotated.vcf.gz",
+		VCF=config["bcftoolsVCF"]
+	output:
+		"VCF/{caller}/BCFtools/{sample}.{caller}.annotated.vcf"
+	conda:
+		"envs/bcftools.yaml"
+	log:
+		"logs/bcftools/{sample}.{caller}.annotate.log"
+	threads:
+		config["bcftoolsThreads"]
+	params:
+		mem=config["bcftoolsMem"]
+	shell:
+		"""
+		tabix -f {input.calls}
+		bcftools annotate -a {input.VCF} \
+			-c ID \
+			{input.calls} > {output}
+		"""
+
+##########################################################
+## Variant QC 
+##########################################################
+
+## Generate stats for the VCF files
+rule bcf_stats:
+	input:
+		"VCF/{caller}/BCFtools/{sample}.{caller}.annotated.vcf",
+	output:
+		"QC/vcf/{sample}.{caller}.final.stats.txt",
+	log:
+		"logs/bcftools_stat/{sample}.{caller}.log",
+	params:
+		mem=config["bcftoolsMem"]
+	threads: 
+		config["bcftoolsThreads"]
+	wrapper:
+		"v4.0.0/bio/bcftools/stats"
+

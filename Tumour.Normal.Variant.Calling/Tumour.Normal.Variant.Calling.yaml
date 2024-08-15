@@ -1,0 +1,105 @@
+##########################################
+## Genomes
+##########################################
+reference:
+        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta
+knownsites:
+        [
+        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.dbsnp138.vcf,
+        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/1000G_phase1.snps.high_confidence.hg38.vcf.gz,
+        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
+        ]
+gnomad:
+        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/af-only-gnomad.hg38.vcf.gz
+intervals:
+        /data/BCI-OkosunLab/Ref/GRCh38/Nonacus_Exome_GRCh38/Nonacus_Exome_GRCh38_covered.chr.bed
+pon:
+        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/1000g_pon.hg38.vcf.gz
+
+##########################################
+## Samples
+##########################################
+## This will search for samples called .con.bam
+## This is for samples processed by fgbio into consensus bam files.
+search: Alignment/{sample}.con.bam
+
+germlineFilesDir:
+        /data/home/hfx472/BCI-OkosunLab/Findlay/20240517-Will-ctDNA/WES/Alignment
+
+
+##########################################
+## Variant Calling
+##########################################
+callers: [
+        Strelka2, 
+        Mutect2, 
+        Varscan2,
+        VarDict,
+        ]
+
+
+##########################################
+## Annotation
+##########################################
+AnnovarData: 
+        /data/BCI-OkosunLab/Ref/GRCh38/annovar.databases/
+## VEP
+vepCache:
+        /data/BCI-OkosunLab/Ref/GRCh38/vep/cache
+vepSpecies:
+        homo_sapiens
+vepBuild:
+        GRCh38
+vepRelease:
+        112
+
+## COSMIC VCF
+bcftoolsVCF:
+        /data/BCI-OkosunLab/Ref/GRCh38/COSMIC/Cosmic_Genome.Targeted.NonCoding.Merged._Normal_v100_GRCh38.chr.vcf.gz
+
+##########################################
+## Memory
+##########################################
+
+# MultiQC
+multiqcThreads: 1
+multiqcMem: 4G
+
+# VEP prep
+prepMem: 8G
+prepThreads: 1
+
+# Mutect2
+mutect2Threads: 1
+gatkMem: 24G
+gatkRunMem: 22000
+
+# Manta
+mantaThreads: 2
+mantaMem: 10G
+mantaMemMB: 8195
+
+# Strelka
+strelkaMem: 24G
+strelkaThreads: 1
+
+# BCFtools
+bcftoolsMem: 8G
+bcftoolsMemFloat: 7168
+bcftoolsThreads: 1
+
+# Annotation
+laatvThreads: 1
+vepThreads: 4
+vepMem: 8G
+
+#Vardict
+VarDictMem: 24G
+vardictThreads: 1
+
+# Varscan
+varscanResMem: 7168
+varscanMem: 8G
+varscanThreads: 1
+pileupMem: 8G
+pileupThreads: 1
