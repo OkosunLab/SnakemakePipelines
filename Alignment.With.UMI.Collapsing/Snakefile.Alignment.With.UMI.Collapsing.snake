@@ -76,10 +76,11 @@ rule multiQC:
 	conda:
 		"envs/multiqc.yaml"
 	params:
-		mem = "4G"
+		mem = config["multiqcThreads"]
 	log:
 		"logs/multiqc/multiqc.log",
-	threads: 1
+	threads: 
+		config["multiqcThreads"]
 	shell:
 		"""
 		multiqc -o QC/MultiQC/ \
@@ -108,7 +109,8 @@ rule combine_fastqs:
 		mem=config["combineMem"],
 	log:
 		"logs/combine_fastq/{sample}.log"
-	threads: 1
+	threads: 
+		config["combineThreads"]
 	shell:
 		"""
 		cat {input.R1} > {output.R1_out}
@@ -130,7 +132,7 @@ rule fastq_screen:
 		subset=100000,
 		aligner='bowtie2',
 		mem=config["fastqScreenMem"],
-	threads: 8
+	threads: config["fastqScreenThreads"]
 	log:
 		"logs/fastq_screen/{sample}.{read}.log"
 	wrapper:
@@ -155,7 +157,8 @@ rule fastp:
 		## detect adapter for pe should work out what the adapters are.
 		extra="-g --detect_adapter_for_pe",
 		mem=config["fastpMem"]
-	threads: 1 
+	threads: 
+		config["fastpThreads"]
 	wrapper:
 		"v4.0.0/bio/fastp"
 
@@ -179,7 +182,8 @@ rule bwa_mem:
 		sort_order="coordinate",  # Can be 'queryname' or 'coordinate'.
 		sort_extra="",  # Extra args for samtools/picard.
 		mem=config["bwaMem"],
-	threads: config["bwaThreads"]
+	threads: 
+		config["bwaThreads"]
 	conda:
 		"envs/bwa.yaml"
 	shell:
@@ -200,7 +204,8 @@ rule samtools_stats_raw:
 	params:
 		extra="",  # Optional: extra arguments.
 		mem=config["samtoolsStatMem"]
-	threads: 1
+	threads: 
+		config["samtoolsStatThreads"]
 	log:
 		"logs/samtools_stats/{sample}.log",
 	wrapper:
@@ -221,6 +226,8 @@ rule annotate_bam:
 	params:
 		mem=config["fgbioMem"],
 		javaMem=config["fgbioJavaMem"],
+	threads:
+		config["fgbioThreads"]
 	conda:
 		"envs/fgbio.yaml",
 	shell:
@@ -243,7 +250,8 @@ rule sort_UMI_bam:
 		javaMem = config["fgbioJavaMem"]
 	conda:
 		"envs/fgbio.yaml"
-	threads: 1
+	threads: 
+		config["fgbioThreads"]
 	shell:
 		"""
 		fgbio {params.javaMem} -XX:+AggressiveOpts -XX:+AggressiveHeap SortBam \
@@ -264,7 +272,8 @@ rule set_mate_info:
 	params:
 		mem=config["fgbioMem"],
 		javaMem = config["fgbioJavaMem"]
-	threads: 1
+	threads:
+		config["fgbioThreads"]
 	shell:
 		"""
 		fgbio {params.javaMem} -XX:+AggressiveOpts -XX:+AggressiveHeap SetMateInformation \
@@ -285,7 +294,8 @@ rule group_reads:
 		javaMem = config["fgbioJavaMem"]
 	conda:
 		"envs/fgbio.yaml"
-	threads: 1
+	threads:
+		config["fgbioThreads"]
 	shell:
 		"""
 		fgbio {params.javaMem} -XX:+AggressiveOpts -XX:+AggressiveHeap GroupReadsByUmi \
@@ -308,7 +318,8 @@ rule call_consensus:
 		mem=config["fgbioMem"],
 		javaMem = config["fgbioJavaMem"],
 		consensusReads = config["consensusReads"],
-	threads: 1
+	threads: 
+		config["fgbioThreads"]
 	shell:
 		"""
 		fgbio {params.javaMem} -XX:+AggressiveOpts -XX:+AggressiveHeap CallMolecularConsensusReads \
@@ -336,7 +347,8 @@ rule consensus_fastq:
 	## Remember, this is the number of samtools' additional threads. 
 	## At least 2 threads have to be requested on cluster sumbission. 
 	## This value - 2 will be sent to samtools sort -@ argument.
-	threads: 3
+	threads: 
+		config["consensusFastqThreads"]
 	wrapper:
 		"v4.0.0/bio/samtools/fastq/separate"
 
@@ -355,7 +367,8 @@ rule bwa_mem_consensus:
 		sort_order="coordinate",  # Can be 'queryname' or 'coordinate'.
 		sort_extra="",  # Extra args for samtools/picard.
 		mem=config["bwaMem"],
-	threads: config["bwaThreads"]
+	threads: 
+		config["bwaThreads"]
 	conda:
 		"envs/bwa.yaml"
 	shell:
@@ -376,7 +389,8 @@ rule samtools_index:
 	params:
 		extra="",  # optional params string
 		mem=config["samtoolsStatMem"]
-	threads: 4  # This value - 1 will be sent to -@
+	threads: 
+		config["samtoolsIdxThreads"]# This value - 1 will be sent to -@
 	wrapper:
 		"v4.0.0/bio/samtools/index"
 	
@@ -393,7 +407,8 @@ rule samtools_stats_con:
 	params:
 		extra="",  # Optional: extra arguments.
 		mem=config["samtoolsStatMem"]
-	threads: 1
+	threads: 
+		config["samtoolsStatsThreads"]
 	log:
 		"logs/samtools_stats/{sample}.con.log",
 	wrapper:
@@ -424,7 +439,8 @@ rule gatk_depth_of_coverage:
                 mem=config["gatkMem"]
         resources:
                 mem_mb=config["gatkRunMem"],
-        threads: 1
+        threads: 
+		config["gatkThreads"]
         conda:
                 "envs/gatk4.yaml"
         shell:

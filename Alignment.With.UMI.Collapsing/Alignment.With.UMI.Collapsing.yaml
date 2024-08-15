@@ -4,14 +4,6 @@ samples:
 ##########################################
 reference:
         /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta
-dict:
-        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.dict
-knownsites:
-        [
-        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.dbsnp138.vcf,
-        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/1000G_phase1.snps.high_confidence.hg38.vcf.gz,
-        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
-        ]
 bwa_index:
         /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta
 intervals:
@@ -44,20 +36,46 @@ sampleString:
 consensusReads: 1
 
 ##########################################
-## file stuff
+## Resources
 ##########################################
 
-## Memory
+## MultiQC
+multiqcThreads: 1
+multiqcMem: 4G
+
+## combineFastq 
+combineThreads: 1
 combineMem: 8G
-trimMem: 8G
-bwaMem: 4G
+
+## fastq screen
+fastqScreenThreads: 8
+fastqScreenMem: 8G
+
+## fastp
+fastpThreads: 1
+fastpMem: 8G
+
+## Alignment
 bwaThreads: 8
+bwaMem: 4G
+
+## fgbio
+fgbioThreads: 1
 fgbioMem: 26G
 fgbioJavaMem: -Xmx24g
+
+## bam to fastq
+consensusFastqThreads: 3
 consensusFastqMem: 8G
+
+## GATK
+gatkThreads: 1
 gatkMem: 16G
 gatkRunMem: 12288
+
+## Samtools
+samtoolsStatThreads: 1
 samtoolsStatMem: 8G
+samtoolsIdxThreads: 4
 samtoolsIdxMem: 8G
-fastpMem: 8G
-fastqScreenMem: 8G
+
