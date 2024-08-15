@@ -59,7 +59,6 @@ knownsites | gold standard SNV and indel positions | [ /data/BCI-OkosunLab/Ref/G
 intervals | bed file of targeted positions | /data/home/hfx472/BCI-OkosunLab/Ed/Ref/Bed-Files/PCNSL_ctDNA_panel_v6/PCNSL_ctDNA_panel_v6_covered.bed |
 rawFolder | location of raw files | FASTQ_Raw |
 sampleString | string to target the samples (change this to sample sheet) | "{sample}_S{number}_{lane}_R1_001.fastq.gz" |
-consensusReads | minimum number of reads to call consensus from (1 is low, but OK with high complexity libraries) | 1 |
 multiqcThreads | threads | 1 |
 multiqcMem | memory | 4G |
 combineThreads | threads | 1 |
