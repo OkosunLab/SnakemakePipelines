@@ -2,11 +2,14 @@
 
 ## Contents
 1. [Overview](#overview)
+	2. [Pipeline Steps](#pipeline-steps)
 1. [Config Options](#config-options)
 
 # Overview
 
 This pipeline will run from unaligned fastq files to consensus bam files using UMIs.
+
+## Pipeline Steps
 
 ![Rulegraph for UMI consensus alignment](Alignment.With.UMI.Collapsing.svg)
 
