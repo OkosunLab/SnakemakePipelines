@@ -415,29 +415,39 @@ rule samtools_stats_con:
 		"v4.0.0/bio/samtools/stats"
 
 rule gatk_depth_of_coverage:
-	input:
-		bam="Alignment/{sample}.con.bam",	
-		fasta=config["reference"],
-		intervals=config["intervals"],
-		idx="Alignment/{sample}.con.bai"
-	output:
-		multiext(
-			"QC/depth/{sample}",
-			"",
-			".sample_interval_summary",
-			".sample_cumulative_coverage_counts",
-			".sample_cumulative_coverage_proportions",
-			".sample_interval_statistics",
-			".sample_statistics",
-			".sample_summary",
-		),
-	log:
-		"logs/gatk/depthofcoverage/{sample}.log",
-	params:
-		extra="",
-		java_opts="",
-		mem=config["gatkMem"]
-	resources:
-		mem_mb=config["gatkRunMem"],
-	wrapper:
-		"v4.0.0/bio/gatk/depthofcoverage"
+        input:
+                bam="Alignment/{sample}.recalib.bam",
+                fasta=config["reference"],
+                intervals=config["intervals"],
+                idx="Alignment/{sample}.recalib.bai"
+        output:
+                multiext(
+                        "QC/depth/{sample}",
+                        ".sample_interval_summary",
+                        ".sample_cumulative_coverage_counts",
+                        ".sample_cumulative_coverage_proportions",
+                        ".sample_interval_statistics",
+                        ".sample_statistics",
+                        ".sample_summary",
+                )
+        log:
+                "logs/gatk/depthofcoverage/{sample}.log",
+        params:
+                extra="--omit-depth-output-at-each-base true",
+                java_opts="",
+                out=lambda w: "QC/depth/{}".format(w.sample),
+                mem=config["gatkMem"]
+        resources:
+                mem_mb=config["gatkRunMem"],
+        threads: 1
+        conda:
+                "envs/gatk4.yaml"
+        shell:
+                """
+                gatk DepthOfCoverage \
+                        -R {input.fasta} \
+                        -O {params.out} \
+                        -I {input.bam} \
+                        -L {input.intervals} \
+                        {params.extra}
+                """
