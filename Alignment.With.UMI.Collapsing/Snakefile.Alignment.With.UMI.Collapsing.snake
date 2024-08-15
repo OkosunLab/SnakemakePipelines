@@ -134,10 +134,10 @@ rule fastq_screen:
 	log:
 		"logs/fastq_screen/{sample}.{read}.log"
 	wrapper:
-	 "v4.0.0/bio/fastq_screen"
+		## the up to date version of this wrapper is blacklisted as it doesn't generate the png
+		"v3.10.2/bio/fastq_screen"
 
 ## FASTP is a tool for QC and trimming of FASTQ files.
-
 rule fastp:
 	input:
 		sample=["FASTQ_Raw/Combined/{sample}.R1.combined.fastq.gz", "FASTQ_Raw/Combined/{sample}.R2.combined.fastq.gz"]
@@ -158,6 +158,7 @@ rule fastp:
 	threads: 1 
 	wrapper:
 		"v4.0.0/bio/fastp"
+
 
 ##########################################################
 ## Alignment
@@ -394,16 +395,16 @@ rule samtools_stats_con:
 		mem=config["samtoolsStatMem"]
 	threads: 1
 	log:
-		"logs/samtools_stats/{sample}.con.recalib.log",
+		"logs/samtools_stats/{sample}.con.log",
 	wrapper:
 		"v4.0.0/bio/samtools/stats"
 
 rule gatk_depth_of_coverage:
         input:
-                bam="Alignment/{sample}.recalib.bam",
+                bam="Alignment/{sample}.con.bam",
                 fasta=config["reference"],
                 intervals=config["intervals"],
-                idx="Alignment/{sample}.recalib.bai"
+                idx="Alignment/{sample}.con.bai"
         output:
                 multiext(
                         "QC/depth/{sample}",
