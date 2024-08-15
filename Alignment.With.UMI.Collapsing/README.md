@@ -9,8 +9,6 @@ Jump to section:
 
 This pipeline will run from unaligned fastq files to consensus bam files using UMIs.
 
-### Pipeline steps
-
 ![Rulegraph for UMI consensus alignment](Alignment.With.UMI.Collapsing.svg)
 
 1. Quality Check
