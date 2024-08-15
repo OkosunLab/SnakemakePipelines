@@ -2,7 +2,6 @@
 
 ## Contents
 1. [Overview](#overview)
-	1. [Pipeline steps](#pipeline-steps)
 1. [Config Options](#config-options)
 
 # Overview
