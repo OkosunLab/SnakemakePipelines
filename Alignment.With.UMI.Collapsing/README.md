@@ -4,6 +4,9 @@
 1. [Overview](#overview)
    1. [Pipeline Steps](#pipeline-steps)
    2. [Quality Control](#quality-control)
+   3. [First Alignment](#First-Alignment)
+   4. [UMI collapsing](#UMI-collapsing)
+   5. [Consensus Alignment](#Consensus-Alignment)
 2. [Config Options](#config-options)
 
 # Overview
