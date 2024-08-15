@@ -1,6 +1,6 @@
 # BWA alignment and GATK preprocessing
 
-Jump to section:
+## Contents
 1. [Overview](#overview)
 	1. [Quality Control](#Quality-Control)
 	2. [Alignment](#Alignment)
