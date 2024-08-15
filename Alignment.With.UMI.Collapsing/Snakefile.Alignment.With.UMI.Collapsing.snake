@@ -159,26 +159,6 @@ rule fastp:
 	wrapper:
 		"v4.0.0/bio/fastp"
 
-rule fastqc_fastp_run:
-	input:
-		html=expand("QC/fastqc_fastp/{sample}_{read}_posttrim.html", sample = SAMPLES, read = READS2),
-		zip=expand("QC/fastqc_fastp/{sample}_{read}_posttrim.fastqc.zip", sample = SAMPLES, read = READS2)
-	output:
-		"QC/MultiQC/multiqc_report.html",
-	conda:
-		"envs/multiqc.yaml"
-	params:
-		mem = "4G"
-	log:
-		"logs/multiqc/multiqc.fastp.log",
-	threads: 1
-	shell:
-		"""
-		multiqc -o QC/MultiQC/ \
-			-n Multiqc.post.fastp \
-			-f QC/fastqc_fastp/
-		"""
-
 ##########################################################
 ## Alignment
 ##########################################################
@@ -399,6 +379,10 @@ rule samtools_index:
 	wrapper:
 		"v4.0.0/bio/samtools/index"
 	
+
+##########################################################
+## Bam file stats
+##########################################################
 
 rule samtools_stats_con:
 	input:
