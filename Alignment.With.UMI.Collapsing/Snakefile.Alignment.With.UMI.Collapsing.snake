@@ -7,18 +7,20 @@
 ##########################################################
 
 import glob
+import re
 
 ## Load config file
-configfile: "UMI.Consensus.DNA.config.yaml"
+configfile: "Alignment.With.UMI.Collapsing.yaml"
 ## Used for FASTQC
 READS=["R1", "R2"]
 READS2=["1", "2"]
 ## Dynamically file all the sample IDs
 ## First build the search string
-search="%s/{sample}_S{number}_{lane}_R1_001.fastq.gz" % config["rawFolder"]
+## search="%s/{sample}_S{number}_{lane}_R1_001.fastq.gz" % config["rawFolder"]
+search="%s/%s" % ( config["rawFolder"], config["sampleString"] )
 ## Then find all the samples
 SAMPLES = set(glob_wildcards(search).sample)
-
+## print(SAMPLES)
 ##########################################################
 ## Functions
 ##########################################################
@@ -26,27 +28,29 @@ SAMPLES = set(glob_wildcards(search).sample)
 ## Find all FASTQ files of a specific read given the sample ID
 
 def get_R1(wildcards):
-	files = glob.glob('{}/{}*R1*.fastq.gz'.format(config["rawFolder"], wildcards.sample))
+	files = glob.glob('{}/{}_*R1*.fastq.gz'.format(config["rawFolder"], wildcards.sample))
 	files.sort()
 	return files
 
 def get_R2(wildcards):
-	files = glob.glob('{}/{}*R3*.fastq.gz'.format(config["rawFolder"], wildcards.sample))
+	files = glob.glob('{}/{}_*R3*.fastq.gz'.format(config["rawFolder"], wildcards.sample))
 	files.sort()
 	return files
 
 def get_UMI(wildcards):
-	files = glob.glob('{}/{}*R2*.fastq.gz'.format(config["rawFolder"], wildcards.sample))
+	## They messed up the UMIs and now we have two in the folder
+	## The correct UMI has the same number following S as the ID following A in the samples
+	## Each sample in this project starts: OKO6759A[0-9]{1,} so easy to do
+	ID=re.sub(".*OKO6759A", "", wildcards.sample)
+	files = glob.glob('{}/{}_*S{}_*R2*.fastq.gz'.format(config["rawFolder"], wildcards.sample, ID))
 	files.sort()
 	return files
-
  
 ## Find all FASTQ files given the sample ID and read ID
 
 def get_fastq_from_sample_read(wildcards):
-	files = glob.glob('FASTQ_Raw/Combined/{}*{}*.fastq.gz'.format(wildcards.sample, wildcards.read))
+	files = glob.glob('FASTQ_Raw/Combined/{}_*{}*.fastq.gz'.format(wildcards.sample, wildcards.read))
 	return files
-
 
 ##########################################################
 ## RULES
@@ -54,10 +58,34 @@ def get_fastq_from_sample_read(wildcards):
 
 ## One rule to run them all
 
-rule all:
+rule multiQC:
 	input:
-		expand("Alignment/{sample}.con.recalib.bam", sample = SAMPLES),
-		"QC/MultiQC/multiqc_report.html"
+		expand("QC/depth/{sample}.sample_interval_summary",sample = SAMPLES),
+		expand("QC/depth/{sample}.sample_cumulative_coverage_counts",sample = SAMPLES),
+		expand("QC/depth/{sample}.sample_cumulative_coverage_proportions",sample = SAMPLES),
+		expand("QC/depth/{sample}.sample_interval_statistics",sample = SAMPLES),
+		expand("QC/depth/{sample}.sample_statistics",sample = SAMPLES),
+		expand("QC/depth/{sample}.sample_summary",sample = SAMPLES),
+		html=expand("QC/fastp/{sample}.html", sample = SAMPLES),
+		rawBam=expand("QC/samtools_stats/{sample}.raw.txt", sample = SAMPLES),
+		conBam=expand("QC/samtools_stats/{sample}.con.txt", sample = SAMPLES),
+		UMIQC=expand("QC/fgbio/{sample}.family_size_histogram.txt", sample = SAMPLES),
+		txt=expand("QC/fastq_screen/{sample}.{read}.fastq_screen.txt", sample = SAMPLES, read = READS),
+	output:
+		"QC/MultiQC/multiqc_report.html",
+	conda:
+		"envs/multiqc.yaml"
+	params:
+		mem = "4G"
+	log:
+		"logs/multiqc/multiqc.log",
+	threads: 1
+	shell:
+		"""
+		multiqc -o QC/MultiQC/ \
+			-n multiqc_report \
+			-f QC
+		"""
 
 ##########################################################
 ## QC and file manuipulation
@@ -106,7 +134,7 @@ rule fastq_screen:
 	log:
 		"logs/fastq_screen/{sample}.{read}.log"
 	wrapper:
-	    "v3.10.2/bio/fastq_screen"
+	 "v4.0.0/bio/fastq_screen"
 
 ## FASTP is a tool for QC and trimming of FASTQ files.
 
@@ -124,51 +152,12 @@ rule fastp:
 	log:
 		"logs/fastp/pe/{sample}.log"
 	params:
-		## It should detect the adapters but can add them here too
-		## These are the TruSeq adapters
-		## adapters="--adapter_sequence AGATCGGAAGAGCACACGTCTGAACTCCAGTCA --adapter_sequence_r2 AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT",
-		## g removes poly g
 		## detect adapter for pe should work out what the adapters are.
 		extra="-g --detect_adapter_for_pe",
 		mem=config["fastpMem"]
 	threads: 1 
 	wrapper:
-		"v3.4.1/bio/fastp"
-
-rule fastqc:
-	input:
-		"FASTQ_Raw/Combined/{sample}.{read}.combined.fastq.gz"
-	output:
-		html="QC/fastqc/{sample}_{read}.html",
-		zip="QC/fastqc/{sample}_{read}_fastqc.zip"
-	params:
-		extra = "--quiet",
-		mem=config["fastpMem"]
-	log:
-		"logs/fastqc/{sample}_{read}.log"
-	threads: 1
-	resources:
-		mem_mb = 1024,
-	wrapper:
-		"v3.3.6/bio/fastqc"
-
-rule fastqc_fastp:
-	input:
-		"FASTQ_fastp/{sample}.{read}.fastq.gz"
-	output:
-		html="QC/fastqc_fastp/{sample}_{read}.html",
-		zip="QC/fastqc_fastp/{sample}_{read}_fastqc.zip"
-	params:
-		extra = "--quiet",
-		mem=config["fastpMem"]
-	log:
-		"logs/fastqc_fastp/{sample}_{read}.log"
-	threads: 1
-	resources:
-		mem_mb = 1024,
-	wrapper:
-		"v3.3.6/bio/fastqc"
-
+		"v4.0.0/bio/fastp"
 
 rule fastqc_fastp_run:
 	input:
@@ -189,44 +178,6 @@ rule fastqc_fastp_run:
 			-n Multiqc.post.fastp \
 			-f QC/fastqc_fastp/
 		"""
-
-
-
-rule trim_galore_pe:
-	input:
-		["FASTQ_Raw/Combined/{sample}.R1.combined.fastq.gz", "FASTQ_Raw/Combined/{sample}.R2.combined.fastq.gz"],
-	output:
-		fasta_fwd="FASTQ_Trim/{sample}_trimmed_R1.fq.gz",
-		report_fwd="QC/trim_galore/{sample}_R1_trimming_report.txt",
-		fasta_rev="FASTQ_Trim/{sample}_trimmed_R2.fq.gz",
-		report_rev="QC/trim_galore/{sample}_R2_trimming_report.txt",
-	threads: 1
-	params:
-		extra="--illumina --gzip --retain_unpaired",
-		mem=config["trimMem"]
-	log:
-		"logs/trim_galore/{sample}.log",
-	wrapper:
-		"v3.4.0/bio/trim_galore/pe"
-
-
-rule fastqc_post_trim:
-	input:
-		"FASTQ_Trim/{sample}_trimmed_{read}.fq.gz",
-	output:
-		html="QC/fastqc_trimmed/{sample}_{read}_trimmed.html",
-		zip="QC/fastqc_trimmed/{sample}_{read}_trimmed_fastqc.zip"
-	params:
-		extra = "--quiet",
-		mem=config["fastpMem"]
-	log:
-		"logs/fastqc_trimmed/{sample}_{read}_trimmed.log"
-	threads: 1
-	resources:
-		mem_mb = 1024,
-	wrapper:
-		"v3.3.6/bio/fastqc"
-
 
 ##########################################################
 ## Alignment
@@ -272,7 +223,7 @@ rule samtools_stats_raw:
 	log:
 		"logs/samtools_stats/{sample}.log",
 	wrapper:
-		"v3.9.0/bio/samtools/stats"
+		"v4.0.0/bio/samtools/stats"
 
 ##########################################################
 ## FGBIO UMI section
@@ -374,7 +325,8 @@ rule call_consensus:
 		"envs/fgbio.yaml"
 	params:
 		mem=config["fgbioMem"],
-		javaMem = config["fgbioJavaMem"]
+		javaMem = config["fgbioJavaMem"],
+		consensusReads = config["consensusReads"],
 	threads: 1
 	shell:
 		"""
@@ -405,7 +357,7 @@ rule consensus_fastq:
 	## This value - 2 will be sent to samtools sort -@ argument.
 	threads: 3
 	wrapper:
-		"v3.4.0/bio/samtools/fastq/separate"
+		"v4.0.0/bio/samtools/fastq/separate"
 
 rule bwa_mem_consensus:
 	input:
@@ -413,7 +365,7 @@ rule bwa_mem_consensus:
 		R2="FASTQ_Con/{sample}.con.R2.fastq.gz",
 		idx=config["bwa_index"]
 	output:
-		temp("Alignment/{sample}.con.bam")
+		"Alignment/{sample}.con.bam"
 	log:
 		"logs/bwa_mem_consensus/{sample}.log",
 	params:
@@ -433,53 +385,11 @@ rule bwa_mem_consensus:
 			samtools sort -@{threads} -o {output} -
 		"""
 
-rule gatk_baserecalibrator:
-	input:
-		bam="Alignment/{sample}.con.bam",
-		ref=config["reference"],
-		dict=config["dict"],
-		known=config["knownsites"],
-	output:
-		recal_table=temp("Alignment/{sample}.con.grp"),
-	log:
-		"logs/gatk/baserecalibrator/{sample}.log",
-	params:
-		extra="",  # optional
-		java_opts="",  # optional
-		mem=config["gatkMem"]
-	resources:
-		mem_mb=config["gatkRunMem"],
-	threads: 1
-	wrapper:
-		"v3.8.0/bio/gatk/baserecalibrator"
-
-rule gatk_applybqsr:
-	input:
-		bam="Alignment/{sample}.con.bam",
-		ref=config["reference"],
-		dict=config["dict"],
-		recal_table="Alignment/{sample}.con.grp",
-	output:
-		bam="Alignment/{sample}.con.recalib.bam",
-	log:
-		"logs/gatk/gatk_applybqsr/{sample}.log",
-	params:
-		extra="",  # optional
-		java_opts="",  # optional
-		mem=config["gatkMem"],
-		embed_ref=True,  # embed the reference in cram output
-	resources:
-		mem_mb=config["gatkRunMem"],
-	threads: 1
-	wrapper:
-		"v3.8.0/bio/gatk/applybqsr"
-
-
 rule samtools_index:
 	input:
-		"Alignment/{sample}.con.recalib.bam"
+		"Alignment/{sample}.con.bam"
 	output:
-		"Alignment/{sample}.con.recalib.bam.bai",
+		"Alignment/{sample}.con.bai",
 	log:
 		"logs/samtools_index/{sample}.log",
 	params:
@@ -487,14 +397,14 @@ rule samtools_index:
 		mem=config["samtoolsStatMem"]
 	threads: 4  # This value - 1 will be sent to -@
 	wrapper:
-		"v3.10.2/bio/samtools/index"
+		"v4.0.0/bio/samtools/index"
 	
 
 rule samtools_stats_con:
 	input:
-		bam="Alignment/{sample}.con.recalib.bam"
+		bam="Alignment/{sample}.con.bam"
 	output:
-		"QC/samtools_stats/{sample}.con.recalib.txt",
+		"QC/samtools_stats/{sample}.con.txt",
 	params:
 		extra="",  # Optional: extra arguments.
 		mem=config["samtoolsStatMem"]
@@ -502,14 +412,14 @@ rule samtools_stats_con:
 	log:
 		"logs/samtools_stats/{sample}.con.recalib.log",
 	wrapper:
-		"v3.9.0/bio/samtools/stats"
+		"v4.0.0/bio/samtools/stats"
 
 rule gatk_depth_of_coverage:
 	input:
-		bam="Alignment/{sample}.con.recalib.bam",	
+		bam="Alignment/{sample}.con.bam",	
 		fasta=config["reference"],
 		intervals=config["intervals"],
-		idx="Alignment/{sample}.con.recalib.bam.bai"
+		idx="Alignment/{sample}.con.bai"
 	output:
 		multiext(
 			"QC/depth/{sample}",
@@ -530,34 +440,4 @@ rule gatk_depth_of_coverage:
 	resources:
 		mem_mb=config["gatkRunMem"],
 	wrapper:
-		"v3.10.2/bio/gatk/depthofcoverage"
-
-rule multiQC:
-	input:
-		expand("QC/depth/{sample}.sample_interval_summary",sample = SAMPLES),
-		expand("QC/depth/{sample}.sample_cumulative_coverage_counts",sample = SAMPLES),
-		expand("QC/depth/{sample}.sample_cumulative_coverage_proportions",sample = SAMPLES),
-		expand("QC/depth/{sample}.sample_interval_statistics",sample = SAMPLES),
-		expand("QC/depth/{sample}.sample_statistics",sample = SAMPLES),
-		expand("QC/depth/{sample}.sample_summary",sample = SAMPLES),
-		html=expand("QC/fastp/{sample}.html", sample = SAMPLES),
-		rawBam=expand("QC/samtools_stats/{sample}.raw.txt", sample = SAMPLES),
-		conBam=expand("QC/samtools_stats/{sample}.con.recalib.txt", sample = SAMPLES),
-		UMIQC=expand("QC/fgbio/{sample}.family_size_histogram.txt", sample = SAMPLES),
-		txt=expand("QC/fastq_screen/{sample}.{read}.fastq_screen.txt", sample = SAMPLES, read = READS),
-	output:
-		"QC/MultiQC/multiqc_report.html",
-	conda:
-		"envs/multiqc.yaml"
-	params:
-		mem = "4G"
-	log:
-		"logs/multiqc/multiqc.log",
-	threads: 1
-	shell:
-		"""
-		multiqc -o QC/MultiQC/ \
-			-n multiqc_report \
-			-f QC
-		"""
-
+		"v4.0.0/bio/gatk/depthofcoverage"
