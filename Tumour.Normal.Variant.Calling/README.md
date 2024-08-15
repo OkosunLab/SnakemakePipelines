@@ -101,6 +101,26 @@ Here BCFtools is used to annotate the variant calls with the COSMIC ID from a pr
 
 **N.B.** As these calls were manually downloaded you should double check your annotated IDs to make sure they have been processed correctly. They will also not match *all* of the "EXISTING VARIANTS" called by VEP as some of these will be called with the wrong allele.
 
+# Sample Sheet
+
+To make sure the samples are paired with their correct normals I implemented a sample sheet approach. This sheet is run through some python code to generate a dictionary with the sample ID as the key. This makes it easy to pull out various bits of information about the samples easily with only the sample ID.
+
+To create a sample sheet to work with this pipeline you need a tab delimited file with the following columns (the column headers must match the names here).
+
+sample | tumour | tumourID | normal | normalID
+--- | --- |--- | --- |--- 
+SampleA | Alignment/SampleA.bam | SampleA | Alignment/SampleA.normal.bam | SampleA.normal
+
+The IDs are used for variant callers that accept all the bams at once and then use the RG inside the bam to work out which reads come from tumor and which from normal. You can see and example in the Sample.Sheet.tsv.
+
+Column | Reason
+--- | ---------------
+sample | Sample ID - MUST BE unique to this sample
+tumour | tumour bam file
+tumourID | ID for the tumour bam (this is in your bam header) **N.B. this should be the same as sample if you have used my pipeline**
+normal | normal bam file
+normalID | ID for the normal bam (see above)
+
 # Config options:
 Option | Default | Note
 --- | --- | ---
