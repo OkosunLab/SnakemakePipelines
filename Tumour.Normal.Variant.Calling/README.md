@@ -3,6 +3,7 @@
 ## Contents
 
 1. [Overview](#Overview-of-the-pipeline)
+   1. [Pipeline steps](#Pipeline-steps)
    1. [Variant Calling](#Variant-Calling)
       1. [Mutect2](#Mutect2)
       2. [Strelka2](#Strelka2)
@@ -14,9 +15,11 @@
       3. [A note on COSMIC annotation](#COSMIC-annotation)
 4. [Config Options](#Config-options)
 
+# Overview
+
 This snakemake pipeline takes a sample sheet of matched tumour/normal samples and run a selection of somatic variant calling pipelines. 
 
-# Overview of the pipeline:
+## Pipeline Steps
 
 ![Pipeline overview](Tumour.Normal.Variant.Calling.svg)
 
@@ -46,8 +49,8 @@ This stops it from labelling **all** multiallelic variants as multiallelic in th
 *BCFtools version: 1.20-0*
 
 1. The SV caller Manta is run first to generate candidate indels for Strelka2. These are passed to Strelka2 as in the best practices.
-2. Strelka2 is run to generate anv and indel VCF files.
-3. These fiels are merged into one VCF file with BCFtools
+2. Strelka2 is run to generate snv and indel VCF files.
+3. These files are merged into one VCF file with BCFtools
 
 
 ### [Varscan2](http://dkoboldt.github.io/varscan/)
@@ -56,9 +59,11 @@ This stops it from labelling **all** multiallelic variants as multiallelic in th
 *Varscan2 version: 2.4.6*\
 *BCFtools version: 1.20-0*
 
-1. Pileup files are created using Samtools. The snakemake wrapper for this ONLY allows gzipped outputs, but varscan somatic fails if given compressed pileup files.
-2. The gunzip intermediate step ungzips the pileup file so Varscan can run on it.
-3. Varscan is then run in somatic mode with the following option to generate a VCF file instead of Varscan's default output:
+1. Pileup files are created using Samtools.
+   1. This is done with the normal file being the first entry then the tumour, as per the user manual.
+   2. **N.B** The snakemake wrapper for this ONLY allows gzipped outputs, but varscan somatic fails if given compressed pileup files.
+3. The gunzip intermediate step ungzips the pileup file so Varscan can run on it.
+4. Varscan is then run in somatic mode with the following option to generate a VCF file instead of Varscan's default output:
 
 ```bash
 --output-vcf 1
@@ -71,9 +76,9 @@ This stops it from labelling **all** multiallelic variants as multiallelic in th
 
 *VarDict version: 1.8.3*
 
-VarDict is run in paried mode on the Bam files directly. 
+VarDict is run in paried mode on the Bam files directly, producing the VCF file.
 
-**N.B.** Vardict will also call large structural variants. These are denoted by <DEL>, <INS>, <DUP> and  <INV>. These will not be annotated with VEP.
+**N.B.** Vardict will also call large structural variants (>1000bp). These are denoted by \<DEL\>, \<INS\>, \<DUP\> and \<INV\>. These will not be annotated with VEP.
 
 ## Annotation
 
@@ -94,6 +99,9 @@ Due to licencing restrictions, the [Catalogue Of Somatic Mutations In Cancer (CO
 
 Here BCFtools is used to annotate the variant calls with the COSMIC ID from a provided VCF file. By default this is a merged copy of the genome, non coding and targeted calls from version 100, using GRCh38 coordinates. These IDs will be added to the 3rd (ID) column of the VCF files.
 
-**NB** As these calls were manually downloaded you should double check your annotated IDs to make sure they have been processed correctly. They will also not match *all* of the "EXISTING VARIANTS" called by VEP as some of these will be called with the wrong allele.
+**N.B.** As these calls were manually downloaded you should double check your annotated IDs to make sure they have been processed correctly. They will also not match *all* of the "EXISTING VARIANTS" called by VEP as some of these will be called with the wrong allele.
 
 # Config options:
+Option | Default | Note
+--- | --- | ---
+
