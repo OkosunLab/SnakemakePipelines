@@ -123,6 +123,13 @@ normal | normal bam file
 normalID | ID for the normal bam (see above)
 
 # Config options:
+
+These options are avaliable in the config file. Ideally you should not have to alter the snake file at all, and everything you might need to change should be in the config file. Put in an issue here if you want to add more options to this.
+
+TODO: 
+   1. Add time options
+   2. Add options for VEP pick order.
+ 
 Option | description | Default | Note
 --- | --- | --- | ---
 reference | Reference fasta | /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta |
