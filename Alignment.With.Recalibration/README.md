@@ -48,7 +48,7 @@ Staphylococcus aureus | NCTC 8325 | NCBI
 7. **[MultiQC](https://multiqc.info/)** collects all the QC metrics from the pipeline.
 
 
-## Config options
+# Config options
 
 Option | Notes
 --- | ---
