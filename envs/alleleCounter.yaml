@@ -1,0 +1,4 @@
+channels:
+        - bioconda
+dependencies:
+        - cancerit-allelecount =4.3.0
