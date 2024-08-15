@@ -2,8 +2,9 @@
 
 ## Contents
 1. [Overview](#overview)
-	2. [Pipeline Steps](#pipeline-steps)
-1. [Config Options](#config-options)
+   1. [Pipeline Steps](#pipeline-steps)
+   2. [Quality Control](#quality-control)
+2. [Config Options](#config-options)
 
 # Overview
 
@@ -13,21 +14,55 @@ This pipeline will run from unaligned fastq files to consensus bam files using U
 
 ![Rulegraph for UMI consensus alignment](Alignment.With.UMI.Collapsing.svg)
 
-1. Quality Check
-	1. fastp is used to check the raw fastq files as well as running adapter and quality trimming.
-	1. fastq_screen screens the raw fastq for reads aligning to other genomes.
-2. trimmed fastq files are aligned to the reference geneome (set in the config file) using bwa mem.
-3. samtools flagstat extracts the alignment stats from the raw bam.
-4. fgbio is used to add UMIs to the bam files.
-	1. UMIs are added.
-	2. The bam file is sorted.
-	3. Mate info is set.
- 	4. Reads are grouped by their UMIS (the number of UMIs per family is recorded at this step).
-  	5. The consensus is called for UMI marked PCR duplicates.
-5. samtools is used to convert this bam file back into a consensus fastq file.
-6. Consensus fastq files are aligned to the reference geneome (set in the config file) using bwa mem.
+## Quality Control
+
+*fastp version: 0.23.4*\
+*fastq screen version: 0.15.3*
+
+1. **[fastp](https://github.com/OpenGene/fastp)** is used to check the raw fastq files as well as running adapter and quality trimming. The pipeline uses the trimmed files downstream by default.
+2. **[fastq_screen](https://www.bioinformatics.babraham.ac.uk/projects/fastq_screen/)** screens the raw fastq for reads aligning to other genomes. This allows you to test for contaimination in your samples.
+	1. The file: /data/BCI-OkosunLab/Ref/FASTQ_Screen/fastq_screen.conf controls which genomes are used.
+	2. By default it uses the following genomes:
+
+Genome | Version | Origin
+--- | --- | ---
+Human | GRCh38 (hg38) | Ensembl
+Mouse | GRCm39 (mm10) | Ensembl
+Mycobacterium tuberculosis | H37Rv | NCBI
+Escherichia coli | MG1655 | NCBI
+Staphylococcus aureus | NCTC 8325 | NCBI
+
+## First Alignment
+
+*bwa version: 0.7.17*\
+*samtools version: 1.20*
+
+1. Trimmed fastq files are aligned to the reference geneome (set in the config file) using [**bwa mem**](https://github.com/lh3/bwa).
+2. [**Samtools**](http://www.htslib.org/) flagstat extracts the alignment stats from the raw bam.
+
+## UMI collapsing
+
+*fgbio version: 2.2.1-0*\
+*samtools version: 1.20*
+
+1. [fgbio](https://github.com/fulcrumgenomics/fgbio) is used to add UMIs to the bam file with [**AnnotateBamWithUmis**](http://fulcrumgenomics.github.io/fgbio/tools/latest/AnnotateBamWithUmis.html).
+2. The bam file is sorted with [**SortBam**](http://fulcrumgenomics.github.io/fgbio/tools/latest/SortBam.html).
+3. Mate info is set with [**SetMateInformation**](http://fulcrumgenomics.github.io/fgbio/tools/latest/SetMateInformation.html).
+4. Reads are grouped by their UMIs with [**GroupReadsByUmi**](http://fulcrumgenomics.github.io/fgbio/tools/latest/GroupReadsByUmi.html) (the number of UMIs per family is recorded at this step. This is found in QC/fgbio/{sample}.family_size_histogram.txt). 
+5. The consensus is called for UMI marked PCR duplicates with [**CallMolecularConsensusReads**](http://fulcrumgenomics.github.io/fgbio/tools/latest/CallMolecularConsensusReads.html).
+6. samtools is used to convert this bam file back into a consensus fastq file.
+
+## Consensus Alignment
+
+*bwa version: 0.7.17*\
+*samtools version: 1.20*\
+*GATK version: 4.5.0*
+
+1. Consensus fastq files are aligned to the reference geneome (set in the config file) using bwa mem.
    1. The resulting file is coordinate sorted by samtools
-7. multiqc collects all the QC metrics from the pipeline.
+2. samtools flagstat is used to get the alignment stats from the consensus bam file
+3. **[GATK DepthOfCoverage](https://gatk.broadinstitute.org/hc/en-us/articles/21905133224859-DepthOfCoverage-BETA)** is used to generate the coverage across the intervals (with per base coverage turned off).
+4. multiqc collects all the QC metrics from the pipeline.
 
 # Config options
 
