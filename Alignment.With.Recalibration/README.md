@@ -68,12 +68,11 @@ combineMem | memory | 8G |
 fastqScreenThreads | threads | 8 |
 fastqScreenMem | memory | 8G |
 fastpThreads | threads | 1 |
-fastpMem | memory | 8G |
+fastpMem | memory | 24G |
 bwaThreads | threads | 8 |
 bwaMem | memory | 4G |
-fgbioThreads | threads | 1 |
-fgbioMem | memory | 26G |
-fgbioJavaMem | memory (passed to fgbio) | -Xmx24g |
+markDupsMem | memory | 8G |
+markDupsThreads | threads | 1 |
 consensusFastqThreads | threads | 3 |
 consensusFastqMem | memory | 8G |
 gatkThreads | threads | 1 |
