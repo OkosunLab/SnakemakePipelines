@@ -42,6 +42,10 @@ vepBuild:
 vepRelease:
         112
 
+## Pick order
+
+pickOrder: mane_select,mane_plus_clinical,canonical,biotype,rank,tsl,appris,ccds,length
+
 ## COSMIC VCF
 bcftoolsVCF:
         /data/BCI-OkosunLab/Ref/GRCh38/COSMIC/Cosmic_Genome.Targeted.NonCoding.Merged._Normal_v100_GRCh38.chr.vcf.gz
@@ -53,42 +57,52 @@ bcftoolsVCF:
 # MultiQC
 multiqcThreads: 1
 multiqcMem: 4G
+multiqcTime: 24:0:0
 
 # VEP prep
 prepMem: 8G
 prepThreads: 1
+prepTime: 24:0:0
 
 # Mutect2
 mutect2Threads: 1
 gatkMem: 24G
 gatkRunMem: 22000
+gatkTime: 24:0:0
 
 # Manta
 mantaThreads: 2
 mantaMem: 10G
 mantaMemMB: 8195
+mantaTime: 24:0:0
 
 # Strelka
 strelkaMem: 24G
 strelkaThreads: 1
+strelkaTime: 24:0:0
 
 # BCFtools
 bcftoolsMem: 8G
 bcftoolsMemFloat: 7168
 bcftoolsThreads: 1
+bcftoolsTime: 24:0:0
 
 # Annotation
 laatvThreads: 1
 vepThreads: 4
 vepMem: 8G
+vepTime: 24:0:0
 
 #Vardict
 VarDictMem: 24G
 vardictThreads: 1
+vardictTime: 24:0:0
 
 # Varscan
 varscanResMem: 7168
 varscanMem: 8G
 varscanThreads: 1
+varscanTime: 24:0:0
 pileupMem: 8G
 pileupThreads: 1
+pileupTime: 24:0:0

@@ -25,7 +25,7 @@ CALLERS = config["callers"]
 ##########################################################
 
 ## Load Sample Sheet
-sampleFile = open("Sample.Sheet.tsv").readlines()
+sampleFile = open(config["SampleSheet"]).readlines()
 ## Take the first line as a header
 header = sampleFile.pop(0).rstrip().split("\t")
 ## Generate sample dictionary
@@ -64,7 +64,8 @@ rule multiQC:
 	conda:
 		"envs/multiqc.yaml"
 	params:
-		mem=config["multiqcMem"]
+		mem=config["multiqcMem"],
+		time=config["multiqcTime"]
 	log:
 		"logs/multiqc/multiqc.log"
 	threads: 
@@ -91,6 +92,7 @@ rule get_vep_cache:
 		build=config["vepBuild"],
 		release=config["vepRelease"],
 		mem=config["prepMem"],
+		time=config["prepTime"]
 	threads: 
 		config["prepThreads"]
 	log:
@@ -106,6 +108,7 @@ rule download_vep_plugins:
 	params:
 		release=config["vepRelease"],
 		mem=config["prepMem"],
+		time=config["prepTime"]
 	threads: 
 		config["prepThreads"]
 	wrapper:
@@ -129,7 +132,8 @@ rule gatk_mutect2:
 		config["mutect2Threads"]
 	params:
 		mem=config["gatkMem"],
-		extra=lambda w: "-normal-sample {}".format(sampleSheet[w.sample]["normalID"])
+		extra=lambda w: "-normal-sample {}".format(sampleSheet[w.sample]["normalID"]),
+		time=config["gatkTime"]
 	resources:
 		mem_mb=config["gatkRunMem"]
 	log:
@@ -149,7 +153,8 @@ rule gatk_get_pileup_summaries:
 	threads:
 		config["mutect2Threads"]
 	params:
-		mem=config["gatkMem"]
+		mem=config["gatkMem"],
+		time=config["gatkTime"]
 	resources:
 		mem_mb=config["gatkRunMem"]
 	log:
@@ -167,7 +172,8 @@ rule gatk_calculate_contamination:
 		config["mutect2Threads"]
 	params:
 		mem=config["gatkMem"],
-		extra="-tumor-segmentation VCF/Mutect2/{sample}.segmentation.tsv"
+		time=config["gatkTime"],
+		extra="-tumor-segmentation VCF/Mutect2/{sample}.segmentation.tsv",
 	resources:
 		mem_mb=config["gatkRunMem"]
 	log:
@@ -192,7 +198,8 @@ rule gatk_learnreadorientationmodel:
 	threads: 
 		config["mutect2Threads"]
 	params:
-		mem=config["gatkMem"]
+		mem=config["gatkMem"],
+		time=config["gatkTime"],
 	resources:
 		mem_mb=config["gatkRunMem"]
 	log:
@@ -219,6 +226,7 @@ rule gatk_filtermutectcalls_complete:
 		config["mutect2Threads"]
 	params:
 		mem=config["gatkMem"],
+		time=config["gatkTime"],
 		extra="--max-alt-allele-count 3",
 		java_opts="",
 	resources:
@@ -243,6 +251,7 @@ rule Manta:
 		"envs/manta.yaml"
 	params:
 		mem = config["mantaMem"],
+		time=config["mantaTime"],
 		extra_cfg="",  # optional
 		extra_run="",  # optional
 	log:
@@ -276,6 +285,7 @@ rule Strelka2:
 		config_extra="--indelCandidates VCF/Manta/{sample}/results/variants/candidateSmallIndels.vcf.gz",
 		run_extra="",
 		mem=config["strelkaMem"],
+		time=config["strelkaTime"]
 	log:
 		"logs/strelka2/{sample}.log",
 	wrapper:
@@ -290,7 +300,8 @@ rule Merge_Strelka2:
 	threads: 
 		config["bcftoolsThreads"]
 	params:
-		mem = config["bcftoolsMem"]
+		mem = config["bcftoolsMem"],
+		time = config["bcftoolsTime"]
 	conda:
 		"envs/bcftools.yaml"
 	log:
@@ -319,6 +330,7 @@ rule VarDict:
 	params:
 		extra="",
 		mem=config["VarDictMem"],
+		time=config["vardictTime"]
 	threads: 
 		config["vardictThreads"]
 	log:
@@ -343,6 +355,7 @@ rule PileupForVarscan:
 		config["pileupThreads"]
 	params:
 		mem=config["pileupMem"],
+		time=config["pileupTime"],
 		extra="-d 10000 -B",  # optional
 	wrapper:
 		"v4.0.0/bio/samtools/mpileup"
@@ -359,7 +372,8 @@ rule UnzipPileup:
 	threads: 
 		config["pileupThreads"]
 	params:
-		mem = config["pileupMem"]
+		mem = config["pileupMem"],
+		time = config["pileupTime"],
 	shell:
 		"""
 		gunzip {input}
@@ -374,14 +388,15 @@ rule Varscan:
 	message:
 		 "Calling somatic variants {wildcards.sample}"
 	threads: 
-		config["varscanThreads"]
+		config["varscanThreads"],
 	log:
 		"logs/Varscan/{sample}.call.log"
 	resources:
 		mem_mb=config["varscanResMem"]
 	params:
 		extra = "--output-vcf 1",
-		mem=config["varscanMem"]
+		mem=config["varscanMem"],
+		time=config["varscanTime"]
 	wrapper:
 		"v4.0.0/bio/varscan/somatic"
 
@@ -403,7 +418,8 @@ rule Merge_Varscan:
 	threads: 
 		config["bcftoolsThreads"] 
 	params:
-		mem=config["bcftoolsMem"]
+		mem=config["bcftoolsMem"],
+		time=config["bcftoolsTime"]
 	conda:
 		"envs/bcftools.yaml"
 	log:
@@ -436,6 +452,7 @@ rule gatk_leftalignandtrimvariants:
 		config["laatvThreads"]
 	params:
 		mem=config["gatkMem"],
+		time=config["gatkTime"],
 		extra="--split-multi-allelics", # optional
 		java_opts="",  # optional
 	resources:
@@ -457,9 +474,10 @@ rule bcftools_sort:
 	params:
 		uncompressed_bcf=False,
 		extras="",
-		mem=config["bcftoolsMem"]
+		mem=config["bcftoolsMem"],
+		time=config["bcftoolsTime"],
 	threads:
-		config["bcftoolsThreads"]
+		config["bcftoolsThreads"],
 	resources:
 		mem_mb=config["bcftoolsMemFloat"]
 	wrapper:
@@ -480,12 +498,14 @@ rule annotate_variants_vep:
 		plugins=["LoFtool"],
 		extra="--everything \
 			--flag_pick \
-			--pick_order mane_select,mane_plus_clinical,canonical,biotype,rank,tsl,appris,ccds,length \
-			--check_existing --compress_output bgzip",	
-		mem=config["vepMem"]
+			--pick_order {} \
+			--check_existing --compress_output bgzip".format(config["pickOrder"]),	
+		mem=config["vepMem"],
+		time=config["vepTime"]
 	log:
 		"logs/vep/{sample}.{caller}.annotate.log",
-	threads: config["vepThreads"]
+	threads: 
+		config["vepThreads"]
 	wrapper:
 		"v4.0.0/bio/vep/annotate"
 
@@ -503,7 +523,8 @@ rule annotate_with_cosmic_vcf:
 	threads:
 		config["bcftoolsThreads"]
 	params:
-		mem=config["bcftoolsMem"]
+		mem=config["bcftoolsMem"],
+		time=config["bcftoolsTime"]
 	shell:
 		"""
 		tabix -f {input.calls}
@@ -525,7 +546,8 @@ rule bcf_stats:
 	log:
 		"logs/bcftools_stat/{sample}.{caller}.log",
 	params:
-		mem=config["bcftoolsMem"]
+		mem=config["bcftoolsMem"],
+		time=config["bcftoolsTime"]
 	threads: 
 		config["bcftoolsThreads"]
 	wrapper:

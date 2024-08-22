@@ -44,7 +44,7 @@ multiqcThreads: 1
 
 ## combine fastqs
 combineMem: 8G
-combineThread: 1
+combineThreads: 1
 
 ## Mark Duplicates
 markDupsMem: 8G

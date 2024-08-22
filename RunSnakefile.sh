@@ -85,7 +85,7 @@ else
 		$target \
 		-p --executor cluster-generic \
 		--cluster-generic-submit-cmd \
-		"qsub -V -l h_rt=240:0:0 -l h_vmem={params.mem} -pe smp {threads} -j y -cwd -o {log}.jobscript" \
+		"qsub -V -l h_rt=24:0:0 -l h_vmem={params.mem} -pe smp {threads} -j y -cwd -o {log}.jobscript" \
 		-j $Jobs \
 		--software-deployment-method conda $EXTRA
 

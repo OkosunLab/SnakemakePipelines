@@ -76,7 +76,7 @@ rule multiQC:
 	conda:
 		"envs/multiqc.yaml"
 	params:
-		mem = config["multiqcThreads"]
+		mem = config["multiqcMem"]
 	log:
 		"logs/multiqc/multiqc.log",
 	threads: 
@@ -408,47 +408,47 @@ rule samtools_stats_con:
 		extra="",  # Optional: extra arguments.
 		mem=config["samtoolsStatMem"]
 	threads: 
-		config["samtoolsStatsThreads"]
+		config["samtoolsStatThreads"]
 	log:
 		"logs/samtools_stats/{sample}.con.log",
 	wrapper:
 		"v4.0.0/bio/samtools/stats"
 
 rule gatk_depth_of_coverage:
-        input:
-                bam="Alignment/{sample}.con.bam",
-                fasta=config["reference"],
-                intervals=config["intervals"],
-                idx="Alignment/{sample}.con.bai"
-        output:
-                multiext(
-                        "QC/depth/{sample}",
-                        ".sample_interval_summary",
-                        ".sample_cumulative_coverage_counts",
-                        ".sample_cumulative_coverage_proportions",
-                        ".sample_interval_statistics",
-                        ".sample_statistics",
-                        ".sample_summary",
-                )
-        log:
-                "logs/gatk/depthofcoverage/{sample}.log",
-        params:
-                extra="--omit-depth-output-at-each-base true",
-                java_opts="",
-                out=lambda w: "QC/depth/{}".format(w.sample),
-                mem=config["gatkMem"]
-        resources:
-                mem_mb=config["gatkRunMem"],
-        threads: 
+	input:
+		bam="Alignment/{sample}.con.bam",
+		fasta=config["reference"],
+		intervals=config["intervals"],
+		idx="Alignment/{sample}.con.bai"
+	output:
+		multiext(
+			"QC/depth/{sample}",
+			".sample_interval_summary",
+			".sample_cumulative_coverage_counts",
+			".sample_cumulative_coverage_proportions",
+			".sample_interval_statistics",
+			".sample_statistics",
+			".sample_summary",
+			)
+	log:
+		"logs/gatk/depthofcoverage/{sample}.log",
+	params:
+		extra="--omit-depth-output-at-each-base true",
+		java_opts="",
+		out=lambda w: "QC/depth/{}".format(w.sample),
+		mem=config["gatkMem"]
+	resources:
+		mem_mb=config["gatkRunMem"],
+	threads:
 		config["gatkThreads"]
-        conda:
-                "envs/gatk4.yaml"
-        shell:
-                """
-                gatk DepthOfCoverage \
-                        -R {input.fasta} \
-                        -O {params.out} \
-                        -I {input.bam} \
-                        -L {input.intervals} \
-                        {params.extra}
-                """
+	conda:
+		"envs/gatk4.yaml"
+	shell:
+		"""
+		gatk DepthOfCoverage \
+			-R {input.fasta} \
+			-O {params.out} \
+			-I {input.bam} \
+			-L {input.intervals} \
+			{params.extra}
+		"""
