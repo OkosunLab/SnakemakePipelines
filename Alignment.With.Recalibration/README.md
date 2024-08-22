@@ -50,8 +50,36 @@ Staphylococcus aureus | NCTC 8325 | NCBI
 
 # Config options
 
-Option | Notes
---- | ---
-**Memory Options** | 
+Option | Description | Default| Notes
+--- | --- | --- | ---
+reference | reference fasta | /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta |
+dict | reference dictionary | /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.dict |
+bwa_index | index for BWA | /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta |
+knownsites | gold standard SNV and indel positions | [ /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.dbsnp138.vcf,/data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/1000G_phase1.snps.high_confidence.hg38.vcf.gz,/data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz ] | 
+intervals | bed file of targeted positions | /data/BCI-OkosunLab/Ref/GRCh38/Nonacus_Exome_GRCh38/Nonacus_Exome_GRCh38_covered.chr.bed |
+rawFolder | location of raw files | FASTQ_Raw |
+sampleString | string to target the samples (change this to sample sheet) | "{sample}_S{number}_{lane}_R1_001.fastq.gz" |
+multiqcThreads | threads | 1 |
+multiqcMem | memory | 4G |
+combineThreads | threads | 1 |
+combineMem | memory | 8G |
+fastqScreenThreads | threads | 8 |
+fastqScreenMem | memory | 8G |
+fastpThreads | threads | 1 |
+fastpMem | memory | 24G |
+bwaThreads | threads | 8 |
+bwaMem | memory | 4G |
+markDupsMem | memory | 8G |
+markDupsThreads | threads | 1 |
+consensusFastqThreads | threads | 3 |
+consensusFastqMem | memory | 8G |
+gatkThreads | threads | 1 |
+gatkMem | memory | 16G |
+gatkRunMem | memory (passed to java) | 12288 |
+samtoolsStatThreads | threads | 1 |
+samtoolsStatMem | memory | 8G |
+samtoolsIdxThreads | threads | 4 |
+samtoolsIdxMem | memory | 8G |
+
 
 
