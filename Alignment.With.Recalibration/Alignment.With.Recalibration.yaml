@@ -41,34 +41,43 @@ sampleString:
 ## MultiQC
 multiqcMem: 4G
 multiqcThreads: 1
+multiqcTime: 24:0:0
 
 ## combine fastqs
 combineMem: 8G
 combineThreads: 1
+combineTime: 24:0:0
 
 ## Mark Duplicates
 markDupsMem: 8G
 markDupsThreads: 1
+markDupsTime: 24:0:0
 
 ## Alignment
 bwaMem: 4G
 bwaThreads: 8
+bwaTime: 24:0:0
 
 ## GATK
 gatkMem: 16G
 gatkRunMem: 12288
 gatkThreads: 1
+gatkTime: 24:0:0
 
 ## Samtools
 samtoolsStatMem: 8G
 samtoolsStatThreads: 1
+samtoolsStatTime: 24:0:0
 samtoolsIdxMem: 8G
 samtoolsIdxThreads: 4
+samtoolsIdxTime: 24:0:0
 
 ## fastp
 fastpMem: 24G
 fastpThreads: 1
+fastpTime: 24:0:0
 
 ## fastq_screen
 fastqScreenMem: 8G
 fastqScreenThreads: 8
+fastqScreenTime: 24:0:0

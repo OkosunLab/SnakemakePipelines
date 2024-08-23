@@ -61,7 +61,8 @@ rule multiQC:
 	conda:
 		"envs/multiqc.yaml"
 	params:
-		mem = config["multiqcMem"]
+		mem = config["multiqcMem"],
+		time = config["multiqcTime"],
 	log:
 		"logs/multiqc/multiqc.log",
 	threads: 
@@ -90,6 +91,7 @@ rule combine_fastqs:
 		R2_out=temp("FASTQ_Raw/Combined/{sample}.R2.combined.fastq.gz"),
 	params:
 		mem=config["combineMem"],
+		time=config["combineTime"],
 	log:
 		"logs/combine_fastq/{sample}.log"
 	threads: 
@@ -114,6 +116,7 @@ rule fastq_screen:
 		subset=100000,
 		aligner='bowtie2',
 		mem=config["fastqScreenMem"],
+		time=config["fastqScreenTime"],
 	threads: 
 		config["fastqScreenThreads"]
 	log:
@@ -144,7 +147,8 @@ rule fastp:
 		## g removes poly g
 		## detect adapter for pe should work out what the adapters are.
 		extra="-g --detect_adapter_for_pe",
-		mem=config["fastpMem"]
+		mem=config["fastpMem"],
+		time=config["fastpTime"],
 	threads: 
 		config["fastpThreads"] 
 	wrapper:
@@ -170,6 +174,7 @@ rule bwa_mem:
 		sort_order="coordinate",  # Can be 'queryname' or 'coordinate'.
 		sort_extra="",  # Extra args for samtools/picard.
 		mem=config["bwaMem"],
+		time=config["bwaTime"],
 	threads: 
 		config["bwaThreads"]
 	conda:
@@ -194,7 +199,8 @@ rule markduplicates_bam:
 	threads: 
 		config["markDupsThreads"]
 	params:
-		mem=config["markDupsMem"]
+		mem=config["markDupsMem"],
+		time=config["markDupsTime"],
 	resources:
 		mem_mb=7168,
 	wrapper:
@@ -214,7 +220,8 @@ rule gatk_baserecalibrator:
 	params:
 		extra="",  # optional
 		java_opts="",  # optional
-		mem=config["gatkMem"]
+		mem=config["gatkMem"],
+		time=config["gatkTime"],
 	resources:
 		mem_mb=config["gatkRunMem"],
 	threads: 
@@ -237,6 +244,7 @@ rule gatk_applybqsr:
 		extra="",  # optional
 		java_opts="",  # optional
 		mem=config["gatkMem"],
+		time=config["gatkTime"],
 		embed_ref=True,  # embed the reference in cram output
 	resources:
 		mem_mb=config["gatkRunMem"],
@@ -255,7 +263,8 @@ rule samtools_index:
 		"logs/samtools_index/{sample}.log",
 	params:
 		extra="",  # optional params string
-		mem=config["samtoolsStatMem"]
+		mem=config["samtoolsStatMem"],
+		time=config["samtoolsStatTime"],
 	threads: 
 		config["samtoolsIdxThreads"] # This value - 1 will be sent to -@
 	wrapper:
@@ -269,7 +278,8 @@ rule samtools_stats:
 		"QC/samtools_stats/{sample}.recalib.txt",
 	params:
 		extra="",  # Optional: extra arguments.
-		mem=config["samtoolsStatMem"]
+		mem=config["samtoolsStatMem"],
+		time=config["samtoolsStatTime"],
 	threads:
 		config["samtoolsStatThreads"]
 	log:
@@ -301,7 +311,8 @@ rule gatk_depth_of_coverage:
 		extra="--omit-depth-output-at-each-base true",
 		java_opts="",
 		out=lambda w: "QC/depth/{}".format(w.sample),
-		mem=config["gatkMem"]
+		mem=config["gatkMem"],
+		time=config["gatkTime"],
 	resources:
 		mem_mb=config["gatkRunMem"],
 	threads: 
