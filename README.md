@@ -19,7 +19,8 @@ Pipeline | info
 [Alignment with recalibration](https://github.com/OkosunLab/SnakemakePipelines/tree/main/Alignment.With.Recalibration) | Pipeline for aligning DNAseq reads from illumina sequencing and running GATK pre-processing
 [Alignment with UMI collapsing](https://github.com/OkosunLab/SnakemakePipelines/tree/main/Alignment.With.UMI.Collapsing) | Pipeline for aligning DNAseq reads from illumina sequencing from UMI tagged data
 [Tumour normal variant calling](https://github.com/OkosunLab/SnakemakePipelines/tree/main/Tumour.Normal.Variant.Calling) | Pipeline for calling variants from matched tumour normal bam files
-[Tumour only variant calling](https://github.com/OkosunLab/SnakemakePipelines/tree/main/Tumour.Only.Variant.Calling) | Pipeline for calling variants from matched tumour normal bam files
+[Tumour only variant calling](https://github.com/OkosunLab/SnakemakePipelines/tree/main/Tumour.Only.Variant.Calling) | Pipeline for calling variants from only tumour bam files
+
 ## Tutorial
 
 ### Setup
@@ -65,7 +66,8 @@ Short | Long | Purpose
 -e | --extra | Takes all remaining arguments and passes them to snakemake (MUST BE LAST)
 -h | --help | Display this message and exit
 
-My suggestion is to symlink this command in your ~/.local/bin/ so you can call it from anywhere on the system.
+
+If you have added ~/.local/bin/ to your PATH, I would suggest adding a symlink to this there, so you can call it from anywhere on the system.
 
 ```bash
 ln -s /path/to/RunSnakefile.sh ~/.local/bin/
