@@ -61,25 +61,34 @@ rawFolder | location of raw files | FASTQ_Raw |
 sampleString | string to target the samples (change this to sample sheet) | "{sample}_S{number}_{lane}_R1_001.fastq.gz" |
 multiqcThreads | threads | 1 |
 multiqcMem | memory | 4G |
+multiqcTime | time | 24:0:0 | 24 hours
 combineThreads | threads | 1 |
 combineMem | memory | 8G |
+combineTime | time | 24:0:0 | 24 hours
 fastqScreenThreads | threads | 8 |
 fastqScreenMem | memory | 8G |
+fastqScreenTime | time | 24:0:0 | 24 hours
 fastpThreads | threads | 1 |
 fastpMem | memory | 24G |
+fastpTime | time | 24:0:0 | 24 hours
 bwaThreads | threads | 8 |
 bwaMem | memory | 4G |
+bwaTime | time | 24:0:0 | 24 hours
 markDupsMem | memory | 8G |
 markDupsThreads | threads | 1 |
+markDupsTime | time | 24:0:0 | 24 hours
 consensusFastqThreads | threads | 3 |
 consensusFastqMem | memory | 8G |
+consensusTime | time | 24:0:0 | 24 hours
 gatkThreads | threads | 1 |
 gatkMem | memory | 16G |
 gatkRunMem | memory (passed to java) | 12288 |
+gatkTime | time | 24:0:0 | 24 hours
 samtoolsStatThreads | threads | 1 |
 samtoolsStatMem | memory | 8G |
+samtoolsStatTime | time | 24:0:0 | 24 hours
 samtoolsIdxThreads | threads | 4 |
 samtoolsIdxMem | memory | 8G |
-
+samtoolsIdxTime | time | 24:0:0 | 24 hours
 
 
