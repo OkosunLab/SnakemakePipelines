@@ -37,16 +37,19 @@ This snakemake pipeline takes a sample sheet of tumour samples and runs a select
 ```
 This stops it from labelling **all** multiallelic variants as multiallelic in the FILTER column, meaning they are removed when subsetting by PASS.
 
-### [Varscan2](http://dkoboldt.github.io/varscan/)
+### [VarDict](https://github.com/AstraZeneca-NGS/VarDict)
 
-*Samtools version: 1.20*\
-*Varscan2 version: 2.4.6*
+*VarDict version: 1.8.3*
 
-Pileup files are created using Samtools. The snakemake wrapper for this ONLY allows gzipped outputs, but varscan somatic fails if given compressed pileup files. The gunzip intermediate step ungzips the pileup file so Varscan can run on it. varscan is then run in somatic mode with the following option to generate a VCF file instead of Varscan's default output:
+VarDict is run in paried mode on the bam files directly, producing the VCF file.
 
-```bash
---output-vcf 1 
-``` 
+**N.B.** Vardict will also call large structural variants (>1000bp). These are denoted by \<DEL\>, \<INS\>, \<DUP\> and \<INV\>. These will not be annotated with VEP.
+
+### [Freebayes](https://github.com/freebayes/freebayes)
+
+*Freebayes version: 0.0*
+
+Freebayes is run on the tumour bam file directly producing the VCF file.
 
 ## Annotation
 
