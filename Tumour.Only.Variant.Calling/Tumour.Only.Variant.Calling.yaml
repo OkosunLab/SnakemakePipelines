@@ -1,0 +1,102 @@
+##########################################
+## Genomes
+##########################################
+reference:
+        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta
+gnomad:
+        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/af-only-gnomad.hg38.vcf.gz
+intervals:
+        /data/BCI-OkosunLab/Ref/GRCh38/Nonacus_Exome_GRCh38/Nonacus_Exome_GRCh38_covered.chr.bed
+pon:
+        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/1000g_pon.hg38.vcf.gz
+
+##########################################
+## Samples
+##########################################
+## This will search for samples called .con.bam
+## This is for samples processed by fgbio into consensus bam files.
+SampleSheet: Sample.Sheet.tsv
+
+##########################################
+## Variant Calling
+##########################################
+callers: [
+        Mutect2, 
+        VarDict,
+        Freebayes
+        ]
+
+
+##########################################
+## Annotation
+##########################################
+
+## VEP
+vepCache:
+        /data/BCI-OkosunLab/Ref/GRCh38/vep/cache
+vepSpecies:
+        homo_sapiens
+vepBuild:
+        GRCh38
+vepRelease:
+        112
+
+## Pick order
+
+pickOrder: mane_select,mane_plus_clinical,canonical,biotype,rank,tsl,appris,ccds,length
+
+## COSMIC VCF
+bcftoolsVCF:
+        /data/BCI-OkosunLab/Ref/GRCh38/COSMIC/Cosmic_Genome.Targeted.NonCoding.Merged._Normal_v100_GRCh38.chr.vcf.gz
+
+##########################################
+## Memory
+##########################################
+
+# MultiQC
+multiqcThreads: 1
+multiqcMem: 4G
+multiqcTime: 24:0:0
+
+# VEP prep
+prepMem: 8G
+prepThreads: 1
+prepTime: 24:0:0
+
+# Mutect2
+mutect2Threads: 1
+gatkMem: 24G
+gatkRunMem: 22000
+gatkTime: 24:0:0
+
+# Freebayes
+freebayesMem: 4G
+freebayesTime: 24:0:0
+freebayesThreads: 2
+freebayesRunMem: 4096
+
+# BCFtools
+bcftoolsMem: 8G
+bcftoolsMemFloat: 7168
+bcftoolsThreads: 1
+bcftoolsTime: 24:0:0
+
+# Annotation
+laatvThreads: 1
+vepThreads: 4
+vepMem: 8G
+vepTime: 24:0:0
+
+#Vardict
+VarDictMem: 24G
+vardictThreads: 1
+vardictTime: 24:0:0
+
+# Varscan
+varscanResMem: 7168
+varscanMem: 8G
+varscanThreads: 1
+varscanTime: 24:0:0
+pileupMem: 8G
+pileupThreads: 1
+pileupTime: 24:0:0
