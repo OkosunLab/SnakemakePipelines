@@ -2,13 +2,16 @@
 
 ## Contents
 1. [Overview](#overview)
-	1. [Quality Control](#Quality-Control)
-	2. [Alignment](#Alignment)
+	1. [Pipeline Steps](#Pipeline-steps)
+	2. [Quality Control](#Quality-Control)
+	3. [Alignment](#Alignment)
 1. [Config Options](#config-options)
 
 # Overview
 
 This pipeline will run from unaligned fastq files to duplicate marked, recalibrated bam files.
+
+## Pipeline Steps
 
 ![Rulegraph for BWA alignment and GATK preprocessing](Alignment.With.Recalibration.svg)
 
