@@ -42,7 +42,7 @@ Staphylococcus aureus | NCTC 8325 | NCBI
 *samtools version: 1.20*\
 *multiQC version: 1.21-0*
 
-1. Trimmed fastq files are aligned to the reference geneome (set in the config file) using **[bwa mem](https://github.com/lh3/bwa)**.
+1. Trimmed fastq files are aligned to the reference genome (set in the config file) using **[bwa mem](https://github.com/lh3/bwa)**.
 2. **[Picard markduplicates](https://gatk.broadinstitute.org/hc/en-us/articles/21905036102043-MarkDuplicates-Picard)** (GATK) is used to mark potential PCR duplicates
 5. GATK is used to recalibrate the base quality scores
 	1. **[BQSR](https://gatk.broadinstitute.org/hc/en-us/articles/21905050792603-BaseRecalibrator)** is used to generate a model for the analysis
