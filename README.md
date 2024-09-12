@@ -76,11 +76,13 @@ ln -s /path/to/RunSnakefile.sh ~/.local/bin/
 So to run a pipeline you can use something like this:
 
 ```bash
-## Dry run first
+## Dry run first (this will not produce any files)
 RunSnakefile.sh -s pipeline.name.snake -j 100 -n
 ## Proper run if now happy
 RunSnakefile.sh -s pipeline.name.snake -j 100
 ```
+
+**N.B. snakemake will complain about your conda priority not being set to strict. For now ignore this. Setting the priority to strict causes issues with installing the software that I haven't been able to resolve yet.**
 
 #### Job Submission Setup
 
