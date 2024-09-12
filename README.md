@@ -34,7 +34,7 @@ conda env create -n snakemake -f /data/BCI-OkosunLab/Environments/anaconda3/2024
 
 ### Running A Pipeline
 
-Copy a version of the current pipeline, config.yaml and envs folder into your project directory. This ensures we have a copy of the exact pipeline you ran to generate your data, in case the pipeline is updated.
+Copy a version of the current pipeline (.snake file), the config (.yaml file) and envs folder into your project directory. This ensures we have a copy of the exact pipeline you ran to generate your data, in case the pipeline is updated.
 
 Adjust the values in the config file as you see fit (these should be described in the file and in the repo for the subfolders.
 
