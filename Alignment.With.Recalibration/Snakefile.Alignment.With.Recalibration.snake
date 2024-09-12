@@ -1,6 +1,6 @@
 ##########################################################
 ##
-## Snakefile for the processing of UMI based DNA seq
+## Snakefile for the processing fastq files
 ##
 ## Written by: Findlay Bewicke-Copley
 ## Date: 13-05-2024
