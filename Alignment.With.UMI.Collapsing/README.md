@@ -7,6 +7,7 @@
    3. [First Alignment](#First-Alignment)
    4. [UMI collapsing](#UMI-collapsing)
    5. [Consensus Alignment](#Consensus-Alignment)
+1. [Output](#Output)
 2. [Config Options](#config-options)
 
 # Overview
@@ -66,6 +67,10 @@ Staphylococcus aureus | NCTC 8325 | NCBI
 2. samtools flagstat is used to get the alignment stats from the consensus bam file
 3. **[GATK DepthOfCoverage](https://gatk.broadinstitute.org/hc/en-us/articles/21905133224859-DepthOfCoverage-BETA)** is used to generate the coverage across the intervals (with per base coverage turned off).
 4. multiqc collects all the QC metrics from the pipeline.
+
+# Output
+
+The pipeline will output the aligned bams in a folder called Alignment. QC files will be stored in the folder QC, with a subfolder called MultiQC which contains a summary of all the QC records
 
 # Config options
 
