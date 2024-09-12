@@ -40,7 +40,7 @@ def get_R2(wildcards):
 def get_UMI(wildcards):
 	## They messed up the UMIs and now we have two in the folder
 	## The correct UMI has the same number following S as the ID following A in the samples
-	files = glob.glob('{}/{}_*S*_*R2*.fastq.gz'.format(config["rawFolder"], wildcards.sample))
+	files = glob.glob('{}/{}_*R2*.fastq.gz'.format(config["rawFolder"], wildcards.sample))
 	files.sort()
 	return files
  
