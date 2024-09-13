@@ -18,6 +18,10 @@ import glob
 ## Load config file
 configfile: "Tumour.Only.Variant.Calling.yaml"
 
+## Check for intervals file
+if config["intervals"] == "":
+	raise Exception("You need to specify the interval file in the config file")
+
 ## get the callers chosen in the config file.
 CALLERS = config["callers"]
 
