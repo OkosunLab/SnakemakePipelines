@@ -34,7 +34,7 @@ conda env create -n snakemake -f /data/BCI-OkosunLab/Environments/anaconda3/2024
 
 ### Running A Pipeline
 
-Copy a version of the current pipeline, config.yaml and envs folder into your project directory. This ensures we have a copy of the exact pipeline you ran to generate your data, in case the pipeline is updated.
+Copy a version of the current pipeline (.snake file), the config (.yaml file) and envs folder into your project directory. This ensures we have a copy of the exact pipeline you ran to generate your data, in case the pipeline is updated.
 
 Adjust the values in the config file as you see fit (these should be described in the file and in the repo for the subfolders.
 
@@ -76,23 +76,25 @@ ln -s /path/to/RunSnakefile.sh ~/.local/bin/
 So to run a pipeline you can use something like this:
 
 ```bash
-## Dry run first
+## Dry run first (this will not produce any files)
 RunSnakefile.sh -s pipeline.name.snake -j 100 -n
 ## Proper run if now happy
 RunSnakefile.sh -s pipeline.name.snake -j 100
 ```
+
+**N.B. snakemake will complain about your conda priority not being set to strict. For now ignore this. Setting the priority to strict causes issues with installing the software that I haven't been able to resolve yet.**
 
 #### Job Submission Setup
 
 For those interested we are dymanically creating job scripts using this command:
 
 ```bash
-"qsub -V -l h_rt=240:0:0 -l h_vmem={params.mem} -pe smp {threads} -j y -cwd -o {log}.jobscript"
+"qsub -V -l h_rt=24:0:0 -l h_vmem={params.mem} -pe smp {threads} -j y -cwd -o {log}.jobscript"
 ```
 Args | Notes
 --- | ---
 -V | Is vital as this preserves the loaded conda module - without this you cannont use conda to load software (I have not been able to find another way to submit jobs with a module automatically loaded yet).
--l h_rt | Currently I am asking for the max time (240 hours or 10 days) I need to parameterise this so we can use the config to set this.
+-l h_rt | Currently I am asking for 1 day, I am in the process of turning this into a parameter than can be set per rule.
 -l h_vmem | we set the required memory in the params section of the rule using the key mem (hence {params.mem})
 -pe smp {threads} | take the number of threads from the rule.
 -j y | join stdev and sterr

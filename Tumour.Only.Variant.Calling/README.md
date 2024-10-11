@@ -1,4 +1,4 @@
-# Tumour only variant calling (UNDER CONSTRUCTION)
+# Tumour only variant calling
 
 ## Contents
 
@@ -6,6 +6,8 @@
    1. [Variant Calling](#Variant-Calling)
       1. [Mutect2](#Mutect2)
       2. [Varscan2](#Varscan2)
+      3. [VarDict](#VarDict)
+      4. [LoFreq](#LoFreq)
    2. [Annotation](#Annotation)
       1. [Normalisation](#Normalisation)
       2. [Annotation](#Annotation)
@@ -37,6 +39,25 @@ This snakemake pipeline takes a sample sheet of tumour samples and runs a select
 ```
 This stops it from labelling **all** multiallelic variants as multiallelic in the FILTER column, meaning they are removed when subsetting by PASS.
 
+
+### [Varscan2](http://dkoboldt.github.io/varscan/)
+
+*Samtools version: 1.20*\
+*Varscan2 version: 2.4.6*\
+*BCFtools version: 1.20-0*
+
+1. Pileup files are created using Samtools.
+2. The gunzip intermediate step ungzips the pileup file so Varscan can run on it.
+3. Varscan is then run in pileup2snp and pileup2indel mode with the following option to generate a VCF file instead of Varscan's default output:
+
+```bash
+--output-vcf 1
+```
+
+4. BCFtools is used to merge the snp and indel files
+   1. This step requires bgziped VCF files, so first BCFtools is used to bgzip and index the snv and indel outputs from varscan
+   2. The files are merged
+
 ### [VarDict](https://github.com/AstraZeneca-NGS/VarDict)
 
 *VarDict version: 1.8.3*
@@ -45,11 +66,11 @@ VarDict is run in paried mode on the bam files directly, producing the VCF file.
 
 **N.B.** Vardict will also call large structural variants (>1000bp). These are denoted by \<DEL\>, \<INS\>, \<DUP\> and \<INV\>. These will not be annotated with VEP.
 
-### [Freebayes](https://github.com/freebayes/freebayes)
+### [LoFreq](https://csb5.github.io/lofreq/)
 
-*Freebayes version: 0.0*
+*LoFreq version: 2.1.5*
 
-Freebayes is run on the tumour bam file directly producing the VCF file.
+LoFreq is run on the tumour bam file directly producing the VCF file.
 
 ## Annotation
 
