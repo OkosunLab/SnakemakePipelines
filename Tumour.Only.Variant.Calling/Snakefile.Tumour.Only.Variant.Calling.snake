@@ -8,8 +8,7 @@
 ##
 ## Callers Avaliable:
 ## Mutect2
-## Strelka2
-## Varscan2
+## Lofreq
 ## VarDict
 ##########################################################
 
@@ -81,13 +80,11 @@ rule multiQC:
 ##########################################################
 ## Prep-Vep References
 ##########################################################
-
 ## VEP needs to have it's data downloaded before use
 ## This only needs to be run if we don't have the data you want
-
 rule get_vep_cache:
 	output:
-		directory(config["vepCache"]),
+		directory(config["vepCache"])
 	params:
 		species=config["vepSpecies"],
 		build=config["vepBuild"],
@@ -120,10 +117,9 @@ rule download_vep_plugins:
 ##########################################################
 
 ## Basic run of Mutect2
-## Provide both T/N files and specify which is normal in the call.
 rule gatk_mutect2:
 	input:
-		map=lambda w: [sampleSheet[w.sample]["tumour"],
+		map=lambda w: sampleSheet[w.sample]["tumour"],
 		fasta=config["reference"],
 		pon=config["pon"],
 	output:
@@ -260,29 +256,135 @@ rule VarDict:
 
 
 ##########################################################
-# Freebayes 
+# Lofreq
 ##########################################################
 
-rule freebayes:
+rule lofreq:
 	input:
-		alns=lambda w: sampleSheet[w.sample]["tumour"],
-		## idx was here - see if needed :D
-		ref=config["reference"],
+		bam=lambda w: sampleSheet[w.sample]["tumour"],
+		bai=lambda w: "{bam}.bai".format(bam = sampleSheet[w.sample]["tumour"])
 	output:
-		vcf = "calls/{sample}.vcf",
-		vcf=temp("VCF/Freebayes/{sample}.final.vcf"),
+		"VCF/Lofreq/{sample}.final.vcf"
 	log:
-		"logs/freebayes/{sample}.log",
+		"logs/lofreq_call/{sample}.log"
 	params:
-		normalize="-a",
-		mem=config["freebayesMem"],
-		time=config["freebayesTime"],
+		ref=config["reference"],
+		extra="",
+		mem=config["lofreqMem"],
+		time=config["lofreqTime"],
 	threads: 
-		config["freebayesThreads"]
-	resources:
-		mem_mb=config["freebayesRunMem"],
+		config["lofreqThreads"]
 	wrapper:
-		"v4.0.0/bio/freebayes"
+		"v4.0.0/bio/lofreq/call"
+
+##########################################################
+## Varcan 
+##########################################################
+
+## generate pileup files for Varscan
+rule PileupForVarscan:
+	input:
+		bam=lambda w: sampleSheet[w.sample]["tumour"],
+		reference_genome=config["reference"],
+	output:
+		temp("VCF/Varscan2/{sample}.tumor.mpileup.gz"),
+	log:
+		 "logs/samtools/mpileup/{sample}.log",
+	threads:
+		config["pileupThreads"]
+	params:
+		mem=config["pileupMem"],
+		time=config["pileupTime"],
+		extra="-d 10000 -B",  # optional
+	wrapper:
+		"v4.0.0/bio/samtools/mpileup"
+
+## Despite claiming it can handel gzipped files ....
+## The Varscan wrapper doesn't seem to be able to handel gzipped files
+## And the pileup wrapper can't be told not to gzip them
+## So this step is needed
+rule UnzipPileup:
+	input:
+		"VCF/Varscan2/{sample}.tumor.mpileup.gz",
+	output:
+		temp("VCF/Varscan2/{sample}.tumor.mpileup"),
+	threads:
+		config["pileupThreads"]
+	params:
+		mem = config["pileupMem"],
+		time = config["pileupTime"],
+	shell:
+		"""
+		gunzip {input}
+		"""
+
+## Run Varscan on the unzipped pileups
+rule Varscan:
+	input:
+		mpileup="VCF/Varscan2/{sample}.tumor.mpileup"
+	output:
+		snp = "VCF/Varscan2/{sample}.snp.vcf",
+		indel = "VCF/Varscan2/{sample}.indel.vcf"
+	message:
+		 "Calling somatic variants {wildcards.sample}"
+	threads:
+		config["varscanThreads"],
+	log:
+		"logs/Varscan/{sample}.call.log"
+	resources:
+		mem_mb=config["varscanResMem"]
+	params:
+		extra = "--output-vcf 1",
+		mem=config["varscanMem"],
+		time=config["varscanTime"]
+	conda:
+		"envs/varscan.yaml"
+	shell:
+		"""
+		varscan mpileup2snp \
+			{input.mpileup} \
+			{params.extra} > {output.snp}
+		## indels
+		varscan mpileup2indel \
+			{input.mpileup} \
+			{params.extra} > {output.indel}
+		"""
+
+## Merge Varscan output
+## BCFtools complains about them not being bgzipped (lord have mercy)
+## So first, bgzip both files with bcftools
+## Generate indexes
+## Then merge and sort the files
+rule Merge_Varscan:
+	input:
+		snp = "VCF/Varscan2/{sample}.snp.vcf",
+		indel = "VCF/Varscan2/{sample}.indel.vcf"
+	output:
+		merge="VCF/Varscan2/{sample}.final.vcf",
+		snp="VCF/Varscan2/{sample}.snp.vcf.gz",
+		snpidx="VCF/Varscan2/{sample}.snp.vcf.gz.tbi",
+		indel="VCF/Varscan2/{sample}.indel.vcf.gz",
+		indelidx="VCF/Varscan2/{sample}.indel.vcf.gz.tbi"
+	threads:
+		config["bcftoolsThreads"]
+	params:
+		mem=config["bcftoolsMem"],
+		time=config["bcftoolsTime"]
+	conda:
+		"envs/bcftools.yaml"
+	log:
+		"logs/BCFtools/Concat/Varscan/{sample}.log"
+	shell:
+		"""
+		bcftools view -Oz -o {output.snp} {input.snp}
+		bcftools view -Oz -o {output.indel} {input.indel}
+		tabix -f {output.snp}
+		tabix -f {output.indel}
+		bcftools concat -a \
+				{output.snp} \
+				{output.indel} |
+		bcftools sort -o {output.merge} -
+		"""
 
 
 ##########################################################

@@ -6,7 +6,8 @@ reference:
 gnomad:
         /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/af-only-gnomad.hg38.vcf.gz
 intervals:
-        /data/BCI-OkosunLab/Ref/GRCh38/Nonacus_Exome_GRCh38/Nonacus_Exome_GRCh38_covered.chr.bed
+        ## /data/BCI-OkosunLab/Ref/GRCh38/Nonacus_Exome_GRCh38/Nonacus_Exome_GRCh38_covered.chr.bed
+        /data/BCI-OkosunLab/Lizzie/20240627.FFPE.targetedpanel.PTCL.deidentified/PanelBedFiles/T.cell.panel.revised._covered.bed
 pon:
         /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/1000g_pon.hg38.vcf.gz
 
@@ -23,7 +24,8 @@ SampleSheet: Sample.Sheet.tsv
 callers: [
         Mutect2, 
         VarDict,
-        Freebayes
+        LoFreq,
+        Varscan2
         ]
 
 
@@ -70,10 +72,15 @@ gatkRunMem: 22000
 gatkTime: 24:0:0
 
 # Freebayes
-freebayesMem: 4G
+freebayesMem: 24G
 freebayesTime: 24:0:0
 freebayesThreads: 2
-freebayesRunMem: 4096
+freebayesRunMem: 23552
+
+# lofreq
+lofreqMem: 8G
+lofreqTime: 24:0:0
+lofreqThreads: 8
 
 # BCFtools
 bcftoolsMem: 8G
