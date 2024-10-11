@@ -14,9 +14,11 @@
       3. [A note on COSMIC annotation](#COSMIC-annotation)
 4. [Config Options](#Config-options)
 
+# Overview of the pipeline:
+
 This snakemake pipeline takes a sample sheet of tumour samples and runs a selection of somatic variant calling pipelines. 
 
-# Overview of the pipeline:
+## Pipeline Steps
 
 ![Pipeline overview](Tumour.Only.Variant.Calling.svg)
 
