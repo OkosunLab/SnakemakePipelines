@@ -5,8 +5,9 @@
 1. [Overview](#Overview-of-the-pipeline)
    1. [Variant Calling](#Variant-Calling)
       1. [Mutect2](#Mutect2)
-      2. [VarDict](#VarDict)
-      3. [Freebayes](#Freebayes)
+      2. [Varscan2](#Varscan2)
+      3. [VarDict](#VarDict)
+      4. [LoFreq](#LoFreq)
    2. [Annotation](#Annotation)
       1. [Normalisation](#Normalisation)
       2. [Annotation](#Annotation)
@@ -65,11 +66,11 @@ VarDict is run in paried mode on the bam files directly, producing the VCF file.
 
 **N.B.** Vardict will also call large structural variants (>1000bp). These are denoted by \<DEL\>, \<INS\>, \<DUP\> and \<INV\>. These will not be annotated with VEP.
 
-### [Freebayes](https://github.com/freebayes/freebayes)
+### [LoFreq](https://csb5.github.io/lofreq/)
 
-*Freebayes version: 0.0*
+*LoFreq version: 2.1.5*
 
-Freebayes is run on the tumour bam file directly producing the VCF file.
+LoFreq is run on the tumour bam file directly producing the VCF file.
 
 ## Annotation
 
