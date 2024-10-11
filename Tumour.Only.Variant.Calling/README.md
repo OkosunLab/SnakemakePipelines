@@ -18,7 +18,7 @@ This snakemake pipeline takes a sample sheet of tumour samples and runs a select
 
 # Overview of the pipeline:
 
-![Pipeline overview](Tumour.Normal.Variant.Calling.svg)
+![Pipeline overview](Tumour.Only.Variant.Calling.svg)
 
 ## Variant Calling
 
