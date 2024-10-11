@@ -1,4 +1,4 @@
-# Tumour only variant calling (UNDER CONSTRUCTION)
+# Tumour only variant calling
 
 ## Contents
 
