@@ -13,11 +13,15 @@ Dry=""
 DAG=0
 ## Create a rulegraph
 RULEGRAPH=0
+## Set high mem
+HIGHMEM=""
 ## Target rule/file?
 target=""
 ## Extra options?
 EXTRA=""
 dagFile="dag.svg"
+## Where is the conda environment
+conda_envs="/data/BCI-OkosunLab/Environments/Snakemake"
 ###################################
 
 while [ "$1" != "" ]; do
@@ -37,8 +41,13 @@ while [ "$1" != "" ]; do
 					;;
 		-r | --rulegraph )	RULEGRAPH=1
 					;;
+		-m | --highmem )	HIGHMEM='-l highmem'
+					;;
 		-f | --dag-file )	shift
 					dagFile=$1
+					;;
+		-c | --conda_location )	shift
+					conda_envs=$1
 					;;
 		-e | --extra )		shift
 					EXTRA=$@
@@ -54,8 +63,10 @@ Options:
 -j | --jobs		Number of concurrent jobs to run (default: 1)
 -t | --target		Target file/rule (default: none)
 -d | --dag		Print the dag and exit (default: off)
+-m | --highmem		Submit this pipeline using the highmem nodes (default: off)
 -r | --rulegraph	Print the rule graph and exit (default: off)
 -f | --dag-file		The file name for the dag (default: dag.svg)
+-c | --conda_location	The location to store conda environments (default: $conda_envs)
 -e | --extra		Takes all remaining arguments and passes them to snakemake (MUST BE LAST)
 -h | --help		Display this message and exit
 "
@@ -85,9 +96,11 @@ else
 		$target \
 		-p --executor cluster-generic \
 		--cluster-generic-submit-cmd \
-		"qsub -V -l h_rt=24:0:0 -l h_vmem={params.mem} -pe smp {threads} -j y -cwd -o {log}.jobscript" \
+		"qsub -V -l h_rt=24:0:0 -l h_vmem={params.mem} ${HIGHMEM} -pe smp {threads} -j y -cwd -o {log}.jobscript -l rocky" \
 		-j $Jobs \
-		--software-deployment-method conda $EXTRA
+		--software-deployment-method conda \
+		--conda-prefix $conda_envs \
+		$EXTRA
 
 fi
 

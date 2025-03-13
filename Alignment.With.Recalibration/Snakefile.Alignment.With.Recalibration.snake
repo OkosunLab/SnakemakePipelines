@@ -22,6 +22,8 @@ search="%s/%s" % ( config["rawFolder"], config["sampleString"] )
 SAMPLES = set(glob_wildcards(search).sample)
 ## print(SAMPLES)
 
+READS = ["R1","R2"]
+
 #########################################################
 ## Functions
 ##########################################################
@@ -329,4 +331,58 @@ rule gatk_depth_of_coverage:
 			-L {input.intervals} \
 			{params.extra}
 		"""
+
+rule bed_to_interval_list:
+        input:
+                bed=config["intervals"],
+                dict=config["dict"],
+        output:
+                temp("QC/picard.interval_list"),
+        log:
+                "logs/picard/bedtointervallist/Log.log",
+        threads:
+                config["picardThreads"]
+        params:
+                # optional parameters
+                extra="--SORT true",  # sort output interval list before writing
+                mem=config["picardMem"]
+		time=config["picardTime"]
+        resources:
+                mem_mb=1024,
+        wrapper:
+                "v4.0.0/bio/picard/bedtointervallist"
+
+rule picard_collect_hs_metrics:
+        input:
+                bam="Alignment/{sample}.recalib.bam",
+                reference=config["reference"],
+                # Baits and targets should be given as interval lists. These can
+                # be generated from bed files using picard BedToIntervalList.
+                target_intervals=temp("QC/picard.interval_list"),
+        output:
+                "QC/depth/picard/{sample}.txt",
+        params:
+                # Optional extra arguments. Here we reduce sample size
+                # to reduce the runtime in our unit test.
+                extra="",
+                mem=config["picardMem"]
+		time=config["picardTime"]
+        resources:
+                mem_mb=1024,
+        threads:
+                config["picardThreads"]
+        log:
+                "logs/picard_collect_hs_metrics/{sample}.log",
+        conda:
+                "envs/gatk4.yaml"
+        shell:
+                """
+                gatk CollectHsMetrics \
+                        -R {input.reference} \
+                        -O {output} \
+                        -I {input.bam} \
+                        -TI {input.target_intervals} \
+                        -BI {input.target_intervals}
+                        {params.extra}
+                """
 
