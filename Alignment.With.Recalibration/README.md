@@ -49,8 +49,8 @@ Staphylococcus aureus | NCTC 8325 | NCBI
  	2. **[ApplyBSQR](https://gatk.broadinstitute.org/hc/en-us/articles/21905038144155-ApplyBQSR)** is used to apply this model
 3. **[samtools flagstat](http://www.htslib.org/)** extracts the alignment stats from the raw bam.
 6. **[GATK depth of coverage](https://gatk.broadinstitute.org/hc/en-us/articles/21905133224859-DepthOfCoverage-BETA)** generates coverage statistics (using supplied interval file)
-7. **[Picardtools BedToInterval](https://gatk.broadinstitute.org/hc/en-us/articles/21905044859419-BedToIntervalList-Picard)** generates several QC metrics from the pipeline. GATK implementation
-8. **[Picardtools CollectHsMetrics](https://gatk.broadinstitute.org/hc/en-us/articles/21904964615451-CollectHsMetrics-Picard)** generates several QC metrics from the pipeline. GATK implementation
+7. **[Picard BedToInterval](https://gatk.broadinstitute.org/hc/en-us/articles/21905044859419-BedToIntervalList-Picard)** Converts the bed file into an interval file for picard. GATK implementation
+8. **[Picard CollectHsMetrics](https://gatk.broadinstitute.org/hc/en-us/articles/21904964615451-CollectHsMetrics-Picard)** generates several QC metrics from the pipeline. GATK implementation
 9. **[MultiQC](https://multiqc.info/)** collects all the QC metrics from the pipeline.
 
 # Output
