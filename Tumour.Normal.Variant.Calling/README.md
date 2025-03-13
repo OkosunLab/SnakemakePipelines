@@ -142,30 +142,39 @@ vepCache | Location for VEP cache download | /data/BCI-OkosunLab/Ref/GRCh38/vep/
 vepSpecies | species | homo_sapiens | 
 vepBuild | genome version | GRCh38 |
 vepRelease | ensembl release | 112 | 
+pickOrder | order for annotation choice | mane_select,mane_plus_clinical,canonical,biotype,rank,tsl,appris,ccds,length |
 bcftoolsVCF | Cosmic VCF file |  /data/BCI-OkosunLab/Ref/GRCh38/COSMIC/Cosmic_Genome.Targeted.NonCoding.Merged._Normal_v100_GRCh38.chr.vcf.gz |
 multiqcThreads | threads | 1 |
-multiqcMem | memory | 4G |
+multiqcMem | mem | 4G |
+multiqcTime | time | 24:0:0 |
+prepMem | mem | 8G |
 prepThreads | threads | 1 |
-prepMem | memory | 8G
+prepTime | time | 24:0:0 |
 mutect2Threads | threads | 1 |
-gatkMem | memory | 24G | 
-gatkRunMem | memory (passed to gatk) | 22000 | 
+gatkMem | mem | 24G |
+gatkRunMem | run mem | 22000 |
+gatkTime | time | 24:0:0 |
+bcftoolsMem | mem | 8G |
+bcftoolsMemFloat | run mem | 7168 |
+bcftoolsThreads | threads | 1 |
+bcftoolsTime | time | 24:0:0 |
+laatvThreads | threads | 1 |
+vepThreads | threads | 4 |
+vepMem | mem | 8G |
+vepTime | time | 24:0:0 |
+VarDictMem | mem | 24G |
+vardictThreads | threads | 1 |
+vardictTime | time | 24:0:0 |
+varscanResMem | run mem | 7168 |
+varscanMem | mem | 8G |
+varscanThreads | threads | 1 |
+varscanTime | time | 24:0:0 |
+pileupMem | mem | 8G |
+pileupThreads | threads | 1 |
+pileupTime | time | 24:0:0 |
 mantaThreads | threads | 2 | 
 mantaMem | memory | 10G | 
 mantaMemMB | memory (passed to mamba) | 8195 | 
 strelkaThreads | threads | 1 | 
 strelkaMem | memory | 24G |
-bcftoolsThreads | threads | 1 | 
-bcftoolsMem | memory | 8G |
-bcftoolsMemFloat | memory (passed to bcftools) | 7168
-laatvThreads | threads | 1 |
-vepThreads | threads | 4 |
-vepMem | memory | 8G |
-vardictThreads | threads | 1 |
-VarDictMem | memory | 24G |
-varscanThreads | threads | 1 |
-varscanMem | memory | 8G |
-varscanResMem | memory (passed to varscan) | 7168
-pileupThreads | threads | 1 |
-pileupMem | memory | 8G |
 
