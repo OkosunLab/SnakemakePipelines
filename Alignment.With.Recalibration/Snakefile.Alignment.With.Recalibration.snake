@@ -348,9 +348,17 @@ rule bed_to_interval_list:
                 mem=config["picardMem"]
 		time=config["picardTime"]
         resources:
-                mem_mb=1024,
-        wrapper:
-                "v4.0.0/bio/picard/bedtointervallist"
+                mem_mb=config["picardRunMem"],
+        conda:
+                "envs/gatk4.yaml"
+        shell:
+                """
+                gatk BedToIntervalList \
+                        -O {output} \
+                        -I {input.bed} \
+			-SD {input.dict} \
+                        {params.extra}
+                """
 
 rule picard_collect_hs_metrics:
         input:
@@ -368,7 +376,7 @@ rule picard_collect_hs_metrics:
                 mem=config["picardMem"]
 		time=config["picardTime"]
         resources:
-                mem_mb=1024,
+                mem_mb=config["picardRunMem"],
         threads:
                 config["picardThreads"]
         log:

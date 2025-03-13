@@ -88,4 +88,5 @@ fastqScreenTime: 24:0:0
 ## Picard tools
 picardThreads: 1
 picardMem: 8G
+picardRunMem: 7168
 picardTime: 24:0:0
