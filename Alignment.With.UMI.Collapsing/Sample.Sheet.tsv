@@ -1,0 +1,3 @@
+sample	tumour	tumourID	normal	normalID
+SampleA	Alignment/SampleA.bam	SampleA	Alignment/SampleA.normal.bam	SampleA.normal
+SampleB	Alignment/SampleB.bam	SampleB	Alignment/SampleB.normal.bam	SampleB.normal
