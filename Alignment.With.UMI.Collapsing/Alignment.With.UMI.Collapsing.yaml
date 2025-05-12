@@ -8,7 +8,20 @@ dict:
 bwa_index:
         /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta
 intervals:
+        ## PCNSL
+        ## Dona's updated panel
+        ## /data/BCI-OkosunLab/Ref/BED_files/PCNSL_ctDNA_gene_panel_2024/PCNSL_ctDNA_gene_panel_2024_covered.bed
+        ## Ed's old panel
+        ## /data/BCI-OkosunLab/Ref/BED_files/PCNSL_ctDNA_panel_v6/PCNSL_ctDNA_panel_v6_covered.bed
+        ##
+        ## T cell Lymphoma
+        ## /data/home/hfx472/BCI-OkosunLab/Ref/BED_files/T_Cell_Lymphoma/T.cell.panel.revised._covered.bed
+        ##
+        ## WES
+        ## Nonacus tumour exome pipeline
+        ## /data/BCI-OkosunLab/Ref/BED_files/Nonacus_Tumor_Exome/Nonacus-Tumour-Exome-GRCh38-v1.0_covered.bed
         ""
+        
 ##########################################
 ## Raw file location
 ##########################################
