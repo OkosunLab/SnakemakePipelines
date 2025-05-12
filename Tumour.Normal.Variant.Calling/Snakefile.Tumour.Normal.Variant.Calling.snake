@@ -17,10 +17,6 @@ import glob
 ## Load config file
 configfile: "Tumour.Normal.Variant.Calling.yaml"
 
-## Check for intervals file
-if config["intervals"] == "":
-	raise Exception("You need to specify the interval file in the config file")
-
 ## get the callers chosen in the config file.
 CALLERS = config["callers"]
 
@@ -54,13 +50,32 @@ for line in sampleFile:
 SAMPLES = sampleSheet.keys()
 
 ##########################################################
+## Python functions
+##########################################################
+## For ASCAT output
+## Returns numbers 1-22 + X
+c = list(range(1,23))
+c.append("X")
+chrs = ()
+for ch in c:
+	chrs += ("_alleleFrequencies_chr{c}.txt".format( c = ch ),) 
+
+##########################################################
 ## RULES
 ##########################################################
 
 ## This rule requires all steps have been run, so is the default rule
 ## MultiQC all reports.
+
 rule multiQC:
 	input:
+		## CNVkit
+		CNVkit=expand("VCF/CNVkit/{sample}/", sample = SAMPLES),
+		heatmap="VCF/CNVkit/heatmap.png",
+		seq="VCF/CNVkit/All.sample.seg",
+		## ASCAT
+		logr=expand("VCF/ASCAT/{sample}/{sample}_LogR.txt", sample = SAMPLES),
+		## SNV callers
 		vcfstat=expand("QC/vcf/{sample}.{caller}.final.stats.txt", caller = CALLERS, sample = SAMPLES),
 		VEPstats=expand("QC/vcf/{sample}.{caller}.summary.html", caller = CALLERS, sample = SAMPLES)
 	output:
@@ -99,10 +114,10 @@ rule get_vep_cache:
 		time=config["prepTime"]
 	threads: 
 		config["prepThreads"]
+	cache:
+		"omit-software",
 	log:
 		"logs/vep/cache.log",
-	cache: 
-		"omit-software"
 	wrapper:
 		"v4.0.0/bio/vep/cache"
 
@@ -256,8 +271,8 @@ rule Manta:
 	params:
 		mem = config["mantaMem"],
 		time=config["mantaTime"],
-		extra_cfg="",  # optional
 		extra_run="",  # optional
+		extra_cfg = config["mantaExtra"],
 	log:
 		"logs/manta/{sample}.log",
 	threads: 
@@ -269,9 +284,32 @@ rule Manta:
 		configManta.py --normalBam {input.normal} \
 			--tumorBam {input.tumour} \
 			--referenceFasta {input.ref} \
-			--runDir {output.run_dir}
+			--runDir {output.run_dir} \
+			{params.extra_cfg}
 		python2 {output.run_dir}/runWorkflow.py --jobs {threads} --memGb 8
 		"""
+
+
+rule manta_prep_annotation:
+	input:
+		"VCF/Manta/{sample}",
+	output:
+		vcf="VCF/Manta/{sample}.final.vcf"
+	threads: 
+		config["mantaThreads"] 
+	params:
+		mem=config["mantaMem"],
+		time=config["mantaTime"],
+	log:
+		"logs/manta/annoPrep/{sample}.log"
+	shell:
+		"""
+		cp \
+			{input}/results/variants/somaticSV.vcf.gz \
+			{output.vcf}.gz
+		gunzip {output.vcf}.gz
+		"""
+
 
 ## Then run Strelka2.
 rule Strelka2:
@@ -286,7 +324,9 @@ rule Strelka2:
 	threads: 
 		config["strelkaThreads"]
 	params:
-		config_extra="--indelCandidates VCF/Manta/{sample}/results/variants/candidateSmallIndels.vcf.gz",
+		config_extra=" ".join(
+			["--indelCandidates VCF/Manta/{sample}/results/variants/candidateSmallIndels.vcf.gz", 
+			config["strelkaExtra"]]),
 		run_extra="",
 		mem=config["strelkaMem"],
 		time=config["strelkaTime"]
@@ -332,7 +372,7 @@ rule VarDict:
 	output:
 		vcf=temp("VCF/VarDict/{sample}.final.vcf"),
 	params:
-		extra="",
+		extra="-U",
 		mem=config["VarDictMem"],
 		time=config["vardictTime"]
 	threads: 
@@ -398,7 +438,8 @@ rule Varscan:
 	resources:
 		mem_mb=config["varscanResMem"]
 	params:
-		extra = "--output-vcf 1",
+		extra=config["varscanExtra"],
+		## extra="--output-vcf 1 --min-vaf-freq 0 --strand-filter 1",
 		mem=config["varscanMem"],
 		time=config["varscanTime"]
 	wrapper:
@@ -439,6 +480,297 @@ rule Merge_Varscan:
 			{output.indel} |
 		bcftools sort -o {output.merge} -
 		"""
+
+
+##########################################################
+# GRIDSS structural variant caller 
+##########################################################
+
+rule preprocess:
+	input:
+		bam="Alignment/{bam}",
+		bai=lambda w: re.sub(".bam", ".bai", "Alignment/{}".format(w.bam)),
+		reference=config["reference"],
+		dictionary="{}.dict".format(config["reference"]),
+		refindex=multiext(config["reference"], ".amb", ".ann", ".bwt", ".pac", ".sa")
+	output:
+		temp(multiext("VCF/GRIDSS/{bam}.gridss.working/{bam}",
+			".cigar_metrics", 
+			".computesamtags.changes.tsv", 
+			".coverage.blacklist.bed",
+			".idsv_metrics", 
+			".insert_size_histogram.pdf", 
+			".insert_size_metrics", 
+			".mapq_metrics", 
+			".sv.bam", 
+			".sv.bam.csi", 
+			".tag_metrics"))
+	threads: 
+		config["gridssThreads"] 
+	params:
+		mem=config["gridssMem"],
+		time=config["gridssTime"],
+		extra="--jvmheap 4g",
+		workingdir="VCF/GRIDSS/"
+	log:
+		"logs/gridss/preprocess/{bam}.preprocess.log"
+	wrapper:
+		"v4.0.0/bio/gridss/preprocess"
+
+rule assemble:
+	input:
+		bams=lambda w: [sampleSheet[w.sample]["normal"], sampleSheet[w.sample]["tumour"]],
+		bais=lambda w: [re.sub(".bam", ".bai", sampleSheet[w.sample]["normal"]), 
+				re.sub(".bam", ".bai", sampleSheet[w.sample]["tumour"])],
+		reference=config["reference"],
+		dictionary="{}.dict".format(config["reference"]),
+		indices=multiext(config["reference"], ".amb", ".ann", ".bwt", ".pac", ".sa"),
+		preprocess = lambda w: expand("VCF/GRIDSS/{bam}.gridss.working/{bam}{ext}",
+			ext = [
+			".cigar_metrics", 
+			".computesamtags.changes.tsv", 
+			".coverage.blacklist.bed",
+			".idsv_metrics", 
+			".insert_size_histogram.pdf", 
+			".insert_size_metrics", 
+			".mapq_metrics", 
+			".sv.bam", 
+			".sv.bam.csi", 
+			".tag_metrics"], 
+			bam=[re.sub(".*/", "", sampleSheet[w.sample]["normal"]), 
+				re.sub(".*/", "", sampleSheet[w.sample]["tumour"])])
+	output:
+		assembly=temp("VCF/GRIDSS/{sample}.group.bam"),
+		assembly_others=temp(multiext("VCF/GRIDSS/{sample}.group.bam.gridss.working/{sample}.group.bam", 
+					".cigar_metrics",
+					".coverage.blacklist.bed",
+					".downsampled_0.bed",
+					".excluded_0.bed",
+					".idsv_metrics",
+					".mapq_metrics",
+					".quality_distribution.pdf",
+					".quality_distribution_metrics",
+					".subsetCalled_0.bed",
+					".sv.bam",
+					".sv.bam.bai",
+					".tag_metrics"))
+	threads: 
+		config["gridssThreads"] 
+	params:
+		mem=config["gridssMem"],
+		time=config["gridssTime"],
+		extra="--jvmheap 4g",
+		workingdir="VCF/GRIDSS/"
+	log:
+		"logs/gridss/assemble/{sample}.group.log"
+	wrapper:
+		"v4.0.0/bio/gridss/assemble"
+
+
+rule call:
+	input:
+		bams=lambda w: [sampleSheet[w.sample]["normal"], sampleSheet[w.sample]["tumour"]],
+		bais=lambda w: [re.sub(".bam", ".bai", sampleSheet[w.sample]["normal"]), 
+				re.sub(".bam", ".bai", sampleSheet[w.sample]["tumour"])],
+		reference=config["reference"],
+		dictionary="{}.dict".format(config["reference"]),
+		indices=multiext(config["reference"], ".amb", ".ann", ".bwt", ".pac", ".sa"),
+		preprocess = lambda w: expand("VCF/GRIDSS/{bam}.gridss.working/{bam}{ext}",
+			ext = [
+			".cigar_metrics", 
+			".computesamtags.changes.tsv", 
+			".coverage.blacklist.bed",
+			".idsv_metrics", 
+			".insert_size_histogram.pdf", 
+			".insert_size_metrics", 
+			".mapq_metrics", 
+			".sv.bam", 
+			".sv.bam.csi", 
+			".tag_metrics"], 
+			bam=[re.sub(".*/", "", sampleSheet[w.sample]["normal"]), 
+				re.sub(".*/", "", sampleSheet[w.sample]["tumour"])]),
+		assembly="VCF/GRIDSS/{sample}.group.bam",
+		assembly_others=multiext("VCF/GRIDSS/{sample}.group.bam.gridss.working/{sample}.group.bam", 
+					".cigar_metrics",
+					".coverage.blacklist.bed",
+					".downsampled_0.bed",
+					".excluded_0.bed",
+					".idsv_metrics",
+					".mapq_metrics",
+					".quality_distribution.pdf",
+					".quality_distribution_metrics",
+					".subsetCalled_0.bed",
+					".sv.bam",
+					".sv.bam.bai",
+					".tag_metrics")
+	output:
+		vcf="VCF/GRIDSS/{sample}.vcf",
+		#idx="VCF/GRIDSS/{sample}.vcf.idx",
+		#tmpidx=temp("VCF/GRIDSS/{sample}.allocated.vcf.idx")
+	threads: 
+		config["gridssThreads"] 
+	params:
+		mem=config["gridssMem"],
+		time=config["gridssTime"],
+		extra="--jvmheap 4g",
+		workingdir="VCF/GRIDSS/"
+	log:
+		"logs/gridss/call/{sample}.log"
+	wrapper:
+		"v4.0.0/bio/gridss/call"
+
+rule PrepForAnnotation:
+	input:
+		vcf="VCF/GRIDSS/{sample}.vcf"
+	output:
+		vcf="VCF/GRIDSS/{sample}.final.vcf"
+	threads: 
+		config["gridssThreads"] 
+	params:
+		mem=config["gridssMem"],
+		time=config["gridssTime"],
+	log:
+		"logs/gridss/annoPrep/{sample}.log"
+	shell:
+		"""
+		cp {input.vcf} {output.vcf}
+		"""
+##########################################################
+# CNVs 
+##########################################################
+
+##########################################################
+# CNVkit 
+##########################################################
+
+
+rule cnvkit_batch:
+	input:
+		tumour = lambda w: sampleSheet[w.sample]["tumour"],
+		normal = lambda w: sampleSheet[w.sample]["normal"],
+		targets = config["intervals"],
+		reference = config["reference"],
+	output:
+		output_dir = directory("VCF/CNVkit/{sample}/"),
+	threads: 
+		config["cnvkitThreads"] 
+	params:
+		mem=config["cnvkitMem"],
+		time=config["cnvkitTime"]
+	conda:
+		"envs/cnvkit.yaml"
+	log:
+		"logs/cnvkit/batch/{sample}.log"
+	shell:
+		"""
+		cnvkit.py batch {input.tumour} \
+			--normal {input.normal} \
+			--targets {input.targets} \
+			--fasta {input.reference} \
+			--output-dir {output.output_dir} \
+			--diagram --scatter
+		"""
+
+rule cnvkit_to_seg:
+	input:
+		cns=expand("VCF/CNVkit/{sample}/", sample = SAMPLES)
+	output:
+		seg="VCF/CNVkit/All.sample.seg"
+	threads: 
+		config["cnvkitThreads"] 
+	params:
+		mem=config["cnvkitMem"],
+		time=config["cnvkitTime"]
+	conda:
+		"envs/cnvkit.yaml"
+	log:
+		"logs/cnvkit/heatmap.log"
+	shell:
+		"""
+		cnvkit.py export seg $(find VCF/CNVkit -name "*call.cns") -o {output.seg}
+		"""
+
+rule cnvkit_heatmap:
+	input:
+		cns=expand("VCF/CNVkit/{sample}/", sample = SAMPLES)
+	output:
+		heatmap="VCF/CNVkit/heatmap.png"
+	threads: 
+		config["cnvkitThreads"] 
+	params:
+		mem=config["cnvkitMem"],
+		time=config["cnvkitTime"]
+	conda:
+		"envs/cnvkit.yaml"
+	log:
+		"logs/cnvkit/heatmap.log"
+	shell:
+		"""
+		cnvkit.py heatmap $(find VCF/CNVkit -name "*call.cns") -o {output.heatmap}
+		"""
+
+##########################################################
+# ASCAT 
+##########################################################
+
+
+rule ASCAT:
+	input:
+		tumour_bam = lambda w: sampleSheet[w.sample]["tumour"],
+		normal_bam = lambda w: sampleSheet[w.sample]["normal"],
+	output:
+		alleleCounter_tumour = temp(multiext("VCF/ASCAT/{sample}/{sample}", *chrs)),
+		alleleCounter_normal = temp(multiext("VCF/ASCAT/{sample}/{sample}_normal", *chrs)),
+		directory = directory("VCF/ASCAT/{sample}"),
+		rds = "VCF/ASCAT/{sample}/{sample}.rds",
+		logr = "VCF/ASCAT/{sample}/{sample}_LogR.txt",
+		baf = "VCF/ASCAT/{sample}/{sample}_BAF.txt",
+		pcf_logr = "VCF/ASCAT/{sample}/{sample}.LogR.PCFed.txt",
+		pcf_baf = "VCF/ASCAT/{sample}/{sample}.BAF.PCFed.txt",
+		rawbaf = "VCF/ASCAT/{sample}/{sample}_BAF_rawBAF.txt",
+		norm_logr = "VCF/ASCAT/{sample}/{sample}_normal_LogR.txt",
+		norm_baf = "VCF/ASCAT/{sample}/{sample}_normal_BAF.txt",
+		norm_rawbaf = "VCF/ASCAT/{sample}/{sample}_normal_BAF_rawBAF.txt",
+	threads: 
+		config["ascatThreads"] 
+	params:
+		mem=config["ascatMem"],
+		time=config["ascatTime"],
+		sex = lambda w: sampleSheet[w.sample]["sex"],
+		genome = config["ascatGenome"],
+		bin = config["ascatBin"],
+		phred = config["ascatPhred"],
+		flags = config["ascatFlags"],
+		tumour_name = "{sample}",
+		normal_name = "{sample}_normal",
+		allele = directory(config["allale_file"]),
+		loci = directory(config["loci_file"]),
+	conda:
+		"envs/ASCAT.yaml"
+	log:
+		"logs/ASCAT/{sample}.log"
+	shell:
+		"""
+		dir=$PWD
+		cd {output.directory}	
+		Rscript $dir/ASCAT.r \
+			--tumour-bam $dir/{input.tumour_bam} \
+			--normal-bam $dir/{input.normal_bam} \
+			--tumour-name {params.tumour_name} \
+			--normal-name {params.normal_name} \
+			--allele {params.allele} \
+			--loci {params.loci} \
+			--sex-chr {params.sex} \
+			--genome {params.genome} \
+			--threads {threads} \
+			--logr $dir/{output.logr} \
+			--baf $dir/{output.baf} \
+			--norm-logr $dir/{output.norm_logr} \
+			--norm-baf $dir/{output.norm_baf} \
+			--loci-bin {params.bin} \
+			--phred {params.phred} 
+		"""
+
 ##########################################################
 # Annotation Pipeline 
 ##########################################################
@@ -499,7 +831,7 @@ rule annotate_variants_vep:
 		calls="VCF/{caller}/VEP/{sample}.annotated.vcf.gz",
 		stats="QC/vcf/{sample}.{caller}.summary.html",
 	params:
-		plugins=["LoFtool"],
+		plugins=config["vepPlugins"],
 		extra="--everything \
 			--flag_pick \
 			--pick_order {} \
@@ -512,6 +844,8 @@ rule annotate_variants_vep:
 		config["vepThreads"]
 	wrapper:
 		"v4.0.0/bio/vep/annotate"
+		## Updated to fix SV annotations
+		## "v5.8.2/bio/vep/annotate"
 
 ## Annotate variants with COSMIC vcf file (VEP doesn't do allele matching)
 rule annotate_with_cosmic_vcf:

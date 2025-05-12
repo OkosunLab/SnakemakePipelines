@@ -22,7 +22,12 @@ EXTRA=""
 dagFile="dag.svg"
 ## Where is the conda environment
 conda_envs="/data/BCI-OkosunLab/Environments/Snakemake"
+OS="rocky"
+## join output
+join="-j y"
+
 ###################################
+
 
 while [ "$1" != "" ]; do
         case $1 in
@@ -41,6 +46,8 @@ while [ "$1" != "" ]; do
 					;;
 		-r | --rulegraph )	RULEGRAPH=1
 					;;
+		-x | --join-off )	join="-e {log}.error"
+					;;
 		-m | --highmem )	HIGHMEM='-l highmem'
 					;;
 		-f | --dag-file )	shift
@@ -48,6 +55,9 @@ while [ "$1" != "" ]; do
 					;;
 		-c | --conda_location )	shift
 					conda_envs=$1
+					;;
+		-o | --os )		shift
+					OS=$1
 					;;
 		-e | --extra )		shift
 					EXTRA=$@
@@ -96,7 +106,7 @@ else
 		$target \
 		-p --executor cluster-generic \
 		--cluster-generic-submit-cmd \
-		"qsub -V -l h_rt=24:0:0 -l h_vmem={params.mem} ${HIGHMEM} -pe smp {threads} -j y -cwd -o {log}.jobscript -l rocky" \
+		"qsub -V -l h_rt=24:0:0 -l h_vmem={params.mem} ${HIGHMEM} -pe smp {threads} ${join} -cwd -o {log}.jobscript -l ${OS}" \
 		-j $Jobs \
 		--software-deployment-method conda \
 		--conda-prefix $conda_envs \

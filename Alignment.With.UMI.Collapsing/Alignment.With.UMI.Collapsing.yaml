@@ -1,17 +1,14 @@
-samples:
 ##########################################
 ## Genomes
 ##########################################
 reference:
         /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta
+dict:
+        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.dict
 bwa_index:
         /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta
 intervals:
-        ## Ed's PCNSL panel
-        ## /data/BCI-OkosunLab/Ed/Ref/Bed-Files/PCNSL_ctDNA_panel_v6/PCNSL_ctDNA_panel_v6_covered.bed
-        ## Nonacus WES panel
-        ## /data/BCI-OkosunLab/Ref/GRCh38/Nonacus_Exome_GRCh38/Nonacus_Exome_GRCh38_covered.chr.bed
-        ""
+        /data/BCI-OkosunLab/Ref/BED_files/PCNSL_ctDNA_gene_panel_2024/PCNSL_ctDNA_gene_panel_2024_covered.bed
 ##########################################
 ## Raw file location
 ##########################################
@@ -20,6 +17,8 @@ rawFolder:
         ## /data/home/hfx472/BCI-OkosunLab/Raw_Data/20240327_Okosun_WL_PM23340_PRIZM_ctDNA_01_with.UMIs/PM23440
         ## Renamed symlinks here:
         FASTQ_Raw
+SampleSheet:
+        Sample.Sheet.tsv
 sampleString:
         ## default:
         ## This will work on samples that have the format
@@ -83,3 +82,6 @@ samtoolsStatMem: 8G
 samtoolsIdxThreads: 4
 samtoolsIdxMem: 8G
 
+## picard tools
+picardThreads: 1
+picardMem: 8G
