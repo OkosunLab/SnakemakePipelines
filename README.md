@@ -28,7 +28,7 @@ Pipeline | info
 First you will need to create a copy of the snakemake environment. You only need to do this once and it will be able to handle all your snakemake pipelines.
 
 ```bash
-ml anaconda3
+ml miniforge
 conda env create -n snakemake -f /data/BCI-OkosunLab/Environments/anaconda3/20240513.snakemake.8.11.3.yml
 ```
 
