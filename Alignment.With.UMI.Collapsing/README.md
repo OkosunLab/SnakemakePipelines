@@ -7,6 +7,7 @@
    3. [First Alignment](#First-Alignment)
    4. [UMI collapsing](#UMI-collapsing)
    5. [Consensus Alignment](#Consensus-Alignment)
+1. [Input](#sample-sheet)
 1. [Output](#Output)
 2. [Config Options](#config-options)
 
@@ -68,6 +69,15 @@ Staphylococcus aureus | NCTC 8325 | NCBI
 3. **[GATK DepthOfCoverage](https://gatk.broadinstitute.org/hc/en-us/articles/21905133224859-DepthOfCoverage-BETA)** is used to generate the coverage across the intervals (with per base coverage turned off).
 4. multiqc collects all the QC metrics from the pipeline.
 
+# Sample sheet
+
+You need to have the sample IDs in a file like the below (see the example sample sheet):
+
+sample | 
+--- | 
+sampleA | 
+sampleB | 
+
 # Output
 
 The pipeline will output the aligned bams in a folder called Alignment. QC files will be stored in the folder QC, with a subfolder called MultiQC which contains a summary of all the QC records
@@ -80,7 +90,7 @@ reference | reference fasta | /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundl
 bwa_index | index for BWA | /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta |
 intervals | bed file of targeted positions | /data/BCI-OkosunLab/Ed/Ref/Bed-Files/PCNSL_ctDNA_panel_v6/PCNSL_ctDNA_panel_v6_covered.bed |
 rawFolder | location of raw files | FASTQ_Raw |
-sampleString | string to target the samples (change this to sample sheet) | "{sample}_S{number}_{lane}_R1_001.fastq.gz" |
+SampleSheet | sample sheet for the samples | Sample.Sheet.tsv |
 consensusReads | minimum number of reads to call consensus from (1 is low, but OK with high complexity libraries) | 1 |
 multiqcThreads | threads | 1 |
 multiqcMem | memory | 4G |
