@@ -25,17 +25,8 @@ intervals:
 ##########################################
 rawFolder:
         FASTQ_Raw/
-
-## Original Raw folders
-## /data/BCI-OkosunLab/Raw_Data/20240311_Okosun_WL_GC-WH-10904_PRIZM_FFPE_02/fastq/
-
-sampleString:
-        ## default:
-        ## This will work on samples that have the format
-        ## SampleID_S[0-9]{1,}_L00[0-9]_R[1-3]_001.fastq.gz
-        ## This should work most of the time with files from the genome centre
-        ## Other sequencing companies may need some alterations.
-        "{sample}_S{number}_{lane}_R1_001.fastq.gz"
+SampleSheet:
+        Sample.Sheet.tsv
 
 ##########################################
 ## Resources

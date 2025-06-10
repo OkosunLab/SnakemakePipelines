@@ -14,13 +14,30 @@ configfile: "Alignment.With.Recalibration.yaml"
 ## Check for intervals file
 if config["intervals"] == "":
 	raise Exception("You need to specify the interval file in the config file")
-## Dynamically file all the sample IDs
-## First build the search string
-## search="%s/{sample}_S{number}_{lane}_R1_001.fastq.gz" % config["rawFolder"]
-search="%s/%s" % ( config["rawFolder"], config["sampleString"] )
-## Then find all the samples
-SAMPLES = set(glob_wildcards(search).sample)
-## print(SAMPLES)
+## Load Sample Sheet
+sampleFile = open(config["SampleSheet"]).readlines()
+## Take the first line as a header
+header = sampleFile.pop(0).rstrip().split("\t")
+## Generate sample dictionary
+sampleSheet = {}
+## Run through the sample file and create a dictionary
+for line in sampleFile:
+        ## Remove whitespace and split on tabs
+        line = line.rstrip().split("\t")
+        ## zip the line info (values) and the header (keys) to generate a dictionary
+        rv = dict(zip(header, line))
+        ## if the sample name isn't in the dictionary keys:
+        if not rv["sample"] in sampleSheet.keys():
+                ## Add it and attach the dictionary
+                ## N.B. "sample" needs to be unique
+                sampleSheet[rv["sample"]] = rv
+        ## If there are multiple samples
+        else:
+                ## Raise and error and complain about it.
+                raise Exception("Sorry, please make sure the sample column is unique")
+## set the value of SAMPLES to sampleSheet.keys()
+## This could be replaced throughout the file BUT SAMPLES is easier to type ....
+SAMPLES = sampleSheet.keys()
 
 READS = ["R1","R2"]
 
