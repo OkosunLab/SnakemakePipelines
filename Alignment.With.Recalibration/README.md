@@ -5,6 +5,7 @@
 	1. [Pipeline Steps](#Pipeline-steps)
 	2. [Quality Control](#Quality-Control)
 	3. [Alignment](#Alignment)
+1. [Input](#sample-sheet)
 1. [Output](#output)
 1. [Config Options](#config-options)
 
@@ -53,6 +54,15 @@ Staphylococcus aureus | NCTC 8325 | NCBI
 8. **[Picard CollectHsMetrics](https://gatk.broadinstitute.org/hc/en-us/articles/21904964615451-CollectHsMetrics-Picard)** generates several QC metrics from the pipeline. GATK implementation
 9. **[MultiQC](https://multiqc.info/)** collects all the QC metrics from the pipeline.
 
+# Sample sheet
+
+You need to have the sample IDs in a file like the below (see the example sample sheet):
+
+sample | 
+--- | 
+sampleA | 
+sampleB | 
+
 # Output
 
 The pipeline will output the aligned bams in a folder called Alignment. QC files will be stored in the folder QC, with a subfolder called MultiQC which contains a summary of all the QC records. 
@@ -67,7 +77,7 @@ bwa_index | index for BWA | /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/
 knownsites | gold standard SNV and indel positions | [ /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.dbsnp138.vcf,/data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/1000G_phase1.snps.high_confidence.hg38.vcf.gz,/data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz ] | 
 intervals | bed file of targeted positions | /data/BCI-OkosunLab/Ref/GRCh38/Nonacus_Exome_GRCh38/Nonacus_Exome_GRCh38_covered.chr.bed |
 rawFolder | location of raw files | FASTQ_Raw |
-sampleString | string to target the samples (change this to sample sheet) | "{sample}_S{number}_{lane}_R1_001.fastq.gz" |
+SampleSheet | sample sheet for the samples | Sample.Sheet.tsv |
 multiqcThreads | threads | 1 |
 multiqcMem | memory | 4G |
 multiqcTime | time | 24:0:0 | 24 hours
