@@ -29,7 +29,7 @@ First you will need to create a copy of the snakemake environment. You only need
 
 ```bash
 ml miniforge
-conda env create -n snakemake -f /data/BCI-OkosunLab/Environments/anaconda3/20240513.snakemake.8.11.3.yml
+mamba env create -n snakemake -f /data/BCI-OkosunLab/Environments/anaconda3/20240513.snakemake.8.11.3.yml
 ```
 
 ### Running A Pipeline
@@ -50,8 +50,8 @@ cd /Project/Directory/Goes/Here
 Load your snakemake environment:
 
 ```bash
-ml anaconda3
-conda activate snakemake
+ml miniforge
+mamba activate snakemake
 ```
 
 I have written a little wrapper for the snakemake command that includes the correct way to get it to call jobs on the cluster. This is in the root of this repositiory and is called RunSnakefile.sh. By default this will run the local file called Snakefile, running one job at a time, but has a few options to change this.
@@ -80,6 +80,12 @@ So to run a pipeline you can use something like this:
 RunSnakefile.sh -s pipeline.name.snake -j 100 -n
 ## Proper run if now happy
 RunSnakefile.sh -s pipeline.name.snake -j 100
+```
+
+Otherwise you can use the full path to the wrapper like this:
+
+```bash
+/data/BCI-OkosunLab/SnakemakePipelines/RunSnakefile.sh -s pipeline.name.snake -j 100
 ```
 
 **N.B. snakemake will complain about your conda priority not being set to strict. For now ignore this. Setting the priority to strict causes issues with installing the software that I haven't been able to resolve yet.**
