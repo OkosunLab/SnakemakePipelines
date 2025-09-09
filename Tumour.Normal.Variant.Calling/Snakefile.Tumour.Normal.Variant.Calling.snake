@@ -145,8 +145,8 @@ rule gatk_mutect2:
 		fasta=config["reference"],
 		pon=config["pon"],
 	output:
-		vcf="VCF/Mutect2/{sample}.raw.vcf",
-		f1r2="VCF/Mutect2/{sample}.f1r2.tar.gz"
+		vcf=temp("VCF/Mutect2/{sample}.raw.vcf"),
+		f1r2=temp("VCF/Mutect2/{sample}.f1r2.tar.gz")
 	threads:
 		config["mutect2Threads"]
 	params:
@@ -168,7 +168,7 @@ rule gatk_get_pileup_summaries:
 		variants=config["gnomad"],
 		intervals=config["intervals"]
 	output:
-		"VCF/Mutect2/{sample}.summaries.table",
+		temp("VCF/Mutect2/{sample}.summaries.table"),
 	threads:
 		config["mutect2Threads"]
 	params:
@@ -184,9 +184,9 @@ rule gatk_get_pileup_summaries:
 ## Generate contamination table as well as segmentation files
 rule gatk_calculate_contamination:
 	input:
-		tumor="VCF/Mutect2/{sample}.summaries.table",
+		tumor=temp("VCF/Mutect2/{sample}.summaries.table"),
 	output:
-		"VCF/Mutect2/{sample}.contamination.table",
+		temp("VCF/Mutect2/{sample}.contamination.table"),
 	threads:
 		config["mutect2Threads"]
 	params:
@@ -206,14 +206,14 @@ rule cleanup_calc_contamination:
 	input:
 		"VCF/Mutect2/{sample}.contamination.table",
 	output:
-		"VCF/Mutect2/{sample}.segmentation.tsv",
+		temp("VCF/Mutect2/{sample}.segmentation.tsv"),
 
 ## GATK learn read orinentation model for filtering
 rule gatk_learnreadorientationmodel:
 	input:
 		f1r2="VCF/Mutect2/{sample}.f1r2.tar.gz",
 	output:
-		"VCF/Mutect2/{sample}.artifacts_prior.tar.gz",
+		temp("VCF/Mutect2/{sample}.artifacts_prior.tar.gz"),
 	threads: 
 		config["mutect2Threads"]
 	params:
@@ -237,8 +237,8 @@ rule gatk_filtermutectcalls_complete:
 		segmentation="VCF/Mutect2/{sample}.segmentation.tsv",
 		f1r2="VCF/Mutect2/{sample}.artifacts_prior.tar.gz"
 	output:
-		"VCF/Mutect2/{sample}.final.vcf.idx",
-		vcf="VCF/Mutect2/{sample}.final.vcf",
+		temp("VCF/Mutect2/{sample}.final.vcf.idx"),
+		vcf=temp("VCF/Mutect2/{sample}.final.vcf"),
 	log:
 		"logs/gatk_filter/{sample}.filter.log",
 	threads: 
@@ -313,34 +313,45 @@ rule manta_prep_annotation:
 
 ## Then run Strelka2.
 rule Strelka2:
-	input:
-		tumor=lambda w: sampleSheet[w.sample]["tumour"],
-		normal=lambda w: sampleSheet[w.sample]["normal"],
-		fasta=config["reference"],
-		manta="VCF/Manta/{sample}",
-	output:
-		# Strelka output - can be directory or full file path
-		directory("VCF/Strelka2/{sample}"),
-	threads: 
-		config["strelkaThreads"]
-	params:
-		config_extra=" ".join(
-			["--indelCandidates VCF/Manta/{sample}/results/variants/candidateSmallIndels.vcf.gz", 
-			config["strelkaExtra"]]),
-		run_extra="",
-		mem=config["strelkaMem"],
-		time=config["strelkaTime"]
-	log:
-		"logs/strelka2/{sample}.log",
-	wrapper:
-		"v4.0.0/bio/strelka/somatic"
+        input:
+                tumor=lambda w: sampleSheet[w.sample]["tumour"],
+                normal=lambda w: sampleSheet[w.sample]["normal"],
+                fasta=config["reference"],
+                manta="VCF/Manta/{sample}",
+                strelka2_path=config["strelka2"]
+        output:
+                directory("VCF/Strelka2/{sample}"),
+        threads:
+                config["strelkaThreads"]
+        params:
+                config_extra=" ".join(
+                        ["--indelCandidates VCF/Manta/{sample}/results/variants/candidateSmallIndels.vcf.gz",
+                        config["strelkaExtra"]]),
+                mem=config["strelkaMem"],
+                time=config["strelkaTime"],
+        log:
+                "logs/strelka2/{sample}.log",
+        conda:
+                "envs/manta.yaml"
+        shell:
+                """
+                {input.strelka2_path} \
+                        --tumorBam {input.tumor} \
+                        --normalBam {input.normal} \
+                        --referenceFasta {input.fasta} \
+                        --runDir {output}\
+                        {params.config_extra}
+                {output}/runWorkflow.py \
+                        -m local \
+                        -j {threads}
+                """
 
 ## Merge Strelka2 output
 rule Merge_Strelka2:
 	input:
 		"VCF/Strelka2/{sample}"
 	output:
-		"VCF/Strelka2/{sample}.final.vcf",
+		temp("VCF/Strelka2/{sample}.final.vcf"),
 	threads: 
 		config["bcftoolsThreads"]
 	params:
@@ -427,8 +438,8 @@ rule Varscan:
 	input:
 		mpileup="VCF/Varscan2/{sample}.normal.tumor.mpileup"
 	output:
-		snp = "VCF/Varscan2/{sample}.snp.vcf",
-		indel = "VCF/Varscan2/{sample}.indel.vcf"
+		snp = temp("VCF/Varscan2/{sample}.snp.vcf"),
+		indel = temp("VCF/Varscan2/{sample}.indel.vcf")
 	message:
 		 "Calling somatic variants {wildcards.sample}"
 	threads: 
@@ -455,7 +466,7 @@ rule Merge_Varscan:
 		snp = "VCF/Varscan2/{sample}.snp.vcf",
 		indel = "VCF/Varscan2/{sample}.indel.vcf"
 	output:
-		merge="VCF/Varscan2/{sample}.final.vcf",
+		merge=temp("VCF/Varscan2/{sample}.final.vcf"),
 		snp=temp("VCF/Varscan2/{sample}.snp.vcf.gz"),
 		snpidx=temp("VCF/Varscan2/{sample}.snp.vcf.gz.tbi"),
 		indel=temp("VCF/Varscan2/{sample}.indel.vcf.gz"),
@@ -781,7 +792,7 @@ rule gatk_leftalignandtrimvariants:
 		vcf="VCF/{caller}/{sample}.final.vcf",
 		ref=config["reference"],
 	output:
-		vcf="VCF/{caller}/{sample}.final.split.vcf",
+		vcf=temp("VCF/{caller}/{sample}.final.split.vcf"),
 	log:
 		"logs/gatk_laatv/{sample}.{caller}.leftalignandtrimvariants.log",
 	threads: 
@@ -804,7 +815,7 @@ rule bcftools_sort:
 	input:
 		"VCF/{caller}/{sample}.final.split.vcf",
 	output:
-		"VCF/{caller}/{sample}.final.split.sort.vcf",
+		temp("VCF/{caller}/{sample}.final.split.sort.vcf"),
 	log:
 		"logs/bcftools/sort/{sample}.{caller}.log",
 	params:
@@ -853,7 +864,7 @@ rule annotate_with_cosmic_vcf:
 		calls="VCF/{caller}/VEP/{sample}.annotated.vcf.gz",
 		VCF=config["bcftoolsVCF"]
 	output:
-		"VCF/{caller}/BCFtools/{sample}.{caller}.annotated.vcf"
+		"VCF/{caller}/BCFtools/{sample}.{caller}.annotated.vcf.gz"
 	conda:
 		"envs/bcftools.yaml"
 	log:
@@ -868,6 +879,7 @@ rule annotate_with_cosmic_vcf:
 		tabix -f {input.calls}
 		bcftools annotate -a {input.VCF} \
 			-c ID \
+			-O z \
 			{input.calls} > {output}
 		"""
 
@@ -878,7 +890,7 @@ rule annotate_with_cosmic_vcf:
 ## Generate stats for the VCF files
 rule bcf_stats:
 	input:
-		"VCF/{caller}/BCFtools/{sample}.{caller}.annotated.vcf",
+		"VCF/{caller}/BCFtools/{sample}.{caller}.annotated.vcf.gz",
 	output:
 		"QC/vcf/{sample}.{caller}.final.stats.txt",
 	log:
