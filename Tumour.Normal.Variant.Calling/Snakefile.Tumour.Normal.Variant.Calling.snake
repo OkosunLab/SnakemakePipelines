@@ -184,7 +184,7 @@ rule gatk_get_pileup_summaries:
 ## Generate contamination table as well as segmentation files
 rule gatk_calculate_contamination:
 	input:
-		tumor=temp("VCF/Mutect2/{sample}.summaries.table"),
+		tumor="VCF/Mutect2/{sample}.summaries.table",
 	output:
 		temp("VCF/Mutect2/{sample}.contamination.table"),
 	threads:
