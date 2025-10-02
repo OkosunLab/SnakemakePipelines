@@ -1,0 +1,270 @@
+####################################################################
+##
+## Snakefile for the alignment and counting of RNAseq fastq files
+##
+## Written by: Findlay Bewicke-Copley
+## Date: 02/10/2025
+####################################################################
+
+import glob
+import re
+
+## Load config file
+configfile: "Alignment.With.Recalibration.yaml"
+## Check for intervals file
+if config["intervals"] == "":
+	raise Exception("You need to specify the interval file in the config file")
+## Load Sample Sheet
+sampleFile = open(config["SampleSheet"]).readlines()
+## Take the first line as a header
+header = sampleFile.pop(0).rstrip().split("\t")
+## Generate sample dictionary
+sampleSheet = {}
+## Run through the sample file and create a dictionary
+for line in sampleFile:
+		## Remove whitespace and split on tabs
+		line = line.rstrip().split("\t")
+		## zip the line info (values) and the header (keys) to generate a dictionary
+		rv = dict(zip(header, line))
+		## if the sample name isn't in the dictionary keys:
+		if not rv["sample"] in sampleSheet.keys():
+				## Add it and attach the dictionary
+				## N.B. "sample" needs to be unique
+				sampleSheet[rv["sample"]] = rv
+		## If there are multiple samples
+		else:
+				## Raise and error and complain about it.
+				raise Exception("Sorry, please make sure the sample column is unique")
+## set the value of SAMPLES to sampleSheet.keys()
+## This could be replaced throughout the file BUT SAMPLES is easier to type ....
+SAMPLES = sampleSheet.keys()
+
+READS = ["R1","R2"]
+
+#########################################################
+## Functions
+##########################################################
+
+## Find all FASTQ files of a specific read given the sample ID
+
+def get_R1(wildcards):
+	files = glob.glob('{}/{}_*R1*.fastq.gz'.format(config["rawFolder"], wildcards.sample))
+	files.sort()
+	return files
+
+def get_R2(wildcards):
+	files = glob.glob('{}/{}_*R2*.fastq.gz'.format(config["rawFolder"], wildcards.sample))
+	files.sort()
+	return files
+
+## Find all FASTQ files given the sample ID and read ID
+
+def get_fastq_from_sample_read(wildcards):
+	files = glob.glob('FASTQ_Raw/Combined/{}_*{}*.fastq.gz'.format(wildcards.sample, wildcards.read))
+	return files
+
+
+##########################################################
+## RULES
+##########################################################
+
+## One rule to run them all
+
+rule multiQC:
+	input:
+		html=expand("QC/fastp/{sample}.html", sample = SAMPLES),
+		txt=expand("QC/fastq_screen/{sample}.{read}.fastq_screen.txt", sample = SAMPLES, read = READS),
+		bam=expand("QC/star_pe/{sample}/Log.out", sample = SAMPLES),
+	output:
+		"QC/MultiQC/multiqc_report.html",
+	conda:
+		"envs/multiqc.yaml"
+	params:
+		mem = config["multiqcMem"],
+		time = config["multiqcTime"],
+	log:
+		"logs/multiqc/multiqc.log",
+	threads: 
+		config["multiqcThreads"]
+	shell:
+		"""
+		multiqc -o QC/MultiQC/ \
+			-n multiqc_report \
+			-f QC
+		"""
+
+##########################################################
+## QC and file manuipulation
+##########################################################
+
+## If samples are across multiple lanes this will combine them
+## If not it will just copy the files into FASTQ_Raw/Combined
+## These will be temporary files
+## the combined files will be removed after use
+rule combine_fastqs:
+	input:
+		R1 = get_R1,
+		R2 = get_R2,
+	output:
+		R1_out=temp("FASTQ_Raw/Combined/{sample}.R1.combined.fastq.gz"),
+		R2_out=temp("FASTQ_Raw/Combined/{sample}.R2.combined.fastq.gz"),
+	params:
+		mem=config["combineMem"],
+		time=config["combineTime"],
+	log:
+		"logs/combine_fastq/{sample}.log"
+	threads: 
+		config["combineThreads"] 
+	shell:
+		"""
+		cat {input.R1} > {output.R1_out}
+		cat {input.R2} > {output.R2_out}
+		"""
+
+## FASTQ screen does a little alignment with a small number of reads from numerous genomes
+## tests for contaminants
+
+rule fastq_screen:
+	input: 
+		"FASTQ_Raw/Combined/{sample}.{read}.combined.fastq.gz"
+	output:
+		txt="QC/fastq_screen/{sample}.{read}.fastq_screen.txt",
+		png="QC/fastq_screen/{sample}.{read}.fastq_screen.png"
+	params:
+		fastq_screen_config="/data/BCI-OkosunLab/Ref/FASTQ_Screen/fastq_screen.conf",
+		subset=100000,
+		aligner='bowtie2',
+		mem=config["fastqScreenMem"],
+		time=config["fastqScreenTime"],
+	threads: 
+		config["fastqScreenThreads"]
+	log:
+		"logs/fastq_screen/{sample}.{read}.log"
+	wrapper:
+		## the up to date version of this wrapper is blacklisted as it doesn't generate the png
+		"v3.10.2/bio/fastq_screen"
+
+## FASTP is a tool for QC and trimming of FASTQ files.
+
+rule fastp:
+	input:
+		sample=["FASTQ_Raw/Combined/{sample}.R1.combined.fastq.gz", "FASTQ_Raw/Combined/{sample}.R2.combined.fastq.gz"]
+	output:
+		trimmed=[temp("FASTQ_fastp/{sample}.1.fastq.gz"), temp("FASTQ_fastp/{sample}.2.fastq.gz")],
+		# Unpaired reads separately
+		unpaired1=temp("FASTQ_fastp/{sample}.u1.fastq.gz"),
+		unpaired2=temp("FASTQ_fastp/{sample}.u2.fastq.gz"),
+		failed=temp("FASTQ_fastp/{sample}.failed.fastq.gz"),
+		html="QC/fastp/{sample}.html",
+		json="QC/fastp/{sample}.json"
+	log:
+		"logs/fastp/pe/{sample}.log"
+	params:
+		## It should detect the adapters but can add them here too
+		## These are the TruSeq adapters
+		## adapters="--adapter_sequence AGATCGGAAGAGCACACGTCTGAACTCCAGTCA --adapter_sequence_r2 AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT",
+		## g removes poly g
+		## detect adapter for pe should work out what the adapters are.
+		extra="-g --detect_adapter_for_pe",
+		mem=config["fastpMem"],
+		time=config["fastpTime"],
+	threads: 
+		config["fastpThreads"] 
+	wrapper:
+		"v4.0.0/bio/fastp"
+
+##########################################################
+## Alignment
+##########################################################
+
+## Generate STAR index
+rule star_index:
+	input:
+		reference=config["reference"]
+		gtf=config["gtf"]
+	output:
+		index=config["index"]
+	threads:
+		12
+	conda:
+		"envs/STAR.yaml"
+	params:
+		mem=config["starIdxMem"]
+		overhang=config["overhang"]
+	shell:
+		"""
+		STAR --runThread {threads} \
+			--runMode genomeGenerate \
+			--genomeDir {output.index} \
+			--genomeFastaFiles {input.reference} \
+			--sjdbGTFfile {input.gtf} \
+			--sjdbOverhang {params.overhang}
+		"""
+
+## Align and sort
+rule star_pe_multi:
+	input:
+		R1="FASTQ_Raw/Combined/{sample}.R1.combined.fastq.gz",
+		R2="FASTQ_Raw/Combined/{sample}.R2.combined.fastq.gz",  #optional
+		index=config["index"]
+	output:
+		# see STAR manual for additional output files
+		bam="Alignment/{sample}.twopass",
+		log="QC/star_pe/{sample}/Log.out",
+	log:
+		"logs/star_pe/{sample}.log",
+	conda:
+		"envs/STAR.yaml"
+	params:
+		# optional parameters
+		extra="",
+	threads: 8
+	shell:
+		"""
+		time STAR --runMode alignReads \
+		        --twopassMode Basic \
+		        --genomeDir {input.index} \
+		        --runThreadN {threads} \
+		        --readFilesIn {input.R1} {input.R2} \
+		        --readFilesCommand zcat \
+		        --outFileNamePrefix {output.bam} \
+		        --outSAMtype BAM SortedByCoordinate \
+		        --outSAMunmapped Within \
+		        --outSAMattributes Standard \
+			--quantMode GeneCounts
+		"""
+
+## Index the final bam file
+rule samtools_index:
+	input:
+		"Alignment/{sample}.recalib.bam"
+	output:
+		"Alignment/{sample}.recalib.bai",
+	log:
+		"logs/samtools_index/{sample}.log",
+	params:
+		extra="",  # optional params string
+		mem=config["samtoolsStatMem"],
+		time=config["samtoolsStatTime"],
+	threads: 
+		config["samtoolsIdxThreads"] # This value - 1 will be sent to -@
+	wrapper:
+		"v4.0.0/bio/samtools/index"
+	
+## Generate flagstat report for the bam files
+rule samtools_stats:
+	input:
+		bam="Alignment/{sample}.recalib.bam"
+	output:
+		"QC/samtools_stats/{sample}.recalib.txt",
+	params:
+		extra="",  # Optional: extra arguments.
+		mem=config["samtoolsStatMem"],
+		time=config["samtoolsStatTime"],
+	threads:
+		config["samtoolsStatThreads"]
+	log:
+		"logs/samtools_stats/{sample}.log",
+	wrapper:
+		"v4.0.0/bio/samtools/stats"
+
