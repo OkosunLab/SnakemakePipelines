@@ -68,6 +68,10 @@ def get_fastq_from_sample_read(wildcards):
 ## RULES
 ##########################################################
 
+rule main:
+	input:
+		expand("Alignment/{sample}.twopass_Aligned.sortedByCoord.out.bam", sample =  SAMPLES)
+
 ## One rule to run them all
 
 rule multiQC:
@@ -185,7 +189,7 @@ rule star_index:
 	output:
 		index=config["index"]
 	threads:
-		12
+		config["starIdxThreads"]
 	conda:
 		"envs/STAR.yaml"
 	params:
@@ -208,8 +212,8 @@ rule star_pe_multi:
 		R2="FASTQ_Raw/Combined/{sample}.R2.combined.fastq.gz",  #optional
 		index=config["index"]
 	output:
-		# see STAR manual for additional output files
-		bam="Alignment/{sample}.twopass",
+		# see STAR manual for additional output files		
+		bam="Alignment/{sample}.twopass_Aligned.sortedByCoord.out.bam",
 		log="QC/star_pe/{sample}/Log.out",
 	log:
 		"logs/star_pe/{sample}.log",
@@ -218,7 +222,9 @@ rule star_pe_multi:
 	params:
 		# optional parameters
 		extra="",
-	threads: 8
+		men=config["starMem"],
+		prefix="Alignment/{sample}.twopass"
+	threads: config["starThreads"]
 	shell:
 		"""
 		time STAR --runMode alignReads \
@@ -227,7 +233,7 @@ rule star_pe_multi:
 		        --runThreadN {threads} \
 		        --readFilesIn {input.R1} {input.R2} \
 		        --readFilesCommand zcat \
-		        --outFileNamePrefix {output.bam} \
+		        --outFileNamePrefix {params.prefix} \
 		        --outSAMtype BAM SortedByCoordinate \
 		        --outSAMunmapped Within \
 		        --outSAMattributes Standard \

@@ -4,22 +4,8 @@ samples:
 ##########################################
 reference:
         /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta
-dict:
-        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.dict
-knownsites:
-        [
-        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.dbsnp138.vcf,
-        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/1000G_phase1.snps.high_confidence.hg38.vcf.gz,
-        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
-        ]
-bwa_index:
-        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta
-intervals:
-        ## Ed's PCNSL panel
-        ## /data/BCI-OkosunLab/Ed/Ref/Bed-Files/PCNSL_ctDNA_panel_v6/PCNSL_ctDNA_panel_v6_covered.bed
-        ## Nonacus WES panel
-        ## /data/BCI-OkosunLab/Ref/GRCh38/Nonacus_Exome_GRCh38/Nonacus_Exome_GRCh38_covered.chr.bed
-        ""
+index:
+        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Star.2.7.11b/
 ##########################################
 ## Raw file location
 ##########################################
@@ -42,30 +28,6 @@ combineMem: 8G
 combineThreads: 1
 combineTime: 24:0:0
 
-## Mark Duplicates
-markDupsMem: 8G
-markDupsThreads: 1
-markDupsTime: 24:0:0
-
-## Alignment
-bwaMem: 4G
-bwaThreads: 8
-bwaTime: 24:0:0
-
-## GATK
-gatkMem: 16G
-gatkRunMem: 12288
-gatkThreads: 1
-gatkTime: 24:0:0
-
-## Samtools
-samtoolsStatMem: 8G
-samtoolsStatThreads: 1
-samtoolsStatTime: 24:0:0
-samtoolsIdxMem: 8G
-samtoolsIdxThreads: 4
-samtoolsIdxTime: 24:0:0
-
 ## fastp
 fastpMem: 24G
 fastpThreads: 1
@@ -76,8 +38,3 @@ fastqScreenMem: 8G
 fastqScreenThreads: 8
 fastqScreenTime: 24:0:0
 
-## Picard tools
-picardThreads: 1
-picardMem: 8G
-picardRunMem: 7168
-picardTime: 24:0:0
