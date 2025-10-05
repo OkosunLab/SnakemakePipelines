@@ -7,12 +7,16 @@ OkosunLab pipelines built using the snakemake workflow management system
 ## Contents
 
 1. [Pipeline Library](#Pipeline-Library)
-2. [Tutorial](#Tutorial)
+   1. [DNAseq](#DNAseq)
+   2. [RNAseq](RNAseq)   
+3. [Tutorial](#Tutorial)
    1. [Setup](#Setup)
    2. [Running A Pipeline](#Running-A-Pipeline)
       1. [Job Submission Setup](#Job-Submission-Setup)
 
 ## Pipeline Library:
+
+### DNAseq
 
 Pipeline | info
 --- | --- 
@@ -20,6 +24,14 @@ Pipeline | info
 [Alignment with UMI collapsing](https://github.com/OkosunLab/SnakemakePipelines/tree/main/Alignment.With.UMI.Collapsing) | Pipeline for aligning DNAseq reads from illumina sequencing from UMI tagged data
 [Tumour normal variant calling](https://github.com/OkosunLab/SnakemakePipelines/tree/main/Tumour.Normal.Variant.Calling) | Pipeline for calling variants from matched tumour normal bam files
 [Tumour only variant calling](https://github.com/OkosunLab/SnakemakePipelines/tree/main/Tumour.Only.Variant.Calling) | Pipeline for calling variants from only tumour bam files
+
+
+### RNAseq
+
+Pipeline | info
+--- | --- 
+[RNAseq Processing & Counting](https://github.com/OkosunLab/SnakemakePipelines/tree/main/RNAseq.Processing.And.Counting) | Pipeline for alignment and counting of bulk RNAseq data
+
 
 ## Tutorial
 
