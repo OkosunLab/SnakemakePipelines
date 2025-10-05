@@ -1,4 +1,4 @@
-# BWA alignment and GATK preprocessing
+# STAR alignment and Counting
 
 ## Contents
 1. [Overview](#overview)
@@ -15,7 +15,7 @@ This pipeline will run from unaligned fastq files to duplicate marked, recalibra
 
 ## Pipeline Steps
 
-![Rulegraph for BWA alignment and GATK preprocessing](Alignment.With.Recalibration.svg)
+![Rulegraph for STAR alignment and counting](RNAseq.alignment.counting.svg)
 
 ## Quality Control
 
@@ -38,21 +38,6 @@ Staphylococcus aureus | NCTC 8325 | NCBI
 
 ## Alignment
 
-*bwa version: 0.7.17*\
-*GATK version: 4.5.0*\
-*samtools version: 1.20*\
-*multiQC version: 1.21-0*
-
-1. Trimmed fastq files are aligned to the reference genome (set in the config file) using **[bwa mem](https://github.com/lh3/bwa)**.
-2. **[Picard markduplicates](https://gatk.broadinstitute.org/hc/en-us/articles/21905036102043-MarkDuplicates-Picard)** (GATK) is used to mark potential PCR duplicates
-5. GATK is used to recalibrate the base quality scores
-	1. **[BQSR](https://gatk.broadinstitute.org/hc/en-us/articles/21905050792603-BaseRecalibrator)** is used to generate a model for the analysis
- 	2. **[ApplyBSQR](https://gatk.broadinstitute.org/hc/en-us/articles/21905038144155-ApplyBQSR)** is used to apply this model
-3. **[samtools flagstat](http://www.htslib.org/)** extracts the alignment stats from the raw bam.
-6. **[GATK depth of coverage](https://gatk.broadinstitute.org/hc/en-us/articles/21905133224859-DepthOfCoverage-BETA)** generates coverage statistics (using supplied interval file)
-7. **[Picard BedToInterval](https://gatk.broadinstitute.org/hc/en-us/articles/21905044859419-BedToIntervalList-Picard)** Converts the bed file into an interval file for picard. GATK implementation
-8. **[Picard CollectHsMetrics](https://gatk.broadinstitute.org/hc/en-us/articles/21904964615451-CollectHsMetrics-Picard)** generates several QC metrics from the pipeline. GATK implementation
-9. **[MultiQC](https://multiqc.info/)** collects all the QC metrics from the pipeline.
 
 # Sample sheet
 
