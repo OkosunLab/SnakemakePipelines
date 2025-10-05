@@ -38,6 +38,9 @@ Staphylococcus aureus | NCTC 8325 | NCBI
 
 ## Alignment
 
+*star version: 2.7.11b*\
+
+**[STAR](https://github.com/alexdobin/STAR/releases)** is used in two pass mode to align the trimmed FASTQ and count the reads aligned to genes.
 
 # Sample sheet
 
@@ -57,10 +60,9 @@ The pipeline will output the aligned bams in a folder called Alignment. QC files
 Option | Description | Default| Notes
 --- | --- | --- | ---
 reference | reference fasta | /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta |
-dict | reference dictionary | /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.dict |
-bwa_index | index for BWA | /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta |
-knownsites | gold standard SNV and indel positions | [ /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.dbsnp138.vcf,/data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/1000G_phase1.snps.high_confidence.hg38.vcf.gz,/data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz ] | 
-intervals | bed file of targeted positions | /data/BCI-OkosunLab/Ref/GRCh38/Nonacus_Exome_GRCh38/Nonacus_Exome_GRCh38_covered.chr.bed |
+gtf | gtf for ref | /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/hg38.UCSC.ensGene.gtf
+index | index for STAR | /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Star.2.7.11b/
+overhang | for index generation | 100
 rawFolder | location of raw files | FASTQ_Raw |
 SampleSheet | sample sheet for the samples | Sample.Sheet.tsv |
 multiqcThreads | threads | 1 |
@@ -75,26 +77,9 @@ fastqScreenTime | time | 24:0:0 | 24 hours
 fastpThreads | threads | 1 |
 fastpMem | memory | 24G |
 fastpTime | time | 24:0:0 | 24 hours
-bwaThreads | threads | 8 |
-bwaMem | memory | 4G |
-bwaTime | time | 24:0:0 | 24 hours
-markDupsMem | memory | 8G |
-markDupsThreads | threads | 1 |
-markDupsTime | time | 24:0:0 | 24 hours
-consensusFastqThreads | threads | 3 |
-consensusFastqMem | memory | 8G |
-consensusTime | time | 24:0:0 | 24 hours
-gatkThreads | threads | 1 |
-gatkMem | memory | 16G |
-gatkRunMem | memory (passed to java) | 12288 |
-gatkTime | time | 24:0:0 | 24 hours
-samtoolsStatThreads | threads | 1 |
-samtoolsStatMem | memory | 8G |
-samtoolsStatTime | time | 24:0:0 | 24 hours
-samtoolsIdxThreads | threads | 4 |
-samtoolsIdxMem | memory | 8G |
-samtoolsIdxTime | time | 24:0:0 | 24 hours
-picardThreads | threads | 1 |
-picardMem | memory | 8G |
-picardTime | time |  24:0:0 | 24 hours
-
+starThreads | threads | 8 |
+starMem | memory | 12G |
+starTime | time | 24:0:0 | 24 hours
+starIdxThreads | threads | 8 |
+starIdxMem | memory | 12G |
+starIdxTime | time | 24:0:0 | 24 hours
