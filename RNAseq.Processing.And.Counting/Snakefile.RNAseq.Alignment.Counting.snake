@@ -10,10 +10,7 @@ import glob
 import re
 
 ## Load config file
-configfile: "Alignment.With.Recalibration.yaml"
-## Check for intervals file
-if config["intervals"] == "":
-	raise Exception("You need to specify the interval file in the config file")
+configfile: "RNAseq.alignment.counting.yaml"
 ## Load Sample Sheet
 sampleFile = open(config["SampleSheet"]).readlines()
 ## Take the first line as a header
@@ -68,17 +65,16 @@ def get_fastq_from_sample_read(wildcards):
 ## RULES
 ##########################################################
 
-rule main:
-	input:
-		expand("Alignment/{sample}.twopass_Aligned.sortedByCoord.out.bam", sample =  SAMPLES)
-
 ## One rule to run them all
 
 rule multiQC:
 	input:
 		html=expand("QC/fastp/{sample}.html", sample = SAMPLES),
 		txt=expand("QC/fastq_screen/{sample}.{read}.fastq_screen.txt", sample = SAMPLES, read = READS),
-		bam=expand("QC/star_pe/{sample}/Log.out", sample = SAMPLES),
+		bams=expand("Alignment/{sample}.twopassAligned.sortedByCoord.out.bam", sample =  SAMPLES),
+		final=expand("QC/STAR/{sample}.twopassLog.final.out", sample =  SAMPLES),
+		log=expand("QC/STAR/{sample}.twopassLog.out", sample =  SAMPLES),
+		progress=expand("QC/STAR/{sample}.twopassLog.progress.out", sample =  SAMPLES),
 	output:
 		"QC/MultiQC/multiqc_report.html",
 	conda:
@@ -94,7 +90,7 @@ rule multiQC:
 		"""
 		multiqc -o QC/MultiQC/ \
 			-n multiqc_report \
-			-f QC
+			QC
 		"""
 
 ##########################################################
@@ -184,20 +180,22 @@ rule fastp:
 ## Generate STAR index
 rule star_index:
 	input:
-		reference=config["reference"]
+		reference=config["reference"],
 		gtf=config["gtf"]
 	output:
-		index=config["index"]
+		index=directory(config["index"])
 	threads:
 		config["starIdxThreads"]
 	conda:
 		"envs/STAR.yaml"
 	params:
-		mem=config["starIdxMem"]
+		mem=config["starIdxMem"],
 		overhang=config["overhang"]
+	log:
+		"logs/star_index/index.log"
 	shell:
 		"""
-		STAR --runThread {threads} \
+		STAR --runThreadN {threads} \
 			--runMode genomeGenerate \
 			--genomeDir {output.index} \
 			--genomeFastaFiles {input.reference} \
@@ -208,13 +206,21 @@ rule star_index:
 ## Align and sort
 rule star_pe_multi:
 	input:
-		R1="FASTQ_Raw/Combined/{sample}.R1.combined.fastq.gz",
-		R2="FASTQ_Raw/Combined/{sample}.R2.combined.fastq.gz",  #optional
+		R1="FASTQ_fastp/{sample}.1.fastq.gz",
+		R2="FASTQ_fastp/{sample}.2.fastq.gz",
 		index=config["index"]
 	output:
-		# see STAR manual for additional output files		
-		bam="Alignment/{sample}.twopass_Aligned.sortedByCoord.out.bam",
-		log="QC/star_pe/{sample}/Log.out",
+		bam="Alignment/{sample}.twopassAligned.sortedByCoord.out.bam",
+		## Logs
+		final="Alignment/{sample}.twopassLog.final.out",
+		log="Alignment/{sample}.twopassLog.out",
+		progress="Alignment/{sample}.twopassLog.progress.out",
+		## Data
+		SJ="Alignment/{sample}.twopassSJ.out.tab",
+		counts="Alignment/{sample}.twopassReadsPerGene.out.tab",
+		## Processing
+		genome=temp(directory("Alignment/{sample}.twopass_STARgenome")),
+		firstpass=temp(directory("Alignment/{sample}.twopass_STARpass1")),
 	log:
 		"logs/star_pe/{sample}.log",
 	conda:
@@ -222,8 +228,8 @@ rule star_pe_multi:
 	params:
 		# optional parameters
 		extra="",
-		men=config["starMem"],
-		prefix="Alignment/{sample}.twopass"
+		mem=config["starMem"],
+		prefix="Alignment/{sample}.twopass_"
 	threads: config["starThreads"]
 	shell:
 		"""
@@ -240,37 +246,32 @@ rule star_pe_multi:
 			--quantMode GeneCounts
 		"""
 
-## Index the final bam file
-rule samtools_index:
+rule cleanup_files:
 	input:
-		"Alignment/{sample}.recalib.bam"
+		## Logs
+		final="Alignment/{sample}.twopassLog.final.out",
+		log="Alignment/{sample}.twopassLog.out",
+		progress="Alignment/{sample}.twopassLog.progress.out",
+		## Data
+		SJ="Alignment/{sample}.twopassSJ.out.tab",
+		counts="Alignment/{sample}.twopassReadsPerGene.out.tab",
 	output:
-		"Alignment/{sample}.recalib.bai",
-	log:
-		"logs/samtools_index/{sample}.log",
+		## Logs
+		final="QC/STAR/{sample}.twopassLog.final.out",
+		log="QC/STAR/{sample}.twopassLog.out",
+		progress="QC/STAR/{sample}.twopassLog.progress.out",
+		## Data
+		SJ="Junctions/{sample}.twopassSJ.out.tab",
+		counts="Expression/Star/Alignment/{sample}.twopassReadsPerGene.out.tab",
+	threads: 1
 	params:
-		extra="",  # optional params string
-		mem=config["samtoolsStatMem"],
-		time=config["samtoolsStatTime"],
-	threads: 
-		config["samtoolsIdxThreads"] # This value - 1 will be sent to -@
-	wrapper:
-		"v4.0.0/bio/samtools/index"
-	
-## Generate flagstat report for the bam files
-rule samtools_stats:
-	input:
-		bam="Alignment/{sample}.recalib.bam"
-	output:
-		"QC/samtools_stats/{sample}.recalib.txt",
-	params:
-		extra="",  # Optional: extra arguments.
-		mem=config["samtoolsStatMem"],
-		time=config["samtoolsStatTime"],
-	threads:
-		config["samtoolsStatThreads"]
-	log:
-		"logs/samtools_stats/{sample}.log",
-	wrapper:
-		"v4.0.0/bio/samtools/stats"
-
+		mem="1G",
+		time="1:00:00"
+	shell:
+		"""
+		mv {input.final} {output.final}
+		mv {input.log} {output.log}
+		mv {input.progress} {output.progress}
+		mv {input.SJ} {output.SJ}
+		mv {input.counts} {output.counts}
+		"""

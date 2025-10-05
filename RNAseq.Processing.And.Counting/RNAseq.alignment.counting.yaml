@@ -1,11 +1,13 @@
-samples:
 ##########################################
 ## Genomes
 ##########################################
 reference:
         /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta
+gtf:
+        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/hg38.UCSC.ensGene.gtf
 index:
         /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Star.2.7.11b/
+overhang: 100
 ##########################################
 ## Raw file location
 ##########################################
@@ -38,3 +40,12 @@ fastqScreenMem: 8G
 fastqScreenThreads: 8
 fastqScreenTime: 24:0:0
 
+#StarIdx
+starIdxThreads: 8
+starIdxMem: 12G
+starIdxTime: 24:0:00
+
+#Star
+starThreads: 8
+starMem: 12G
+starTime: 24:0:00
