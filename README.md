@@ -8,7 +8,7 @@ OkosunLab pipelines built using the snakemake workflow management system
 
 1. [Pipeline Library](#Pipeline-Library)
    1. [DNAseq](#DNAseq)
-   2. [RNAseq](RNAseq)   
+   2. [RNAseq](#RNAseq)   
 3. [Tutorial](#Tutorial)
    1. [Setup](#Setup)
    2. [Running A Pipeline](#Running-A-Pipeline)
