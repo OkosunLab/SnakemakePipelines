@@ -38,7 +38,7 @@ Staphylococcus aureus | NCTC 8325 | NCBI
 
 ## Alignment
 
-*star version: 2.7.11b*\
+*star version: 2.7.11b*
 
 **[STAR](https://github.com/alexdobin/STAR/releases)** is used in two pass mode to align the trimmed FASTQ and count the reads aligned to genes.
 
