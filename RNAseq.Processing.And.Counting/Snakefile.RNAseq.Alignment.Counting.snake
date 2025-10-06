@@ -75,6 +75,7 @@ rule multiQC:
 		final=expand("QC/STAR/{sample}.twopassLog.final.out", sample =  SAMPLES),
 		log=expand("QC/STAR/{sample}.twopassLog.out", sample =  SAMPLES),
 		progress=expand("QC/STAR/{sample}.twopassLog.progress.out", sample =  SAMPLES),
+		RSEM=expand("RSEM/{sample}.genes.cnt", sample = SAMPLES)
 	output:
 		"QC/MultiQC/multiqc_report.html",
 	conda:
@@ -90,7 +91,7 @@ rule multiQC:
 		"""
 		multiqc -o QC/MultiQC/ \
 			-n multiqc_report \
-			QC
+			QC RSEM
 		"""
 
 ##########################################################
@@ -204,7 +205,7 @@ rule star_index:
 		"""
 
 ## Align and sort
-rule star_pe_multi:
+rule star:
 	input:
 		R1="FASTQ_fastp/{sample}.1.fastq.gz",
 		R2="FASTQ_fastp/{sample}.2.fastq.gz",
@@ -229,20 +230,20 @@ rule star_pe_multi:
 		# optional parameters
 		extra="",
 		mem=config["starMem"],
-		prefix="Alignment/{sample}.twopass_"
+		prefix="Alignment/{sample}.twopass"
 	threads: config["starThreads"]
 	shell:
 		"""
 		time STAR --runMode alignReads \
-		        --twopassMode Basic \
-		        --genomeDir {input.index} \
-		        --runThreadN {threads} \
-		        --readFilesIn {input.R1} {input.R2} \
-		        --readFilesCommand zcat \
-		        --outFileNamePrefix {params.prefix} \
-		        --outSAMtype BAM SortedByCoordinate \
-		        --outSAMunmapped Within \
-		        --outSAMattributes Standard \
+				--twopassMode Basic \
+				--genomeDir {input.index} \
+				--runThreadN {threads} \
+				--readFilesIn {input.R1} {input.R2} \
+				--readFilesCommand zcat \
+				--outFileNamePrefix {params.prefix} \
+				--outSAMtype BAM SortedByCoordinate \
+				--outSAMunmapped Within \
+				--outSAMattributes Standard \
 			--quantMode GeneCounts
 		"""
 
@@ -266,7 +267,7 @@ rule cleanup_files:
 	threads: 1
 	params:
 		mem="1G",
-		time="1:00:00"
+		time="1:0:00"
 	shell:
 		"""
 		mv {input.final} {output.final}
@@ -275,3 +276,50 @@ rule cleanup_files:
 		mv {input.SJ} {output.SJ}
 		mv {input.counts} {output.counts}
 		"""
+
+rule rsem_prepare_reference:
+	input:
+		reference_genome=config["reference"],
+	output:
+		seq="{}.seq".format(config["rsemPre"]),
+		reference=multiext(config["rsemPre"],
+			".grp",
+			".ti",
+			".transcripts.fa",
+			".idx.fa",
+			".n2g.idx.fa"),
+	params:
+		extra="--gtf {}".format(config["gtf"]),
+		mem=config["rsemPrepMem"],
+		time=config["rsemPrepTime"]
+	threads:
+		config["rsemPrepThreads"]
+	log:
+		"logs/rsem/prepare-reference.log",
+	wrapper:
+		"v7.6.1/bio/rsem/prepare-reference"
+
+rule rsem_calculate_expression:
+	input:
+		bam="Alignment/{sample}.twopassAligned.sortedByCoord.out.bam",
+		reference=multiext(config["rsemPre"],
+			".grp", 
+			".ti", 
+			".transcripts.fa", 
+			".seq", 
+			".idx.fa", 
+			".n2g.idx.fa"),
+	output:
+		genes_results="RSEM/{sample}.genes.cnt",
+		isoforms_results="RSEM/{sample}.isoforms.cnt",
+	params:
+		paired_end=True,
+		extra="",
+		mem=config["rsemRunMem"],
+		time=config["rsemRunTime"],
+	log:
+		"logs/rsem/calculate_expression/{sample}.log",
+	threads: 
+		config["rsemRunThreads"]
+	wrapper:
+		"v7.6.1/bio/rsem/calculate-expression"

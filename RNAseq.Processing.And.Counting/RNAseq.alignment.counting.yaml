@@ -4,9 +4,11 @@
 reference:
         /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Homo_sapiens_assembly38.fasta
 gtf:
-        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/hg38.UCSC.ensGene.gtf
+        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/hg38.2020.01.10.UCSC.refGene.gtf
 index:
         /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/Star.2.7.11b/
+rsemPre:
+        /data/BCI-OkosunLab/Ref/GRCh38/GATK_resource_bundle/RSEM/reference
 overhang: 100
 ##########################################
 ## Raw file location
@@ -49,3 +51,13 @@ starIdxTime: 24:0:00
 starThreads: 8
 starMem: 12G
 starTime: 24:0:00
+
+# RSEM
+# prep
+rsemPrepMem: 8G
+rsemPrepThreads: 4
+rsemPrepTime: 24:0:00
+# count
+rsemRunMem: 8G
+rsemRunThreads: 4
+rsemRunTime: 24:0:00
