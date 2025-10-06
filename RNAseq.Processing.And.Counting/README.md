@@ -42,6 +42,12 @@ Staphylococcus aureus | NCTC 8325 | NCBI
 
 **[STAR](https://github.com/alexdobin/STAR/releases)** is used in two pass mode to align the trimmed FASTQ and count the reads aligned to genes.
 
+## RSEM
+
+*rsem version: 1.3.3*
+
+**[RSEM](https://github.com/deweylab/RSEM)** is used for gene and isoform level quantification.
+
 # Sample sheet
 
 You need to have the sample IDs in a file like the below (see the example sample sheet):
@@ -53,7 +59,11 @@ sampleB |
 
 # Output
 
-The pipeline will output the aligned bams in a folder called Alignment. QC files will be stored in the folder QC, with a subfolder called MultiQC which contains a summary of all the QC records. 
+The pipeline will output the aligned bams in a folder called Alignment. 
+STAR quants will be stored in the directory: Expression/STAR/
+RSEM quants will be stored in the directory: RSEM
+QC files will be stored in the folder QC/
+a summary of all the QC records will be generated at: QC/MultiQC/
 
 # Config options
 
@@ -83,3 +93,10 @@ starTime | time | 24:0:0 | 24 hours
 starIdxThreads | threads | 8 |
 starIdxMem | memory | 12G |
 starIdxTime | time | 24:0:0 | 24 hours
+rsemPrepThreads | threads | 4 |
+rsemPrepMem | memory | 8G |
+rsemPrepTime | time | 24:0:0 | 24 hours
+rsemRunThreads | threads | 4 |
+rsemRunMem | memory | 8G |
+rsemRunTime | time | 24:0:0 | 24 hours
+
