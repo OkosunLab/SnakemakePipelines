@@ -52,12 +52,3 @@ starThreads: 8
 starMem: 12G
 starTime: 24:0:00
 
-# RSEM
-# prep
-rsemPrepMem: 8G
-rsemPrepThreads: 4
-rsemPrepTime: 24:0:00
-# count
-rsemRunMem: 8G
-rsemRunThreads: 4
-rsemRunTime: 24:0:00

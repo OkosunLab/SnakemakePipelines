@@ -75,7 +75,6 @@ rule multiQC:
 		final=expand("QC/STAR/{sample}.twopassLog.final.out", sample =  SAMPLES),
 		log=expand("QC/STAR/{sample}.twopassLog.out", sample =  SAMPLES),
 		progress=expand("QC/STAR/{sample}.twopassLog.progress.out", sample =  SAMPLES),
-		RSEM=expand("RSEM/{sample}.genes.cnt", sample = SAMPLES)
 	output:
 		"QC/MultiQC/multiqc_report.html",
 	conda:
@@ -161,11 +160,6 @@ rule fastp:
 	log:
 		"logs/fastp/pe/{sample}.log"
 	params:
-		## It should detect the adapters but can add them here too
-		## These are the TruSeq adapters
-		## adapters="--adapter_sequence AGATCGGAAGAGCACACGTCTGAACTCCAGTCA --adapter_sequence_r2 AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT",
-		## g removes poly g
-		## detect adapter for pe should work out what the adapters are.
 		extra="-g --detect_adapter_for_pe",
 		mem=config["fastpMem"],
 		time=config["fastpTime"],
@@ -277,49 +271,55 @@ rule cleanup_files:
 		mv {input.counts} {output.counts}
 		"""
 
-rule rsem_prepare_reference:
-	input:
-		reference_genome=config["reference"],
-	output:
-		seq="{}.seq".format(config["rsemPre"]),
-		reference=multiext(config["rsemPre"],
-			".grp",
-			".ti",
-			".transcripts.fa",
-			".idx.fa",
-			".n2g.idx.fa"),
-	params:
-		extra="--gtf {}".format(config["gtf"]),
-		mem=config["rsemPrepMem"],
-		time=config["rsemPrepTime"]
-	threads:
-		config["rsemPrepThreads"]
-	log:
-		"logs/rsem/prepare-reference.log",
-	wrapper:
-		"v7.6.1/bio/rsem/prepare-reference"
 
-rule rsem_calculate_expression:
-	input:
-		bam="Alignment/{sample}.twopassAligned.sortedByCoord.out.bam",
-		reference=multiext(config["rsemPre"],
-			".grp", 
-			".ti", 
-			".transcripts.fa", 
-			".seq", 
-			".idx.fa", 
-			".n2g.idx.fa"),
-	output:
-		genes_results="RSEM/{sample}.genes.cnt",
-		isoforms_results="RSEM/{sample}.isoforms.cnt",
-	params:
-		paired_end=True,
-		extra="",
-		mem=config["rsemRunMem"],
-		time=config["rsemRunTime"],
-	log:
-		"logs/rsem/calculate_expression/{sample}.log",
-	threads: 
-		config["rsemRunThreads"]
-	wrapper:
-		"v7.6.1/bio/rsem/calculate-expression"
+##########################################################
+## Isoform aware 
+##########################################################
+
+
+#rule rsem_prepare_reference:
+#	input:
+#		reference_genome=config["reference"],
+#	output:
+#		multiext(config["rsemPre"],
+#			".grp",
+#			".ti",
+#			".transcripts.fa",
+#			".idx.fa",
+#			".n2g.idx.fa"),
+#		seq="{}.seq".format(config["rsemPre"]),
+#	params:
+#		extra="--gtf {}".format(config["gtf"]),
+#		mem=config["rsemPrepMem"],
+#		time=config["rsemPrepTime"]
+#	threads:
+#		config["rsemPrepThreads"]
+#	log:
+#		"logs/rsem/prepare-reference.log",
+#	wrapper:
+#		"v7.6.1/bio/rsem/prepare-reference"
+#
+#rule rsem_calculate_expression:
+#	input:
+#		bam="Alignment/{sample}.twopassAligned.sortedByCoord.out.bam",
+#		reference=multiext(config["rsemPre"],
+#			".grp", 
+#			".ti", 
+#			".transcripts.fa", 
+#			".seq", 
+#			".idx.fa", 
+#			".n2g.idx.fa"),
+#	output:
+#		genes_results="RSEM/{sample}.genes.results",
+#		isoforms_results="RSEM/{sample}.isoforms.results",
+#	params:
+#		paired_end=True,
+#		extra="",
+#		mem=config["rsemRunMem"],
+#		time=config["rsemRunTime"],
+#	log:
+#		"logs/rsem/calculate_expression/{sample}.log",
+#	threads: 
+#		config["rsemRunThreads"]
+#	wrapper:
+#		"v7.6.1/bio/rsem/calculate-expression"
