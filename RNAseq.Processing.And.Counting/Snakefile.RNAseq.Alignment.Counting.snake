@@ -263,7 +263,7 @@ rule cleanup_files:
 		progress="QC/STAR/{sample}.twopassLog.progress.out",
 		## Data
 		SJ="Junctions/{sample}.twopassSJ.out.tab",
-		counts="Expression/Star/Alignment/{sample}.twopassReadsPerGene.out.tab",
+		counts="Expression/STAR/{sample}.twopassReadsPerGene.out.tab",
 	threads: 1
 	params:
 		mem="1G",
