@@ -101,7 +101,7 @@ To make sure the samples are paired with their correct normals I implemented a s
 To create a sample sheet to work with this pipeline you need a tab delimited file with the following columns (the column headers must match the names here).
 
 sample | tumour | tumourID
---- | --- |--- | --- |--- 
+--- | --- |--- 
 SampleA | Alignment/SampleA.bam | SampleA
 
 The IDs are used for variant callers that accept all the bams at once and then use the RG inside the bam to work out which reads come from tumor and which from normal. You can see and example in the Sample.Sheet.tsv.
