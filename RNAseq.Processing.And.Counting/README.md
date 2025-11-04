@@ -86,10 +86,3 @@ starTime | time | 24:0:0 | 24 hours
 starIdxThreads | threads | 8 |
 starIdxMem | memory | 12G |
 starIdxTime | time | 24:0:0 | 24 hours
-rsemPrepThreads | threads | 4 |
-rsemPrepMem | memory | 8G |
-rsemPrepTime | time | 24:0:0 | 24 hours
-rsemRunThreads | threads | 4 |
-rsemRunMem | memory | 8G |
-rsemRunTime | time | 24:0:0 | 24 hours
-

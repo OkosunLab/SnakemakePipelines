@@ -90,7 +90,7 @@ rule multiQC:
 		"""
 		multiqc -o QC/MultiQC/ \
 			-n multiqc_report \
-			QC RSEM
+			QC
 		"""
 
 ##########################################################
@@ -272,54 +272,3 @@ rule cleanup_files:
 		"""
 
 
-##########################################################
-## Isoform aware 
-##########################################################
-
-
-#rule rsem_prepare_reference:
-#	input:
-#		reference_genome=config["reference"],
-#	output:
-#		multiext(config["rsemPre"],
-#			".grp",
-#			".ti",
-#			".transcripts.fa",
-#			".idx.fa",
-#			".n2g.idx.fa"),
-#		seq="{}.seq".format(config["rsemPre"]),
-#	params:
-#		extra="--gtf {}".format(config["gtf"]),
-#		mem=config["rsemPrepMem"],
-#		time=config["rsemPrepTime"]
-#	threads:
-#		config["rsemPrepThreads"]
-#	log:
-#		"logs/rsem/prepare-reference.log",
-#	wrapper:
-#		"v7.6.1/bio/rsem/prepare-reference"
-#
-#rule rsem_calculate_expression:
-#	input:
-#		bam="Alignment/{sample}.twopassAligned.sortedByCoord.out.bam",
-#		reference=multiext(config["rsemPre"],
-#			".grp", 
-#			".ti", 
-#			".transcripts.fa", 
-#			".seq", 
-#			".idx.fa", 
-#			".n2g.idx.fa"),
-#	output:
-#		genes_results="RSEM/{sample}.genes.results",
-#		isoforms_results="RSEM/{sample}.isoforms.results",
-#	params:
-#		paired_end=True,
-#		extra="",
-#		mem=config["rsemRunMem"],
-#		time=config["rsemRunTime"],
-#	log:
-#		"logs/rsem/calculate_expression/{sample}.log",
-#	threads: 
-#		config["rsemRunThreads"]
-#	wrapper:
-#		"v7.6.1/bio/rsem/calculate-expression"

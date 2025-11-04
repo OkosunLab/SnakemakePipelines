@@ -97,6 +97,7 @@ mantaTime: 24:0:0
 mantaExtra: "--exome"
 
 # Strelka
+strelka2: "/data/BCI-OkosunLab/Software/Strelka-2.9.10/bin/"
 strelkaMem: 4G
 strelkaThreads: 12
 strelkaTime: 24:0:0
