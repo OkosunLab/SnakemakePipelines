@@ -19,19 +19,19 @@ header = sampleFile.pop(0).rstrip().split("\t")
 sampleSheet = {}
 ## Run through the sample file and create a dictionary
 for line in sampleFile:
-		## Remove whitespace and split on tabs
-		line = line.rstrip().split("\t")
-		## zip the line info (values) and the header (keys) to generate a dictionary
-		rv = dict(zip(header, line))
-		## if the sample name isn't in the dictionary keys:
-		if not rv["sample"] in sampleSheet.keys():
-				## Add it and attach the dictionary
-				## N.B. "sample" needs to be unique
-				sampleSheet[rv["sample"]] = rv
-		## If there are multiple samples
-		else:
-				## Raise and error and complain about it.
-				raise Exception("Sorry, please make sure the sample column is unique")
+	## Remove whitespace and split on tabs
+	line = line.rstrip().split("\t")
+	## zip the line info (values) and the header (keys) to generate a dictionary
+	rv = dict(zip(header, line))
+	## if the sample name isn't in the dictionary keys:
+	if not rv["sample"] in sampleSheet.keys():
+	## Add it and attach the dictionary
+	## N.B. "sample" needs to be unique
+		sampleSheet[rv["sample"]] = rv
+	## If there are multiple samples
+	else:
+	## Raise and error and complain about it.
+		raise Exception("Sorry, please make sure the sample column is unique")
 ## set the value of SAMPLES to sampleSheet.keys()
 ## This could be replaced throughout the file BUT SAMPLES is easier to type ....
 SAMPLES = sampleSheet.keys()
@@ -229,15 +229,15 @@ rule star:
 	shell:
 		"""
 		time STAR --runMode alignReads \
-				--twopassMode Basic \
-				--genomeDir {input.index} \
-				--runThreadN {threads} \
-				--readFilesIn {input.R1} {input.R2} \
-				--readFilesCommand zcat \
-				--outFileNamePrefix {params.prefix} \
-				--outSAMtype BAM SortedByCoordinate \
-				--outSAMunmapped Within \
-				--outSAMattributes Standard \
+	--twopassMode Basic \
+	--genomeDir {input.index} \
+	--runThreadN {threads} \
+	--readFilesIn {input.R1} {input.R2} \
+	--readFilesCommand zcat \
+	--outFileNamePrefix {params.prefix} \
+	--outSAMtype BAM SortedByCoordinate \
+	--outSAMunmapped Within \
+	--outSAMattributes Standard \
 			--quantMode GeneCounts
 		"""
 
@@ -270,23 +270,4 @@ rule cleanup_files:
 		mv {input.SJ} {output.SJ}
 		mv {input.counts} {output.counts}
 		"""
-
-## QC bam file
-
-## Generate samtools stat report for the bam files
-rule samtools_stats:
-        input:
-		bam="Alignment/{sample}.twopassAligned.sortedByCoord.out.bam",
-        output:
-                "QC/samtools_stats/{sample}.twopass.txt",
-        params:
-                extra="",  # Optional: extra arguments.
-                mem=config["samtoolsStatMem"],
-                time=config["samtoolsStatTime"],
-        threads:
-                config["samtoolsStatThreads"]
-        log:
-                "logs/samtools_stats/{sample}.log",
-        wrapper:
-                "v4.0.0/bio/samtools/stats"
 

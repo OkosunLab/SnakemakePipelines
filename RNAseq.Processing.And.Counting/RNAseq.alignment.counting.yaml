@@ -51,9 +51,3 @@ starIdxTime: 24:0:00
 starThreads: 8
 starMem: 12G
 starTime: 24:0:00
-
-#Samtools
-samtoolsStatThreads: 1
-samtoolsStatMem: 8G
-samtoolsStatTime: 24:0:00
-
