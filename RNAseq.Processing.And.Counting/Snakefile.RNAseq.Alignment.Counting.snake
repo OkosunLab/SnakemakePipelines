@@ -271,4 +271,22 @@ rule cleanup_files:
 		mv {input.counts} {output.counts}
 		"""
 
+## QC bam file
+
+## Generate samtools stat report for the bam files
+rule samtools_stats:
+        input:
+		bam="Alignment/{sample}.twopassAligned.sortedByCoord.out.bam",
+        output:
+                "QC/samtools_stats/{sample}.twopass.txt",
+        params:
+                extra="",  # Optional: extra arguments.
+                mem=config["samtoolsStatMem"],
+                time=config["samtoolsStatTime"],
+        threads:
+                config["samtoolsStatThreads"]
+        log:
+                "logs/samtools_stats/{sample}.log",
+        wrapper:
+                "v4.0.0/bio/samtools/stats"
 
