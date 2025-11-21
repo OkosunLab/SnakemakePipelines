@@ -338,7 +338,8 @@ rule Varscan:
 	resources:
 		mem_mb=config["varscanResMem"]
 	params:
-		extra = "--output-vcf 1",
+		## extra = "--output-vcf 1",
+		extra=config["varscanExtra"],
 		mem=config["varscanMem"],
 		time=config["varscanTime"]
 	conda:

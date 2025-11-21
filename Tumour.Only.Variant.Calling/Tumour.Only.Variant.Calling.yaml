@@ -107,3 +107,4 @@ varscanTime: 24:0:0
 pileupMem: 8G
 pileupThreads: 1
 pileupTime: 24:0:0
+varscanExtra: "--output-vcf 1 --min-var-freq 0 --strand-filter 1"
