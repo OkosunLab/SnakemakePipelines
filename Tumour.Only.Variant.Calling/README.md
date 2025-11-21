@@ -161,3 +161,4 @@ varscanTime | time | 24:0:0 |
 pileupMem | mem | 8G |
 pileupThreads | threads | 1 |
 pileupTime | time | 24:0:0 |
+varscanExtra | extra options for varscan | "--output-vcf 1 --min-var-freq 0 --strand-filter 1" | vcf, min AF 0, strand filter on
