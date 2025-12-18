@@ -2,7 +2,9 @@
 
 ## UNDER DEVELOPMENT
 
-OkosunLab pipelines built using the snakemake workflow management system
+OkosunLab pipelines built using the snakemake workflow management system.
+
+**WARNING**: the cluster will switch from SGE to Slurm in the new year. I am in the process of adapting these pipelines to work on either system but let me know if you notice any issues.
 
 ## Contents
 
