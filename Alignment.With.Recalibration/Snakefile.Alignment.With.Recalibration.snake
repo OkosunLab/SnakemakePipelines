@@ -383,7 +383,7 @@ rule picard_collect_hs_metrics:
                 reference=config["reference"],
                 # Baits and targets should be given as interval lists. These can
                 # be generated from bed files using picard BedToIntervalList.
-                target_intervals=temp("QC/picard.interval_list"),
+                target_intervals="QC/picard.interval_list",
         output:
                 "QC/depth/picard/{sample}.txt",
         params:
