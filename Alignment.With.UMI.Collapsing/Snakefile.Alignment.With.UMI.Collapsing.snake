@@ -90,6 +90,9 @@ rule multiQC:
 		"envs/multiqc.yaml"
 	params:
 		mem = config["multiqcMem"]
+	resources:
+		mem_mb_per_cpu = config["multiqcMemMB"],
+		runtime = config["multiqcTime"],
 	log:
 		"logs/multiqc/multiqc.log",
 	threads: 
@@ -120,6 +123,9 @@ rule combine_fastqs:
 		UMI_out=temp("FASTQ_Raw/Combined/{sample}.UMI.combined.fastq.gz")
 	params:
 		mem=config["combineMem"],
+	resources:
+		mem_mb_per_cpu = config["combineMemMB"],
+		runtime = config["combineTime"],
 	log:
 		"logs/combine_fastq/{sample}.log"
 	threads: 
@@ -145,6 +151,9 @@ rule fastq_screen:
 		subset=100000,
 		aligner='bowtie2',
 		mem=config["fastqScreenMem"],
+	resources:
+		mem_mb_per_cpu = config["fastqScreenMemMB"],
+		runtime = config["fastqScreenTime"],
 	threads: config["fastqScreenThreads"]
 	log:
 		"logs/fastq_screen/{sample}.{read}.log"
@@ -170,6 +179,9 @@ rule fastp:
 		## detect adapter for pe should work out what the adapters are.
 		extra="-g --detect_adapter_for_pe",
 		mem=config["fastpMem"]
+	resources:
+		mem_mb_per_cpu = config["fastpMemMB"],
+		runtime = config["fastpTime"],
 	threads: 
 		config["fastpThreads"]
 	wrapper:
@@ -195,6 +207,9 @@ rule bwa_mem:
 		sort_order="coordinate",  # Can be 'queryname' or 'coordinate'.
 		sort_extra="",  # Extra args for samtools/picard.
 		mem=config["bwaMem"],
+	resources:
+		mem_mb_per_cpu = config["bwaMemMB"],
+		runtime = config["bwaTime"],
 	threads: 
 		config["bwaThreads"]
 	conda:
@@ -217,6 +232,9 @@ rule samtools_stats_raw:
 	params:
 		extra="",  # Optional: extra arguments.
 		mem=config["samtoolsStatMem"]
+	resources:
+		mem_mb_per_cpu = config["samtoolsStatMemMB"],
+		runtime = config["samtoolsStatTime"],
 	threads: 
 		config["samtoolsStatThreads"]
 	log:
@@ -239,6 +257,9 @@ rule annotate_bam:
 	params:
 		mem=config["fgbioMem"],
 		javaMem=config["fgbioJavaMem"],
+	resources:
+		mem_mb_per_cpu = config["fgbioMemMB"],
+		runtime = config["fgbioTime"],
 	threads:
 		config["fgbioThreads"]
 	conda:
@@ -261,6 +282,9 @@ rule sort_UMI_bam:
 	params:
 		mem=config["fgbioMem"],
 		javaMem = config["fgbioJavaMem"]
+	resources:
+		mem_mb_per_cpu = config["fgbioMemMB"],
+		runtime = config["fgbioTime"],
 	conda:
 		"envs/fgbio.yaml"
 	threads: 
@@ -285,6 +309,9 @@ rule set_mate_info:
 	params:
 		mem=config["fgbioMem"],
 		javaMem = config["fgbioJavaMem"]
+	resources:
+		mem_mb_per_cpu = config["fgbioMemMB"],
+		runtime = config["fgbioTime"],
 	threads:
 		config["fgbioThreads"]
 	shell:
@@ -305,6 +332,9 @@ rule group_reads:
 	params:
 		mem=config["fgbioMem"],
 		javaMem = config["fgbioJavaMem"]
+	resources:
+		mem_mb_per_cpu = config["fgbioMemMB"],
+		runtime = config["fgbioTime"],
 	conda:
 		"envs/fgbio.yaml"
 	threads:
@@ -331,6 +361,9 @@ rule call_consensus:
 		mem=config["fgbioMem"],
 		javaMem = config["fgbioJavaMem"],
 		consensusReads = config["consensusReads"],
+	resources:
+		mem_mb_per_cpu = config["fgbioMemMB"],
+		runtime = config["fgbioTime"],
 	threads: 
 		config["fgbioThreads"]
 	shell:
@@ -357,6 +390,9 @@ rule consensus_fastq:
 		sort="-m 4G",
 		fastq="-n",
 		mem=config["consensusFastqMem"],
+	resources:
+		mem_mb_per_cpu = config["consensusFastqMemMB"],
+		runtime = config["consensusFastqTime"],
 	## Remember, this is the number of samtools' additional threads. 
 	## At least 2 threads have to be requested on cluster sumbission. 
 	## This value - 2 will be sent to samtools sort -@ argument.
@@ -380,6 +416,9 @@ rule bwa_mem_consensus:
 		sort_order="coordinate",  # Can be 'queryname' or 'coordinate'.
 		sort_extra="",  # Extra args for samtools/picard.
 		mem=config["bwaMem"],
+	resources:
+		mem_mb_per_cpu = config["bwaMemMB"],
+		runtime = config["bwaTime"],
 	threads: 
 		config["bwaThreads"]
 	conda:
@@ -402,6 +441,9 @@ rule samtools_index:
 	params:
 		extra="",  # optional params string
 		mem=config["samtoolsStatMem"]
+	resources:
+		mem_mb_per_cpu = config["samtoolsStatMemMB"],
+		runtime = config["samtoolsStatTime"],
 	threads: 
 		config["samtoolsIdxThreads"]# This value - 1 will be sent to -@
 	wrapper:
@@ -420,6 +462,9 @@ rule samtools_stats_con:
 	params:
 		extra="",  # Optional: extra arguments.
 		mem=config["samtoolsStatMem"]
+	resources:
+		mem_mb_per_cpu = config["samtoolsStatMemMB"],
+		runtime = config["samtoolsStatTime"],
 	threads: 
 		config["samtoolsStatThreads"]
 	log:
@@ -452,6 +497,8 @@ rule gatk_depth_of_coverage:
 		mem=config["gatkMem"]
 	resources:
 		mem_mb=config["gatkRunMem"],
+		mem_mb_per_cpu = config["gatkMemMB"],
+		runtime = config["gatkTime"],
 	threads:
 		config["gatkThreads"]
 	conda:
@@ -465,6 +512,7 @@ rule gatk_depth_of_coverage:
 			-L {input.intervals} \
 			{params.extra}
 		"""
+
 rule bed_to_interval_list:
 	input:
 		bed=config["intervals"],
@@ -480,7 +528,8 @@ rule bed_to_interval_list:
 		extra="--SORT true",  # sort output interval list before writing
 		mem=config["picardMem"]
 	resources:
-		mem_mb=1024,
+		mem_mb_per_cpu = config["picardMemMB"],
+		runtime = config["picardTime"],
 	wrapper:
 		"v4.0.0/bio/picard/bedtointervallist"
 
@@ -500,7 +549,8 @@ rule picard_collect_hs_metrics:
 		extra="",
 		mem=config["picardMem"]
 	resources:
-		mem_mb=1024,
+		mem_mb_per_cpu = config["picardMemMB"],
+		runtime = config["picardTime"],
 	threads:
 		config["picardThreads"]
 	log:
