@@ -440,10 +440,10 @@ rule samtools_index:
 		"logs/samtools_index/{sample}.log",
 	params:
 		extra="",  # optional params string
-		mem=config["samtoolsStatMem"]
+		mem=config["samtoolsIdxMem"]
 	resources:
-		mem_mb_per_cpu = config["samtoolsStatMemMB"],
-		runtime = config["samtoolsStatTime"],
+		mem_mb_per_cpu = config["samtoolsIdxMemMB"],
+		runtime = config["samtoolsIdxTime"],
 	threads: 
 		config["samtoolsIdxThreads"]# This value - 1 will be sent to -@
 	wrapper:

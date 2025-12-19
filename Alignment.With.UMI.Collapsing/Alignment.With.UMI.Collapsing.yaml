@@ -49,43 +49,65 @@ consensusReads: 1
 ## MultiQC
 multiqcThreads: 1
 multiqcMem: 4G
+multiqcMemMB: 4000
+multiqcTime: 24:0:0
 
 ## combineFastq 
 combineThreads: 1
 combineMem: 8G
+combineMemMB: 8000
+combineTime: 24:0:0
 
 ## fastq screen
 fastqScreenThreads: 8
 fastqScreenMem: 8G
+fastqScreenMemMB: 8000
+fastqScreenTime: 24:0:0
 
 ## fastp
 fastpThreads: 1
 fastpMem: 8G
+fastpMemMB: 8000
+fastpTime: 24:0:0
 
 ## Alignment
 bwaThreads: 8
 bwaMem: 4G
+bwaMemMB: 4000
+bwaTime: 24:0:0
 
 ## fgbio
 fgbioThreads: 1
 fgbioMem: 26G
+fgbioMemMB: 26000
 fgbioJavaMem: -Xmx24g
+fgbioTime: 24:0:0
 
 ## bam to fastq
 consensusFastqThreads: 3
 consensusFastqMem: 8G
+consensusFastqMemMB: 8000
+consensusFastqTime: 24:0:0
 
 ## GATK
 gatkThreads: 1
 gatkMem: 16G
+gatkMemMB: 16000
 gatkRunMem: 12288
+gatkTime: 24:0:0
 
 ## Samtools
 samtoolsStatThreads: 1
 samtoolsStatMem: 8G
+samtoolsStatMemMB: 8000
+samtoolsStatTime: 24:0:0
 samtoolsIdxThreads: 4
 samtoolsIdxMem: 8G
+samtoolsIdxMemMB: 8000
+samtoolsIdxTime: 24:0:0
 
 ## picard tools
 picardThreads: 1
 picardMem: 8G
+picardMemMB: 8000
+picardTime: 24:0:0
