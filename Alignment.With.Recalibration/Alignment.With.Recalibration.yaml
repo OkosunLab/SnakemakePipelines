@@ -34,50 +34,60 @@ SampleSheet:
 
 ## MultiQC
 multiqcMem: 4G
+multiqcMemMB: 4000
 multiqcThreads: 1
 multiqcTime: 24:0:0
 
 ## combine fastqs
 combineMem: 8G
+combineMemMB: 8000
 combineThreads: 1
 combineTime: 24:0:0
 
 ## Mark Duplicates
 markDupsMem: 8G
+markDupsMemMB: 8000
 markDupsThreads: 1
 markDupsTime: 24:0:0
 
 ## Alignment
 bwaMem: 4G
+bwaMemMB: 4000
 bwaThreads: 8
 bwaTime: 24:0:0
 
 ## GATK
 gatkMem: 16G
+gatkMemMB: 16000
 gatkRunMem: 12288
 gatkThreads: 1
 gatkTime: 24:0:0
 
 ## Samtools
 samtoolsStatMem: 8G
+samtoolsStatMemMB: 8000
 samtoolsStatThreads: 1
 samtoolsStatTime: 24:0:0
 samtoolsIdxMem: 8G
+samtoolsIdxMemMB: 8000
 samtoolsIdxThreads: 4
 samtoolsIdxTime: 24:0:0
 
 ## fastp
 fastpMem: 24G
+fastpMemMB: 24000
 fastpThreads: 1
 fastpTime: 24:0:0
 
 ## fastq_screen
 fastqScreenMem: 8G
+fastqScreenMemMB: 8000
 fastqScreenThreads: 8
 fastqScreenTime: 24:0:0
 
 ## Picard tools
 picardThreads: 1
 picardMem: 8G
+picardMemMB: 8000
 picardRunMem: 7168
 picardTime: 24:0:0

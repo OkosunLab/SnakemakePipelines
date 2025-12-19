@@ -22,19 +22,19 @@ header = sampleFile.pop(0).rstrip().split("\t")
 sampleSheet = {}
 ## Run through the sample file and create a dictionary
 for line in sampleFile:
-        ## Remove whitespace and split on tabs
-        line = line.rstrip().split("\t")
-        ## zip the line info (values) and the header (keys) to generate a dictionary
-        rv = dict(zip(header, line))
-        ## if the sample name isn't in the dictionary keys:
-        if not rv["sample"] in sampleSheet.keys():
-                ## Add it and attach the dictionary
-                ## N.B. "sample" needs to be unique
-                sampleSheet[rv["sample"]] = rv
-        ## If there are multiple samples
-        else:
-                ## Raise and error and complain about it.
-                raise Exception("Sorry, please make sure the sample column is unique")
+		## Remove whitespace and split on tabs
+		line = line.rstrip().split("\t")
+		## zip the line info (values) and the header (keys) to generate a dictionary
+		rv = dict(zip(header, line))
+		## if the sample name isn't in the dictionary keys:
+		if not rv["sample"] in sampleSheet.keys():
+				## Add it and attach the dictionary
+				## N.B. "sample" needs to be unique
+				sampleSheet[rv["sample"]] = rv
+		## If there are multiple samples
+		else:
+				## Raise and error and complain about it.
+				raise Exception("Sorry, please make sure the sample column is unique")
 ## set the value of SAMPLES to sampleSheet.keys()
 ## This could be replaced throughout the file BUT SAMPLES is easier to type ....
 SAMPLES = sampleSheet.keys()
@@ -72,7 +72,7 @@ def get_fastq_from_sample_read(wildcards):
 
 rule multiQC:
 	input:
-		expand("QC/depth/{sample}.sample_interval_summary",sample = SAMPLES),
+		picard=expand("QC/depth/picard/{sample}.txt",sample = SAMPLES),
 		html=expand("QC/fastp/{sample}.html", sample = SAMPLES),
 		recalibBam=expand("QC/samtools_stats/{sample}.recalib.txt", sample = SAMPLES),
 		txt=expand("QC/fastq_screen/{sample}.{read}.fastq_screen.txt", sample = SAMPLES, read = READS),
@@ -172,7 +172,7 @@ rule fastp:
 	params:
 		## It should detect the adapters but can add them here too
 		## These are the TruSeq adapters
-		## adapters="--adapter_sequence AGATCGGAAGAGCACACGTCTGAACTCCAGTCA --adapter_sequence_r2 AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT",
+		## adapters="--adapter_sequence AGAT --adapter_sequence_r2 AGAT",
 		## g removes poly g
 		## detect adapter for pe should work out what the adapters are.
 		extra="-g --detect_adapter_for_pe",
@@ -379,68 +379,68 @@ rule gatk_depth_of_coverage:
 		"""
 
 rule bed_to_interval_list:
-        input:
-                bed=config["intervals"],
-                dict=config["dict"],
-        output:
-                temp("QC/picard.interval_list"),
-        log:
-                "logs/picard/bedtointervallist/Log.log",
-        threads:
-                config["picardThreads"]
-        params:
-                # optional parameters
-                extra="--SORT true",  # sort output interval list before writing
-                mem=config["picardMem"]
-				time=config["picardTime"]
-        resources:
-				mem_mb=config["picardRunMem"],
-				mem_mb_per_cpu = config["picardMemMB"],
-				runtime = config["picardTime"],
-        conda:
-                "envs/gatk4.yaml"
-        shell:
-                """
-                gatk BedToIntervalList \
-                        -O {output} \
-                        -I {input.bed} \
-						-SD {input.dict} \
-                        {params.extra}
-                """
+	input:
+		bed=config["intervals"],
+		dict=config["dict"],
+	output:
+		temp("QC/picard.interval_list"),
+	log:
+		"logs/picard/bedtointervallist/Log.log",
+	threads:
+		config["picardThreads"]
+	params:
+		# optional parameters
+		extra="--SORT true",  # sort output interval list before writing
+		mem=config["picardMem"],
+		time=config["picardTime"]
+	resources:
+		mem_mb=config["picardRunMem"],
+		mem_mb_per_cpu = config["picardMemMB"],
+		runtime = config["picardTime"],
+	conda:
+		"envs/gatk4.yaml"
+	shell:
+		"""
+		gatk BedToIntervalList \
+			-O {output} \
+			-I {input.bed} \
+			-SD {input.dict} \
+			{params.extra}
+		"""
 
 rule picard_collect_hs_metrics:
-        input:
-                bam="Alignment/{sample}.recalib.bam",
-                reference=config["reference"],
-                # Baits and targets should be given as interval lists. These can
-                # be generated from bed files using picard BedToIntervalList.
-                target_intervals="QC/picard.interval_list",
-        output:
-                "QC/depth/picard/{sample}.txt",
-        params:
-                # Optional extra arguments. Here we reduce sample size
-                # to reduce the runtime in our unit test.
-                extra="",
-                mem=config["picardMem"]
-				time=config["picardTime"]
-        resources:
-				mem_mb=config["picardRunMem"],
-				mem_mb_per_cpu = config["picardMemMB"],
-				runtime = config["picardTime"],
-        threads:
-                config["picardThreads"]
-        log:
-                "logs/picard_collect_hs_metrics/{sample}.log",
-        conda:
-                "envs/gatk4.yaml"
-        shell:
-                """
-                gatk CollectHsMetrics \
-                        -R {input.reference} \
-                        -O {output} \
-                        -I {input.bam} \
-                        -TI {input.target_intervals} \
-                        -BI {input.target_intervals}
-                        {params.extra}
-                """
+	input:
+		bam="Alignment/{sample}.recalib.bam",
+		reference=config["reference"],
+		# Baits and targets should be given as interval lists. These can
+		# be generated from bed files using picard BedToIntervalList.
+		target_intervals="QC/picard.interval_list",
+	output:
+		"QC/depth/picard/{sample}.txt",
+	params:
+		# Optional extra arguments. Here we reduce sample size
+		# to reduce the runtime in our unit test.
+		extra="",
+		mem=config["picardMem"],
+		time=config["picardTime"],
+	resources:
+		mem_mb=config["picardRunMem"],
+		mem_mb_per_cpu = config["picardMemMB"],
+		runtime = config["picardTime"],
+	threads:
+		config["picardThreads"]
+	log:
+		"logs/picard_collect_hs_metrics/{sample}.log",
+	conda:
+		"envs/gatk4.yaml"
+	shell:
+		"""
+		gatk CollectHsMetrics \
+			-R {input.reference} \
+			-O {output} \
+			-I {input.bam} \
+			-TI {input.target_intervals} \
+			-BI {input.target_intervals}
+			{params.extra}
+		"""
 
