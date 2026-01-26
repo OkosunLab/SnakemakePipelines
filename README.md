@@ -8,13 +8,40 @@ OkosunLab pipelines built using the snakemake workflow management system.
 
 ## Contents
 
-1. [Pipeline Library](#Pipeline-Library)
+1. [Quick Start](#Quick-Start)
+2. [Pipeline Library](#Pipeline-Library)
    1. [DNAseq](#DNAseq)
    2. [RNAseq](#RNAseq)   
 3. [Tutorial](#Tutorial)
    1. [Setup](#Setup)
    2. [Running A Pipeline](#Running-A-Pipeline)
       1. [Job Submission Setup](#Job-Submission-Setup)
+
+## Quick Start
+
+### Copy all the require files to your working directory
+
+```bash
+## Pipeline
+cp Snakefile.pipeline.snake /your/working/directory/
+## options
+cp pipeline.yaml /your/working/directory/
+## Environment yamls
+cp -R envs/ /your/working/directory/
+```
+
+### Edit your options
+
+You should only need to adjust the yaml files to run the pipelines. If you need an argument that isn't avaliable drop an issue on here and we can implement it for you.
+
+### Run the pipeline
+
+```bash
+## Dry run to ensure it is going to run correctly
+RunSnakefile.sh -s Snakefile.pipeline.snake -j 100 -n
+## Real run when happy
+RunSnakefile.sh -s Snakefile.pipeline.snake -j 100 -n 
+```
 
 ## Pipeline Library:
 
@@ -90,10 +117,31 @@ Short | Long | Purpose
 -h | --help | Display this message and exit
 
 
-If you have added ~/.local/bin/ to your PATH, I would suggest adding a symlink to this there, so you can call it from anywhere on the system.
+### Adding RunSnakefile to your PATH
+
+Your PATH contains all the places your computer looks for programs to run. You can add the location of the RunSnakefile script in a few ways.
+
+This is one way that I know works
+
+If you don't have ~/.local/bin you can add it with the below command. This is a great place to store your own bash scripts for easy access.
+
+```bash
+mkdir -P ~/.local/bin/
+```
+
+You can then create a symlink to the RunSnakefile.sh script as below:
 
 ```bash
 ln -s /path/to/RunSnakefile.sh ~/.local/bin/
+```
+
+Then create/edit ~/.bash_profile file and add the /.local/bin directory to your path
+
+```bash
+## open the file
+vim ~/.bash_profile
+## Add this line to the file
+export PATH="$PATH:~/.local/bin"
 ```
 
 So to run a pipeline you can use something like this:
