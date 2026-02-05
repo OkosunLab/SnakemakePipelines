@@ -163,9 +163,9 @@ rule gatk_mutect2:
 		extra=lambda w: "-normal-sample {}".format(sampleSheet[w.sample]["normalID"]),
 		time=config["gatkTime"]
 	resources:
-		mem_mb=config["gatkRunMem"]
+		mem_mb=config["gatkRunMem"],
 		mem_mb_per_cpu=config["gatkMemMB"],
-		runtime=config["gatkRunTime"]
+		runtime=config["gatkTime"]
 	log:
 		"logs/mutect2/{sample}.log"
 	wrapper:
@@ -184,11 +184,11 @@ rule gatk_get_pileup_summaries:
 		config["mutect2Threads"]
 	params:
 		mem=config["gatkMem"],
-		time=config["gatkTime"]
+		time=config["gatkTime"],
 	resources:
-		mem_mb=config["gatkRunMem"]
+		mem_mb=config["gatkRunMem"],
 		mem_mb_per_cpu=config["gatkMemMB"],
-		runtime=config["gatkRunTime"]
+		runtime=config["gatkTime"]
 	log:
 		"logs/gatk_pileup/{sample}.summary.log"
 	wrapper:
@@ -207,9 +207,9 @@ rule gatk_calculate_contamination:
 		time=config["gatkTime"],
 		extra="-tumor-segmentation VCF/Mutect2/{sample}.segmentation.tsv",
 	resources:
-		mem_mb=config["gatkRunMem"]
+		mem_mb=config["gatkRunMem"],
 		mem_mb_per_cpu=config["gatkMemMB"],
-		runtime=config["gatkRunTime"]
+		runtime=config["gatkTime"]
 	log:
 		"logs/gatk_contam/{sample}.contamination.log"
 	wrapper:
@@ -235,9 +235,9 @@ rule gatk_learnreadorientationmodel:
 		mem=config["gatkMem"],
 		time=config["gatkTime"],
 	resources:
-		mem_mb=config["gatkRunMem"]
+		mem_mb=config["gatkRunMem"],
 		mem_mb_per_cpu=config["gatkMemMB"],
-		runtime=config["gatkRunTime"]
+		runtime=config["gatkTime"]
 	log:
 		"logs/gatk_oreintation/{sample}.learnreadorientationbias.log",
 	wrapper:
@@ -266,9 +266,9 @@ rule gatk_filtermutectcalls_complete:
 		extra="--max-alt-allele-count 3",
 		java_opts="",
 	resources:
-		mem_mb=config["gatkRunMem"]
+		mem_mb=config["gatkRunMem"],
 		mem_mb_per_cpu=config["gatkMemMB"],
-		runtime=config["gatkRunTime"]
+		runtime=config["gatkTime"]
 	wrapper:
 		"v4.0.0/bio/gatk/filtermutectcalls"
 
@@ -334,27 +334,27 @@ rule manta_prep_annotation:
 
 ## Then run Strelka2.
 rule Strelka2:
-        input:
-                tumor=lambda w: sampleSheet[w.sample]["tumour"],
-                normal=lambda w: sampleSheet[w.sample]["normal"],
-                fasta=config["reference"],
-                manta="VCF/Manta/{sample}",
-                strelka2_path=config["strelka2"]
-        output:
-                directory("VCF/Strelka2/{sample}"),
-        threads:
-                config["strelkaThreads"]
-        params:
-                config_extra=" ".join(
-                        ["--indelCandidates VCF/Manta/{sample}/results/variants/candidateSmallIndels.vcf.gz",
-                        config["strelkaExtra"]]),
-                mem=config["strelkaMem"],
-                time=config["strelkaTime"],
+	input:
+		tumor=lambda w: sampleSheet[w.sample]["tumour"],
+		normal=lambda w: sampleSheet[w.sample]["normal"],
+		fasta=config["reference"],
+		manta="VCF/Manta/{sample}",
+		strelka2_path=config["strelka2"]
+	output:
+		directory("VCF/Strelka2/{sample}"),
+	threads:
+		config["strelkaThreads"]
+	params:
+		config_extra=" ".join(
+			["--indelCandidates VCF/Manta/{sample}/results/variants/candidateSmallIndels.vcf.gz",
+			config["strelkaExtra"]]),
+		mem=config["strelkaMem"],
+		time=config["strelkaTime"],
 	resources:
 		mem_mb_per_cpu=config["strelkaMemMB"],
 		runtime=config["strelkaTime"]
-        log:
-                "logs/strelka2/{sample}.log",
+	log:
+		"logs/strelka2/{sample}.log",
 	wrapper:
 		"v2.9.1/bio.strelka/somatic"
 
@@ -471,7 +471,7 @@ rule Varscan:
 	log:
 		"logs/Varscan/{sample}.call.log"
 	resources:
-		mem_mb=config["varscanResMem"]
+		mem_mb=config["varscanResMem"],
 		mem_mb_per_cpu=config["varscanMemMB"],
 		runtime=config["pileupTime"]
 	params:
@@ -881,7 +881,7 @@ rule bcftools_sort:
 	threads:
 		config["bcftoolsThreads"],
 	resources:
-		mem_mb=config["bcftoolsMemFloat"]
+		mem_mb=config["bcftoolsMemFloat"],
 		mem_mb_per_cpu=config["bcftoolsMemMB"],
 		runtime=config["bcftoolsTime"],
 	wrapper:
