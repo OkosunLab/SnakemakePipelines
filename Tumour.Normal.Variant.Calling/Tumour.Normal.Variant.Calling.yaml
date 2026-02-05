@@ -74,23 +74,27 @@ bcftoolsVCF:
 # MultiQC
 multiqcThreads: 1
 multiqcMem: 4G
+multiqcMemMB: 4000
 multiqcTime: 24:0:0
 
 # VEP prep
 prepMem: 8G
+prepMemMB: 8000
 prepThreads: 1
 prepTime: 24:0:0
 
 # Mutect2
 mutect2Threads: 1
 gatkMem: 24G
+gatkMemMB: 24000
 gatkRunMem: 22000
 gatkTime: 24:0:0
 
 # Manta
 mantaThreads: 2
 mantaMem: 10G
-mantaMemMB: 8195
+mantaMemMB: 10000
+mantaRunMemMB: 8195
 mantaTime: 24:0:0
 # mantaExtra: ""
 ## exome/targetted sequencing
@@ -99,6 +103,7 @@ mantaExtra: "--exome"
 # Strelka
 strelka2: "/data/BCI-OkosunLab/Software/Strelka-2.9.10/bin/"
 strelkaMem: 4G
+strelkaMemMB: 4000
 strelkaThreads: 12
 strelkaTime: 24:0:0
 ## strelkaExtra: ""
@@ -107,6 +112,7 @@ strelkaExtra: "--exome"
 
 # BCFtools
 bcftoolsMem: 8G
+bcftoolsMemMB: 8000
 bcftoolsMemFloat: 7168
 bcftoolsThreads: 1
 bcftoolsTime: 24:0:0
@@ -115,27 +121,32 @@ bcftoolsTime: 24:0:0
 laatvThreads: 1
 vepThreads: 4
 vepMem: 8G
+vepMemMB: 8000
 vepTime: 24:0:0
 vepPlugins: ["FATHMM", "LoFtool"]
 
 #Vardict
-VarDictMem: 24G
+vardictMem: 24G
+vardictMemMB: 24000
 vardictThreads: 1
 vardictTime: 24:0:0
 
 # GRIDSS
 gridssMem: 8G
+gridssMemMB: 8000
 gridssThreads: 8 
 gridssTime: 24:0:0
 
 # CNVkit
 cnvkitMem: 24G
+cnvkitMemMB: 24000
 cnvkitThreads: 1 
 cnvkitTime: 24:0:0
 
 #ASCAT
 ascatThreads: 1
 ascatMem: 24G
+ascatMemMB: 24000
 ascatTime: 24:0:0
 ascatGenome: "hg38"
 ascatBin: 500
@@ -148,9 +159,11 @@ loci_file: "/data/BCI-OkosunLab/Ref/GRCh38/ASCAT/G1000_lociAll_hg38/G1000_loci_h
 # Varscan
 varscanResMem: 7168
 varscanMem: 8G
+varscanMemMB: 8000
 varscanThreads: 1
 varscanTime: 24:0:0
 pileupMem: 8G
+pileupMemMB: 8000
 pileupThreads: 1
 pileupTime: 24:0:0
 varscanExtra: "--output-vcf 1 --min-var-freq 0 --strand-filter 1"
