@@ -14,8 +14,6 @@ configfile: "Alignment.With.UMI.Collapsing.yaml"
 ## Used for FASTQC
 READS=["R1", "R2"]
 READS2=["1", "2"]
-## Dynamically file all the sample IDs
-## First build the search string
 
 ## Load Sample Sheet
 sampleFile = open(config["SampleSheet"]).readlines()

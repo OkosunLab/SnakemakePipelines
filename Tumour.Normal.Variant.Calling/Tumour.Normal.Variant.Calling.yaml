@@ -35,7 +35,7 @@ SampleSheet: Sample.Sheet.tsv
 ## Variant Calling
 ##########################################
 callers: [
-        ## Strelka2, 
+        Strelka2, 
         Mutect2, 
         Varscan2,
         VarDict,

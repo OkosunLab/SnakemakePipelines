@@ -70,6 +70,9 @@ rule multiQC:
 	params:
 		mem=config["multiqcMem"],
 		time=config["multiqcTime"]
+	resources:
+		mem_mb_per_cpu=config["multiqcMemMB"],
+		runtime=config["multiqcTime"]
 	log:
 		"logs/multiqc/multiqc.log"
 	threads: 
@@ -95,6 +98,9 @@ rule get_vep_cache:
 		release=config["vepRelease"],
 		mem=config["prepMem"],
 		time=config["prepTime"]
+	resources:
+		mem_mb_per_cpu=config["prepMemMB"],
+		runtime=config["prepTime"]
 	threads: 
 		config["prepThreads"]
 	log:
@@ -111,6 +117,9 @@ rule download_vep_plugins:
 		release=config["vepRelease"],
 		mem=config["prepMem"],
 		time=config["prepTime"]
+	resources:
+		mem_mb_per_cpu=config["prepMemMB"],
+		runtime=config["prepTime"]
 	threads: 
 		config["prepThreads"]
 	wrapper:
@@ -136,7 +145,9 @@ rule gatk_mutect2:
 		extra="",
 		time=config["gatkTime"]
 	resources:
-		mem_mb=config["gatkRunMem"]
+		mem_mb=config["gatkRunMem"],
+		mem_mb_per_cpu=config["gatkMemMB"],
+		runtime=config["gatkTime"]
 	log:
 		"logs/mutect2/{sample}.log"
 	wrapper:
@@ -157,7 +168,9 @@ rule gatk_get_pileup_summaries:
 		mem=config["gatkMem"],
 		time=config["gatkTime"]
 	resources:
-		mem_mb=config["gatkRunMem"]
+		mem_mb=config["gatkRunMem"],
+		mem_mb_per_cpu=config["gatkMemMB"],
+		runtime=config["gatkTime"]
 	log:
 		"logs/gatk_pileup/{sample}.summary.log"
 	wrapper:
@@ -176,7 +189,9 @@ rule gatk_calculate_contamination:
 		time=config["gatkTime"],
 		extra="-tumor-segmentation VCF/Mutect2/{sample}.segmentation.tsv",
 	resources:
-		mem_mb=config["gatkRunMem"]
+		mem_mb=config["gatkRunMem"],
+		mem_mb_per_cpu=config["gatkMemMB"],
+		runtime=config["gatkTime"]
 	log:
 		"logs/gatk_contam/{sample}.contamination.log"
 	wrapper:
@@ -202,7 +217,9 @@ rule gatk_learnreadorientationmodel:
 		mem=config["gatkMem"],
 		time=config["gatkTime"],
 	resources:
-		mem_mb=config["gatkRunMem"]
+		mem_mb=config["gatkRunMem"],
+		mem_mb_per_cpu=config["gatkMemMB"],
+		runtime=config["gatkTime"]
 	log:
 		"logs/gatk_oreintation/{sample}.learnreadorientationbias.log",
 	wrapper:
@@ -231,7 +248,9 @@ rule gatk_filtermutectcalls_complete:
 		extra="--max-alt-allele-count 3",
 		java_opts="",
 	resources:
-		mem_mb=config["gatkRunMem"]
+		mem_mb=config["gatkRunMem"],
+		mem_mb_per_cpu=config["gatkMemMB"],
+		runtime=config["gatkTime"]
 	wrapper:
 		"v4.0.0/bio/gatk/filtermutectcalls"
 
@@ -251,6 +270,9 @@ rule VarDict:
 		extra="",
 		mem=config["VarDictMem"],
 		time=config["vardictTime"]
+	resources:
+		mem_mb_per_cpu=config["vardictMemMB"],
+		runtime=config["vardictTime"]
 	threads: 
 		config["vardictThreads"]
 	log:
@@ -276,6 +298,9 @@ rule lofreq:
 		extra="",
 		mem=config["lofreqMem"],
 		time=config["lofreqTime"],
+	resources:
+		mem_mb_per_cpu=config["lofreqMemMB"],
+		runtime=config["lofreqTime"]
 	threads: 
 		config["lofreqThreads"]
 	wrapper:
@@ -300,6 +325,9 @@ rule PileupForVarscan:
 		mem=config["pileupMem"],
 		time=config["pileupTime"],
 		extra="-d 10000 -B",  # optional
+	resources:
+		mem_mb_per_cpu=config["pileupMemMB"],
+		runtime=config["pileupTime"]
 	wrapper:
 		"v4.0.0/bio/samtools/mpileup"
 
@@ -317,6 +345,9 @@ rule UnzipPileup:
 	params:
 		mem = config["pileupMem"],
 		time = config["pileupTime"],
+	resources:
+		mem_mb_per_cpu=config["pileupMemMB"],
+		runtime=config["pileupTime"]
 	shell:
 		"""
 		gunzip {input}
@@ -336,7 +367,9 @@ rule Varscan:
 	log:
 		"logs/Varscan/{sample}.call.log"
 	resources:
-		mem_mb=config["varscanResMem"]
+		mem_mb=config["varscanResMem"],
+		mem_mb_per_cpu=config["varscanMemMB"],
+		runtime=config["varscanTime"]
 	params:
 		## extra = "--output-vcf 1",
 		extra=config["varscanExtra"],
@@ -375,6 +408,9 @@ rule Merge_Varscan:
 	params:
 		mem=config["bcftoolsMem"],
 		time=config["bcftoolsTime"]
+	resources:
+		mem_mb_per_cpu=config["bcftoolsMemMB"],
+		runtime=config["bcftoolsTime"]
 	conda:
 		"envs/bcftools.yaml"
 	log:
@@ -414,6 +450,8 @@ rule gatk_leftalignandtrimvariants:
 		java_opts="",  # optional
 	resources:
 		mem_mb=config["gatkRunMem"],
+		mem_mb_per_cpu=config["gatkMemMB"],
+		runtime=config["gatkTime"]
 	wrapper:
 		"v4.0.0/bio/gatk/leftalignandtrimvariants"
 
@@ -436,7 +474,9 @@ rule bcftools_sort:
 	threads:
 		config["bcftoolsThreads"],
 	resources:
-		mem_mb=config["bcftoolsMemFloat"]
+		mem_mb=config["bcftoolsMemFloat"],
+		mem_mb_per_cpu=config["bcftoolsMemMB"],
+		runtime=config["bcftoolsTime"]
 	wrapper:
 		"v4.0.0/bio/bcftools/sort"
 
@@ -458,6 +498,9 @@ rule annotate_variants_vep:
 			--check_existing --compress_output bgzip".format(config["pickOrder"]),	
 		mem=config["vepMem"],
 		time=config["vepTime"]
+	resources:
+		mem_mb_per_cpu=config["vepMemMB"],
+		runtime=config["vepTime"]
 	log:
 		"logs/vep/{sample}.{caller}.annotate.log",
 	threads: 
@@ -481,6 +524,9 @@ rule annotate_with_cosmic_vcf:
 	params:
 		mem=config["bcftoolsMem"],
 		time=config["bcftoolsTime"]
+	resources:
+		mem_mb_per_cpu=config["bcftoolsMemMB"],
+		runtime=config["bcftoolsTime"]
 	shell:
 		"""
 		tabix -f {input.calls}
@@ -504,6 +550,9 @@ rule bcf_stats:
 	params:
 		mem=config["bcftoolsMem"],
 		time=config["bcftoolsTime"]
+	resources:
+		mem_mb_per_cpu=config["bcftoolsMemMB"],
+		runtime=config["bcftoolsTime"]
 	threads: 
 		config["bcftoolsThreads"]
 	wrapper:
