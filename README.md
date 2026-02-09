@@ -111,6 +111,11 @@ Short | Long | Purpose
 -j | --jobs | Number of concurrent jobs to run (default: 1)
 -t | --target | Target file/rule (default: none)
 -d | --dag | Print the dag and exit (default: off)
+-m | --highmem | Submit this pipeline using the highmem nodes (default: off)
+-r | --rulegraph | Print the rule graph and exit (default: off)
+-f | --dag-file | The file name for the dag (default: dag.svg)
+-c | --conda_location | The location to store conda environments (default: /data/BCI-OkosunLab/Environments/Snakemake)
+-q | --scheduler | The job scheduler to use (default: slurm)
 -e | --extra | Takes all remaining arguments and passes them to snakemake (MUST BE LAST)
 -h | --help | Display this message and exit
 
