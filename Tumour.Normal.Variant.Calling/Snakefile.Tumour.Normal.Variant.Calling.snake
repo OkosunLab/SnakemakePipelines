@@ -70,7 +70,7 @@ for ch in c:
 rule multiQC:
 	input:
 		## CNVkit
-		CNVkit=expand("VCF/CNVkit/{sample}/", sample = SAMPLES),
+		##CNVkit=expand("VCF/CNVkit/{sample}/", sample = SAMPLES),
 		heatmap="VCF/CNVkit/heatmap.png",
 		seq="VCF/CNVkit/All.sample.seg",
 		## ASCAT
@@ -361,7 +361,7 @@ rule Strelka2:
 ## Merge Strelka2 output
 rule Merge_Strelka2:
 	input:
-		"VCF/Strelka2/{sample}"
+		directory("VCF/Strelka2/{sample}")
 	output:
 		temp("VCF/Strelka2/{sample}.final.vcf"),
 	threads: 
