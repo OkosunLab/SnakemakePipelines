@@ -26,8 +26,6 @@ OkosunLab pipelines built using the snakemake workflow management system.
 cp Snakefile.pipeline.snake /your/working/directory/
 ## options
 cp pipeline.yaml /your/working/directory/
-## Environment yamls
-cp -R envs/ /your/working/directory/
 ```
 
 ### Edit your options
@@ -79,12 +77,12 @@ In preparation to move to slurm there is a new version of the environment stored
 
 ```bash
 ml miniforge
-mamba env create -n snakemake -f /data/BCI-OkosunLab/SnakemakePipelines/envs/2025.12.19.snakemake.9.14.5.yaml
+mamba env create -n snakemake -f /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.snakemake.9.16.5.yaml
 ```
 
 ### Running A Pipeline
 
-Copy a version of the current pipeline (.snake file), the config (.yaml file) and envs folder into your project directory. This ensures we have a copy of the exact pipeline you ran to generate your data, in case the pipeline is updated.
+Copy a version of the current pipeline (.snake file), the config (.yaml file) into your project directory. This ensures we have a copy of the exact pipeline you ran to generate your data, in case the pipeline is updated.
 
 Adjust the values in the config file as you see fit (these should be described in the file and in the repo for the subfolders.
 
