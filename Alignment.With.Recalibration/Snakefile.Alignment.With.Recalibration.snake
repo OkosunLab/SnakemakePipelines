@@ -79,7 +79,7 @@ rule multiQC:
 	output:
 		"QC/MultiQC/multiqc_report.html",
 	conda:
-		"envs/multiqc.yaml"
+		"config[multiqc_ENV]"
 	params:
 		mem = config["multiqcMem"],
 		time = config["multiqcTime"],
@@ -213,7 +213,7 @@ rule bwa_mem:
 	threads: 
 		config["bwaThreads"]
 	conda:
-		"envs/bwa.yaml"
+		"config[bwa_ENV]"
 	shell:
 		"""
 		bwa mem -t {threads} -M {input.idx} \
@@ -367,7 +367,7 @@ rule gatk_depth_of_coverage:
 	threads: 
 		config["gatkThreads"]
 	conda:
-		"envs/gatk4.yaml"
+		"config[gatk4_ENV]"
 	shell: 
 		"""
 		gatk DepthOfCoverage \
@@ -398,7 +398,7 @@ rule bed_to_interval_list:
 		mem_mb_per_cpu = config["picardMemMB"],
 		runtime = config["picardTime"],
 	conda:
-		"envs/gatk4.yaml"
+		"config[gatk4_ENV]"
 	shell:
 		"""
 		gatk BedToIntervalList \
@@ -432,7 +432,7 @@ rule picard_collect_hs_metrics:
 	log:
 		"logs/picard_collect_hs_metrics/{sample}.log",
 	conda:
-		"envs/gatk4.yaml"
+		"config[gatk4_ENV]"
 	shell:
 		"""
 		gatk CollectHsMetrics \

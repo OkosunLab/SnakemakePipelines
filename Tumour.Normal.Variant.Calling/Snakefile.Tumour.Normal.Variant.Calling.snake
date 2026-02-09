@@ -81,7 +81,7 @@ rule multiQC:
 	output:
 		"QC/MultiQC/VCF_multiqc_report.html"
 	conda:
-		"envs/multiqc.yaml"
+		"config[multiqc_ENV]"
 	params:
 		mem=config["multiqcMem"],
 		time=config["multiqcTime"]
@@ -286,7 +286,7 @@ rule Manta:
 	output:
 		run_dir=directory("VCF/Manta/{sample}"),
 	conda:
-		"envs/manta.yaml"
+		"config[manta_ENV]"
 	params:
 		mem = config["mantaMem"],
 		time=config["mantaTime"],
@@ -373,7 +373,7 @@ rule Merge_Strelka2:
 		mem_mb_per_cpu=config["bcftoolsMemMB"],
 		runtime=config["bcftoolsTime"]
 	conda:
-		"envs/bcftools.yaml"
+		"config[bcftools_ENV]"
 	log:
 		"logs/BCFtools/Concat/Strelka/{sample}.log"
 	shell:
@@ -506,7 +506,7 @@ rule Merge_Varscan:
 		mem_mb_per_cpu=config["bcftoolsMemMB"],
 		runtime=config["bcftoolsTime"]
 	conda:
-		"envs/bcftools.yaml"
+		"config[bcftools_ENV]"
 	log:
 		"logs/BCFtools/Concat/Varscan/{sample}.log"
 	shell:
@@ -713,7 +713,7 @@ rule cnvkit_batch:
 		mem_mb_per_cpu=config["cnvkitMemMB"],
 		runtime=config["cnvkitTime"],
 	conda:
-		"envs/cnvkit.yaml"
+		"config[cnvkit_ENV]"
 	log:
 		"logs/cnvkit/batch/{sample}.log"
 	shell:
@@ -740,7 +740,7 @@ rule cnvkit_to_seg:
 		mem_mb_per_cpu=config["cnvkitMemMB"],
 		runtime=config["cnvkitTime"],
 	conda:
-		"envs/cnvkit.yaml"
+		"config[cnvkit_ENV]"
 	log:
 		"logs/cnvkit/heatmap.log"
 	shell:
@@ -762,7 +762,7 @@ rule cnvkit_heatmap:
 		mem_mb_per_cpu=config["cnvkitMemMB"],
 		runtime=config["cnvkitTime"],
 	conda:
-		"envs/cnvkit.yaml"
+		"config[cnvkit_ENV]"
 	log:
 		"logs/cnvkit/heatmap.log"
 	shell:
@@ -810,7 +810,7 @@ rule ASCAT:
 		mem_mb_per_cpu=config["ascatMemMB"],
 		runtime=config["ascatTime"],
 	conda:
-		"envs/ASCAT.yaml"
+		"config[ASCAT_ENV]"
 	log:
 		"logs/ASCAT/{sample}.log"
 	shell:
@@ -926,7 +926,7 @@ rule annotate_with_cosmic_vcf:
 	output:
 		"VCF/{caller}/BCFtools/{sample}.{caller}.annotated.vcf.gz"
 	conda:
-		"envs/bcftools.yaml"
+		"config[bcftools_ENV]"
 	log:
 		"logs/bcftools/{sample}.{caller}.annotate.log"
 	threads:

@@ -85,7 +85,7 @@ rule multiQC:
 	output:
 		"QC/MultiQC/multiqc_report.html",
 	conda:
-		"envs/multiqc.yaml"
+		"config[multiqc_ENV]"
 	params:
 		mem = config["multiqcMem"]
 	resources:
@@ -211,7 +211,7 @@ rule bwa_mem:
 	threads: 
 		config["bwaThreads"]
 	conda:
-		"envs/bwa.yaml"
+		"config[bwa_ENV]"
 	shell:
 		"""
 		bwa mem -t {threads} -M {input.idx} \
@@ -261,7 +261,7 @@ rule annotate_bam:
 	threads:
 		config["fgbioThreads"]
 	conda:
-		"envs/fgbio.yaml",
+		"config[fgbio_ENV]",
 	shell:
 		"""
 		fgbio {params.javaMem} -XX:+AggressiveOpts -XX:+AggressiveHeap AnnotateBamWithUmis \
@@ -284,7 +284,7 @@ rule sort_UMI_bam:
 		mem_mb_per_cpu = config["fgbioMemMB"],
 		runtime = config["fgbioTime"],
 	conda:
-		"envs/fgbio.yaml"
+		"config[fgbio_ENV]"
 	threads: 
 		config["fgbioThreads"]
 	shell:
@@ -303,7 +303,7 @@ rule set_mate_info:
 	log:
 		"logs/fgbio/set_mate/{sample}.log"
 	conda:
-		"envs/fgbio.yaml"
+		"config[fgbio_ENV]"
 	params:
 		mem=config["fgbioMem"],
 		javaMem = config["fgbioJavaMem"]
@@ -334,7 +334,7 @@ rule group_reads:
 		mem_mb_per_cpu = config["fgbioMemMB"],
 		runtime = config["fgbioTime"],
 	conda:
-		"envs/fgbio.yaml"
+		"config[fgbio_ENV]"
 	threads:
 		config["fgbioThreads"]
 	shell:
@@ -354,7 +354,7 @@ rule call_consensus:
 	log:
 		"logs/fgbio/call_consensus/{sample}.log"
 	conda:
-		"envs/fgbio.yaml"
+		"config[fgbio_ENV]"
 	params:
 		mem=config["fgbioMem"],
 		javaMem = config["fgbioJavaMem"],
@@ -420,7 +420,7 @@ rule bwa_mem_consensus:
 	threads: 
 		config["bwaThreads"]
 	conda:
-		"envs/bwa.yaml"
+		"config[bwa_ENV]"
 	shell:
 		"""
 		bwa mem -t {threads} -M {input.idx} \
@@ -500,7 +500,7 @@ rule gatk_depth_of_coverage:
 	threads:
 		config["gatkThreads"]
 	conda:
-		"envs/gatk4.yaml"
+		"config[gatk4_ENV]"
 	shell:
 		"""
 		gatk DepthOfCoverage \
@@ -554,7 +554,7 @@ rule picard_collect_hs_metrics:
 	log:
 		"logs/picard_collect_hs_metrics/{sample}.log",
 	conda:
-		"envs/gatk4.yaml"
+		"config[gatk4_ENV]"
 	shell:
 		"""
 		gatk CollectHsMetrics \

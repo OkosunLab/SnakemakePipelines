@@ -32,6 +32,24 @@ SampleSheet:
         Sample.Sheet.tsv
 
 ##########################################
+## Conda environment yamls
+##########################################
+
+alleleCounter_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.alleleCounter.yaml
+ASCAT_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.ASCAT.yaml
+bcftools_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.bcftools.yaml
+bwa_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.bwa.yaml
+cnvkit_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.cnvkit.yaml
+fgbio_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.fgbio.yaml
+gatk4_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.gatk4.yaml
+gridss_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.gridss.yaml
+manta_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.manta.yaml
+multiqc_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.multiqc.yaml
+pysam_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.pysam.yaml
+STAR_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.STAR.yaml
+varscan_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.varscan.yaml
+
+##########################################
 ## UMI stuff
 ##########################################
 ## This is the minimum number of reads required for a consensus read.

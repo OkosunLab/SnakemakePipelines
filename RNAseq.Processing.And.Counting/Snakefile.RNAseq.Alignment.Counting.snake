@@ -78,7 +78,7 @@ rule multiQC:
 	output:
 		"QC/MultiQC/multiqc_report.html",
 	conda:
-		"envs/multiqc.yaml"
+		"config[multiqc_ENV]"
 	params:
 		mem = config["multiqcMem"],
 		time = config["multiqcTime"],
@@ -182,7 +182,7 @@ rule star_index:
 	threads:
 		config["starIdxThreads"]
 	conda:
-		"envs/STAR.yaml"
+		"config[STAR_ENV]"
 	params:
 		mem=config["starIdxMem"],
 		overhang=config["overhang"]
@@ -219,7 +219,7 @@ rule star:
 	log:
 		"logs/star_pe/{sample}.log",
 	conda:
-		"envs/STAR.yaml"
+		"config[STAR_ENV]"
 	params:
 		# optional parameters
 		extra="",
