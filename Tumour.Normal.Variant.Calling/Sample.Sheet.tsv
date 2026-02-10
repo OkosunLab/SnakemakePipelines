@@ -1,3 +1,3 @@
 sample	tumour	tumourID	normal	normalID
-SampleA	Alignment/SampleA.bam	SampleA	Alignment/SampleA.normal.bam	SampleA.normal
-SampleB	Alignment/SampleB.bam	SampleB	Alignment/SampleB.normal.bam	SampleB.normal
+SampleA	Alignment/SampleA_T.recalib.bam	SampleA_T	SampleA_N.recalib.bam	SampleA_N
+SampleB	Alignment/SampleB_T.recalib.bam	SampleB_T	SampleB_N.recalib.bam	SampleB_N
