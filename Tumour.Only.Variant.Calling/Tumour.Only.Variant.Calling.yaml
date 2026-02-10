@@ -76,32 +76,32 @@ bcftoolsVCF:
 multiqcThreads: 1
 multiqcMem: 4G
 multiqcMemMB: 4000
-multiqcTime: 24:0:0
+multiqcTime: 4:0:0
 
 # VEP prep
 prepMem: 8G
 prepMemMB: 8000
 prepThreads: 1
-prepTime: 24:0:0
+prepTime: 4:0:0
 
 # Mutect2
 mutect2Threads: 1
 gatkMem: 24G
 gatkMemMB: 24000
 gatkRunMem: 22000
-gatkTime: 24:0:0
+gatkTime: 4:0:0
 
 # Freebayes
 freebayesMem: 24G
 freebayesMemMB: 24000
-freebayesTime: 24:0:0
+freebayesTime: 4:0:0
 freebayesThreads: 2
 freebayesRunMem: 23552
 
 # lofreq
 lofreqMem: 8G
 lofreqMemMB: 8000
-lofreqTime: 24:0:0
+lofreqTime: 4:0:0
 lofreqThreads: 8
 
 # BCFtools
@@ -109,29 +109,29 @@ bcftoolsMem: 8G
 bcftoolsMemMB: 8000
 bcftoolsMemFloat: 7168
 bcftoolsThreads: 1
-bcftoolsTime: 24:0:0
+bcftoolsTime: 4:0:0
 
 # Annotation
 laatvThreads: 1
 vepThreads: 4
 vepMem: 8G
 vepMemMB: 8000
-vepTime: 24:0:0
+vepTime: 4:0:0
 
 #Vardict
 VarDictMem: 24G
 vardictMemMB: 24000
 vardictThreads: 1
-vardictTime: 24:0:0
+vardictTime: 4:0:0
 
 # Varscan
 varscanResMem: 7168
 varscanMem: 8G
 varscanMemMB: 8000
 varscanThreads: 1
-varscanTime: 24:0:0
+varscanTime: 4:0:0
 pileupMem: 8G
 pileupMemMB: 8000
 pileupThreads: 1
-pileupTime: 24:0:0
+pileupTime: 4:0:0
 varscanExtra: "--output-vcf 1 --min-var-freq 0 --strand-filter 1"

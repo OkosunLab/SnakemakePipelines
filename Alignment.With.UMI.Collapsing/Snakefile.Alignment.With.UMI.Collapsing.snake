@@ -36,11 +36,15 @@ for line in sampleFile:
         else:
                 ## Raise and error and complain about it.
                 raise Exception("Sorry, please make sure the sample column is unique")
-## set the value of SAMPLES to sampleSheet.keys()
-## This could be replaced throughout the file BUT SAMPLES is easier to type ....
-SAMPLES = sampleSheet.keys()
+## Use the columns in the yaml file to find all the sample IDs that need to be generated
+## Defaults to tumourID normalID - edit if you need to only do one or t'other
+bam_IDs = config["bam_ID_columns"]
+SAMPLES = []
+for Line in sampleSheet.values():
+        for key, value in Line.items():
+                if key in bam_IDs:
+                        SAMPLES.append(value)
 
-## print(SAMPLES)
 ##########################################################
 ## Functions
 ##########################################################
