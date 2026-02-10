@@ -229,15 +229,15 @@ rule star:
 	shell:
 		"""
 		time STAR --runMode alignReads \
-	--twopassMode Basic \
-	--genomeDir {input.index} \
-	--runThreadN {threads} \
-	--readFilesIn {input.R1} {input.R2} \
-	--readFilesCommand zcat \
-	--outFileNamePrefix {params.prefix} \
-	--outSAMtype BAM SortedByCoordinate \
-	--outSAMunmapped Within \
-	--outSAMattributes Standard \
+			--twopassMode Basic \
+			--genomeDir {input.index} \
+			--runThreadN {threads} \
+			--readFilesIn {input.R1} {input.R2} \
+			--readFilesCommand zcat \
+			--outFileNamePrefix {params.prefix} \
+			--outSAMtype BAM SortedByCoordinate \
+			--outSAMunmapped Within \
+			--outSAMattributes Standard \
 			--quantMode GeneCounts
 		"""
 
