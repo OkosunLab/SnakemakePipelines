@@ -344,50 +344,6 @@ rule samtools_stats:
 	wrapper:
 		"v4.0.0/bio/samtools/stats"
 
-## Run depth of coverage without outputting the depth at each base
-## That file ends up being huge
-rule gatk_depth_of_coverage:
-	input:
-		bam="Alignment/{sample}.recalib.bam",	
-		fasta=config["reference"],
-		intervals=config["intervals"],
-		idx="Alignment/{sample}.recalib.bai"
-	output:
-		multiext(
-			"QC/depth/{sample}",
-			".sample_interval_summary",
-			".sample_cumulative_coverage_counts",
-			".sample_cumulative_coverage_proportions",
-			".sample_interval_statistics",
-			".sample_statistics",
-			".sample_summary",
-		)		
-	log:
-		"logs/gatk/depthofcoverage/{sample}.log",
-	params:
-		extra="--omit-depth-output-at-each-base true",
-		java_opts="",
-		out=lambda w: "QC/depth/{}".format(w.sample),
-		mem=config["gatkMem"],
-		time=config["gatkTime"],
-	resources:
-		mem_mb=config["gatkRunMem"],
-		mem_mb_per_cpu = config["gatkMemMB"],
-		runtime = config["gatkTime"],
-	threads: 
-		config["gatkThreads"]
-	conda:
-		config["gatk4_ENV"]
-	shell: 
-		"""
-		gatk DepthOfCoverage \
-			-R {input.fasta} \
-			-O {params.out} \
-			-I {input.bam} \
-			-L {input.intervals} \
-			{params.extra}
-		"""
-
 rule bed_to_interval_list:
 	input:
 		bed=config["intervals"],
@@ -457,6 +413,7 @@ rule picard_collect_hs_metrics:
 rule somalier_extract:
 	input:
 		bam="Alignment/{sample}.recalib.bam",
+		bai="Alignment/{sample}.recalib.bai",
 		sites=config["somSites"],
 		fasta=config["reference"]
 	output:
