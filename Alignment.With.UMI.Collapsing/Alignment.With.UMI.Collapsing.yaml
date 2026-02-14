@@ -21,7 +21,11 @@ intervals:
         ## Nonacus tumour exome pipeline
         ## /data/BCI-OkosunLab/Ref/BED_files/Nonacus_Tumor_Exome/Nonacus-Tumour-Exome-GRCh38-v1.0_covered.bed
         ""
-        
+
+## sites for somalier        
+somSites:
+        /data/home/hfx472/BCI-OkosunLab/Ref/GRCh38/somalier/2026.02.13.sites.hg38.vcf.gz
+
 ##########################################
 ## Raw file location
 ##########################################
@@ -57,6 +61,7 @@ multiqc_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.multiqc.yaml
 pysam_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.pysam.yaml
 STAR_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.STAR.yaml
 varscan_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.varscan.yaml
+som_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.13.somalier.yaml
 
 ##########################################
 ## UMI stuff
@@ -138,3 +143,13 @@ picardThreads: 1
 picardMem: 8G
 picardMemMB: 8000
 picardTime: 4:0:0
+
+## Somalier
+somMemMB: 8000
+somMem: 8G
+somTime: 4:0:0
+somThreads: 1
+som_ENV: "envs/2026.02.13.somalier.yaml"
+somExtra: ""
+## If you want to provide a pedegree file
+# somExtra: "--ped /path/to/pedigree"

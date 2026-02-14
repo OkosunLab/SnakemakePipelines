@@ -1,0 +1,6 @@
+name: somalier.0.3.1-0
+channels: 
+  - bioconda
+dependencies:
+  - somalier=0.3.1-0
+

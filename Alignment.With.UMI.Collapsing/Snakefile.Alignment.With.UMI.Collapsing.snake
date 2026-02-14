@@ -23,27 +23,27 @@ header = sampleFile.pop(0).rstrip().split("\t")
 sampleSheet = {}
 ## Run through the sample file and create a dictionary
 for line in sampleFile:
-        ## Remove whitespace and split on tabs
-        line = line.rstrip().split("\t")
-        ## zip the line info (values) and the header (keys) to generate a dictionary
-        rv = dict(zip(header, line))
-        ## if the sample name isn't in the dictionary keys:
-        if not rv["sample"] in sampleSheet.keys():
-                ## Add it and attach the dictionary
-                ## N.B. "sample" needs to be unique
-                sampleSheet[rv["sample"]] = rv
-        ## If there are multiple samples
-        else:
-                ## Raise and error and complain about it.
-                raise Exception("Sorry, please make sure the sample column is unique")
+	## Remove whitespace and split on tabs
+	line = line.rstrip().split("\t")
+	## zip the line info (values) and the header (keys) to generate a dictionary
+	rv = dict(zip(header, line))
+	## if the sample name isn't in the dictionary keys:
+	if not rv["sample"] in sampleSheet.keys():
+		## Add it and attach the dictionary
+		## N.B. "sample" needs to be unique
+		sampleSheet[rv["sample"]] = rv
+	## If there are multiple samples
+	else:
+		## Raise and error and complain about it.
+		raise Exception("Sorry, please make sure the sample column is unique")
 ## Use the columns in the yaml file to find all the sample IDs that need to be generated
 ## Defaults to tumourID normalID - edit if you need to only do one or t'other
 bam_IDs = config["bam_ID_columns"]
 SAMPLES = []
 for Line in sampleSheet.values():
-        for key, value in Line.items():
-                if key in bam_IDs:
-                        SAMPLES.append(value)
+	for key, value in Line.items():
+		if key in bam_IDs:
+			SAMPLES.append(value)
 
 ##########################################################
 ## Functions
@@ -80,16 +80,21 @@ def get_fastq_from_sample_read(wildcards):
 
 rule multiQC:
 	input:
-		picard=expand("QC/depth/picard/{sample}.txt", sample = SAMPLES),		
-		html=expand("QC/fastp/{sample}.html", sample = SAMPLES),
 		rawBam=expand("QC/samtools_stats/{sample}.raw.txt", sample = SAMPLES),
 		conBam=expand("QC/samtools_stats/{sample}.con.txt", sample = SAMPLES),
+		picard=expand("QC/depth/picard/{sample}.txt", sample = SAMPLES),		
+		fastp=expand("QC/fastp/{sample}.html", sample = SAMPLES),
 		UMIQC=expand("QC/fgbio/{sample}.family_size_histogram.txt", sample = SAMPLES),
 		txt=expand("QC/fastq_screen/{sample}.{read}.fastq_screen.txt", sample = SAMPLES, read = READS),
+		somalier=multiext("QC/somalier/somalier",
+				 ".samples.tsv",
+				 ".pairs.tsv",
+				 ".groups.tsv",
+				 ".html")
 	output:
 		"QC/MultiQC/multiqc_report.html",
 	conda:
-		"config[multiqc_ENV]"
+		config["multiqc_ENV"]
 	params:
 		mem = config["multiqcMem"]
 	resources:
@@ -215,7 +220,7 @@ rule bwa_mem:
 	threads: 
 		config["bwaThreads"]
 	conda:
-		"config[bwa_ENV]"
+		config["bwa_ENV"]
 	shell:
 		"""
 		bwa mem -t {threads} -M {input.idx} \
@@ -265,7 +270,7 @@ rule annotate_bam:
 	threads:
 		config["fgbioThreads"]
 	conda:
-		"config[fgbio_ENV]",
+		config["fgbio_ENV"],
 	shell:
 		"""
 		fgbio {params.javaMem} -XX:+AggressiveOpts -XX:+AggressiveHeap AnnotateBamWithUmis \
@@ -288,7 +293,7 @@ rule sort_UMI_bam:
 		mem_mb_per_cpu = config["fgbioMemMB"],
 		runtime = config["fgbioTime"],
 	conda:
-		"config[fgbio_ENV]"
+		config["fgbio_ENV"]
 	threads: 
 		config["fgbioThreads"]
 	shell:
@@ -307,7 +312,7 @@ rule set_mate_info:
 	log:
 		"logs/fgbio/set_mate/{sample}.log"
 	conda:
-		"config[fgbio_ENV]"
+		config["fgbio_ENV"]
 	params:
 		mem=config["fgbioMem"],
 		javaMem = config["fgbioJavaMem"]
@@ -338,7 +343,7 @@ rule group_reads:
 		mem_mb_per_cpu = config["fgbioMemMB"],
 		runtime = config["fgbioTime"],
 	conda:
-		"config[fgbio_ENV]"
+		config["fgbio_ENV"]
 	threads:
 		config["fgbioThreads"]
 	shell:
@@ -358,7 +363,7 @@ rule call_consensus:
 	log:
 		"logs/fgbio/call_consensus/{sample}.log"
 	conda:
-		"config[fgbio_ENV]"
+		config["fgbio_ENV"]
 	params:
 		mem=config["fgbioMem"],
 		javaMem = config["fgbioJavaMem"],
@@ -424,7 +429,7 @@ rule bwa_mem_consensus:
 	threads: 
 		config["bwaThreads"]
 	conda:
-		"config[bwa_ENV]"
+		config["bwa_ENV"]
 	shell:
 		"""
 		bwa mem -t {threads} -M {input.idx} \
@@ -504,7 +509,7 @@ rule gatk_depth_of_coverage:
 	threads:
 		config["gatkThreads"]
 	conda:
-		"config[gatk4_ENV]"
+		config["gatk4_ENV"]
 	shell:
 		"""
 		gatk DepthOfCoverage \
@@ -558,7 +563,7 @@ rule picard_collect_hs_metrics:
 	log:
 		"logs/picard_collect_hs_metrics/{sample}.log",
 	conda:
-		"config[gatk4_ENV]"
+		config["gatk4_ENV"]
 	shell:
 		"""
 		gatk CollectHsMetrics \
@@ -569,3 +574,58 @@ rule picard_collect_hs_metrics:
 			-BI {input.target_intervals}
 			{params.extra}
 		"""
+
+
+rule somalier_extract:
+	input:
+		bam="Alignment/{sample}.con.bam",
+		sites=config["somSites"],
+		fasta=config["reference"]
+	output:
+		output=temp("QC/somalier/{sample}.somalier")
+	resources:
+		mem_mb_per_cpu = config["somMemMB"],
+		runtime = config["somTime"],
+	params:																	    
+		mem = config["somMem"],
+	threads:
+		config["somThreads"],
+	log:
+		"logs/somalier/{sample}.log"
+	conda:
+		config["som_ENV"]
+	shell:
+		"""
+		somalier extract --sites {input.sites} \
+			-f {input.fasta} \
+			-d QC/somalier/ \
+			{input.bam}
+		"""
+
+rule somalier_relate:
+	input:
+		files=expand("QC/somalier/{sample}.somalier", sample = SAMPLES)
+	output:
+		multiext("QC/somalier/somalier",
+				 ".samples.tsv",
+				 ".pairs.tsv",
+				 ".groups.tsv",
+				 ".html")
+	resources:
+		mem_mb_per_cpu = config["somMemMB"],												       
+		runtime = config["somTime"],													       
+	params:																	    
+		mem = config["somMem"],
+		extra = config["somExtra"],														
+	threads:																	   
+		config["somThreads"],														      
+	log:																	       
+		"logs/somalier/relate.log"														 
+	conda:																	     
+		config["som_ENV"]															  
+	shell:																	     
+		"""																	
+		somalier relate {params.extra} \
+			{input.files} \
+			-o QC/somalier/somalier													    
+		"""		  
