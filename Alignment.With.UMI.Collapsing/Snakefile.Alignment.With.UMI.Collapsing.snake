@@ -378,7 +378,7 @@ rule call_consensus:
 		fgbio {params.javaMem} -XX:+AggressiveOpts -XX:+AggressiveHeap CallMolecularConsensusReads \
 			-i {input} \
 			-o {output} \
-			-M 1
+			-M {params.consensusReads}
 		"""
 
 ##########################################################
