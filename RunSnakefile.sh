@@ -25,31 +25,32 @@ conda_envs="/data/BCI-OkosunLab/Environments/Snakemake"
 OS="rocky"
 ## join output
 join="-j y"
-
+## job scheduler
+scheduler="slurm"
 ###################################
-RED="\033[0;31m"
-NC='\033[0m'
-echo -e "${RED}
-⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣤⣤⣶⣶⣿⡟⠢⣶⣤⣄⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⣠⣾⣿⣿⣿⣟⢿⣿⣿⣿⣿⣿⣿⣿⣿⠇⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⢀⣾⣿⣿⣿⣿⣿⣿⣿⣦⢶⣶⡀⠀⠋⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⣾⣿⣿⡟⣽⡖⠀⠀⠉⠙⢿⣿⣷⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⣿⣿⣿⣾⣿⡄⠀⠀⠀⠀⠀⠈⠙⠛⠛⢇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⢿⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠘⢿⣿⣿⣿⣿⣿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠈⠻⣿⣿⣿⣿⣿⣿⣷⣦⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⢀⡄⠀⠀⠀⠈⠛⢿⣿⣿⣿⣿⣿⣿⣷⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠈⠛⢿⣿⣿⣿⣿⣿⣿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⢸⣿⣆⠀⠀⣀⣀⡀⠀⠀⠀⠙⢿⣿⣿⣯⢿⣿⣷⢀⣀⣀⣀⠀⠀⠀⠀⠀
-⠀⠀⣠⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣤⡘⣿⣿⣿⣏⣿⣿⣿⣿⣿⣿⣿⣷⣦⡀⠀
-⢀⣾⣿⣿⣿⠿⣛⣻⣿⣟⣻⣿⣿⣿⣇⣿⣿⣿⣿⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣆
-⣼⣿⣿⣿⢳⣿⣿⡿⠿⠿⠿⣿⣿⣿⣿⣿⣿⣿⡇⣿⣿⣁⣈⣁⣹⣿⣿⣿⣿⣿
-⣿⣿⣿⣿⣧⣝⣁⣀⣀⣀⣀⣤⣾⣿⣿⣿⣿⡟⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟
-⠸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⢋⣼⢟⣵⣾⣭⣽⣛⣛⣯⣽⣿⠟⠀
-⠀⠈⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠟⣫⠴⠋⠁⠙⠛⠻⠿⠿⠿⠿⠟⠋⠁⠀⠀
-⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠉⠀⠈⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-Ceci n'est pas une pipe${NC}"
 
+RED="\033[0;31m" 
+NC='\033[0m' 
+echo -e "${RED} 
+⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣤⣤⣶⣶⣿⡟⠢⣶⣤⣄⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀ 
+⠀⠀⠀⠀⠀⠀⣠⣾⣿⣿⣿⣟⢿⣿⣿⣿⣿⣿⣿⣿⣿⠇⠀⠀⠀⠀⠀⠀⠀⠀ 
+⠀⠀⠀⠀⢀⣾⣿⣿⣿⣿⣿⣿⣿⣦⢶⣶⡀⠀⠋⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀ 
+⠀⠀⠀⠀⣾⣿⣿⡟⣽⡖⠀⠀⠉⠙⢿⣿⣷⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ 
+⠀⠀⠀⠀⣿⣿⣿⣾⣿⡄⠀⠀⠀⠀⠀⠈⠙⠛⠛⢇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ 
+⠀⠀⠀⠀⢿⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ 
+⠀⠀⠀⠀⠘⢿⣿⣿⣿⣿⣿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ 
+⠀⠀⠀⠀⠀⠈⠻⣿⣿⣿⣿⣿⣿⣷⣦⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ 
+⠀⠀⢀⡄⠀⠀⠀⠈⠛⢿⣿⣿⣿⣿⣿⣿⣷⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ 
+⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠈⠛⢿⣿⣿⣿⣿⣿⣿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀ 
+⠀⠀⢸⣿⣆⠀⠀⣀⣀⡀⠀⠀⠀⠙⢿⣿⣿⣯⢿⣿⣷⢀⣀⣀⣀⠀⠀⠀⠀⠀ 
+⠀⠀⣠⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣤⡘⣿⣿⣿⣏⣿⣿⣿⣿⣿⣿⣿⣷⣦⡀⠀ 
+⢀⣾⣿⣿⣿⠿⣛⣻⣿⣟⣻⣿⣿⣿⣇⣿⣿⣿⣿⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣆ 
+⣼⣿⣿⣿⢳⣿⣿⡿⠿⠿⠿⣿⣿⣿⣿⣿⣿⣿⡇⣿⣿⣁⣈⣁⣹⣿⣿⣿⣿⣿ 
+⣿⣿⣿⣿⣧⣝⣁⣀⣀⣀⣀⣤⣾⣿⣿⣿⣿⡟⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟ 
+⠸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⢋⣼⢟⣵⣾⣭⣽⣛⣛⣯⣽⣿⠟⠀ 
+⠀⠈⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠟⣫⠴⠋⠁⠙⠛⠻⠿⠿⠿⠿⠟⠋⠁⠀⠀ 
+⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠉⠀⠈⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ 
+Ceci n'est pas une pipe${NC}" 
 
 while [ "$1" != "" ]; do
         case $1 in
@@ -84,6 +85,9 @@ while [ "$1" != "" ]; do
 		-e | --extra )		shift
 					EXTRA=$@
 					;;
+		-q | --scheduler )	shift
+					scheduler=$1
+					;;
 		-h | --help )		echo -e "
 A script for running OkosunLab snakemake files on apocrita (should work on almost any SGE based system too)
 Written by: Findlay Bewicke-Copley
@@ -99,6 +103,7 @@ Options:
 -r | --rulegraph	Print the rule graph and exit (default: off)
 -f | --dag-file		The file name for the dag (default: dag.svg)
 -c | --conda_location	The location to store conda environments (default: $conda_envs)
+-q | --scheduler	The job scheduler to use (default: $scheduler)
 -e | --extra		Takes all remaining arguments and passes them to snakemake (MUST BE LAST)
 -h | --help		Display this message and exit
 "
@@ -121,7 +126,18 @@ elif [ $RULEGRAPH -eq 1 ]; then
 		$EXTRA \
 		-s $Snakefile  | 
 		dot -Tsvg > $dagFile
-else
+elif [ $scheduler == "slurm" ]; then
+	snakemake \
+		$Dry \
+		-s $Snakefile \
+		$target \
+		-p --executor slurm \
+		--default-resources \
+		-j $Jobs \
+		--software-deployment-method conda \
+		--conda-prefix $conda_envs \
+		$EXTRA
+elif [ $scheduler == "sge" ]; then
 	snakemake \
 		$Dry \
 		-s $Snakefile \
@@ -133,6 +149,8 @@ else
 		--software-deployment-method conda \
 		--conda-prefix $conda_envs \
 		$EXTRA
+else
+	echo "Do I look like I know what a dang ${scheduler} is!"
 
 fi
 

@@ -356,7 +356,7 @@ rule Strelka2:
 	log:
 		"logs/strelka2/{sample}.log",
 	wrapper:
-		"v2.9.1/bio.strelka/somatic"
+		"v2.9.1/bio/strelka/somatic"
 
 ## Merge Strelka2 output
 rule Merge_Strelka2:
