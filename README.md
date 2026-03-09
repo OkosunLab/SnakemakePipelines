@@ -77,7 +77,7 @@ In preparation to move to slurm there is a new version of the environment stored
 
 ```bash
 ml miniforge
-mamba env create -n snakemake -f /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.snakemake.9.16.5.yaml
+mamba env create -n snakemake -f /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.snakemake.9.16.3.yaml
 ```
 
 ### Running A Pipeline
