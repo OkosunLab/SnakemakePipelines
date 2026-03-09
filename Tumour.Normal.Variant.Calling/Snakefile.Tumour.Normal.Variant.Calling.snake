@@ -70,7 +70,7 @@ for ch in c:
 rule multiQC:
 	input:
 		## CNVkit
-		##CNVkit=expand("VCF/CNVkit/{sample}/", sample = SAMPLES),
+		CNVkit=expand("VCF/CNVkit/Calls/{sample}/", sample = SAMPLES),
 		heatmap="VCF/CNVkit/heatmap.png",
 		seq="VCF/CNVkit/All.sample.seg",
 		## ASCAT
@@ -341,7 +341,7 @@ rule Strelka2:
 		manta="VCF/Manta/{sample}",
 		strelka2_path=config["strelka2"]
 	output:
-		directory("VCF/Strelka2/{sample}"),
+		directory("VCF/Strelka2/Calls/{sample}"),
 	threads:
 		config["strelkaThreads"]
 	params:
@@ -361,7 +361,7 @@ rule Strelka2:
 ## Merge Strelka2 output
 rule Merge_Strelka2:
 	input:
-		directory("VCF/Strelka2/{sample}")
+		"VCF/Strelka2/Calls/{sample}",
 	output:
 		temp("VCF/Strelka2/{sample}.final.vcf"),
 	threads: 
@@ -703,7 +703,7 @@ rule cnvkit_batch:
 		targets = config["intervals"],
 		reference = config["reference"],
 	output:
-		output_dir = directory("VCF/CNVkit/{sample}/"),
+		output_dir = directory("VCF/CNVkit/Calls/{sample}/"),
 	threads: 
 		config["cnvkitThreads"] 
 	params:
@@ -728,7 +728,7 @@ rule cnvkit_batch:
 
 rule cnvkit_to_seg:
 	input:
-		cns=expand("VCF/CNVkit/{sample}/", sample = SAMPLES)
+		cns=expand("VCF/CNVkit/Calls/{sample}/", sample = SAMPLES)
 	output:
 		seg="VCF/CNVkit/All.sample.seg"
 	threads: 
@@ -750,7 +750,7 @@ rule cnvkit_to_seg:
 
 rule cnvkit_heatmap:
 	input:
-		cns=expand("VCF/CNVkit/{sample}/", sample = SAMPLES)
+		cns=expand("VCF/CNVkit/Calls/{sample}/", sample = SAMPLES)
 	output:
 		heatmap="VCF/CNVkit/heatmap.png"
 	threads: 
@@ -914,9 +914,8 @@ rule annotate_variants_vep:
 	threads: 
 		config["vepThreads"]
 	wrapper:
-		"v4.0.0/bio/vep/annotate"
 		## Updated to fix SV annotations
-		## "v5.8.2/bio/vep/annotate"
+		"v8.0.0/bio/vep/annotate"
 
 ## Annotate variants with COSMIC vcf file (VEP doesn't do allele matching)
 rule annotate_with_cosmic_vcf:
