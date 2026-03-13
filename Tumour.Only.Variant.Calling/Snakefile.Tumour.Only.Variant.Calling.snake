@@ -514,7 +514,7 @@ rule annotate_with_cosmic_vcf:
 		calls="VCF/{caller}/VEP/{sample}.annotated.vcf.gz",
 		VCF=config["bcftoolsVCF"]
 	output:
-		"VCF/{caller}/BCFtools/{sample}.{caller}.annotated.vcf"
+		"VCF/{caller}/BCFtools/{sample}.{caller}.annotated.vcf.gz"
 	conda:
 		config["bcftools_ENV"]
 	log:
@@ -532,6 +532,7 @@ rule annotate_with_cosmic_vcf:
 		tabix -f {input.calls}
 		bcftools annotate -a {input.VCF} \
 			-c ID \
+			-O z \
 			{input.calls} > {output}
 		"""
 
