@@ -91,7 +91,7 @@ while [ "$1" != "" ]; do
 		-h | --help )		echo -e "
 A script for running OkosunLab snakemake files on apocrita (should work on almost any SGE based system too)
 Written by: Findlay Bewicke-Copley
-Last Updated: 01/05/2024
+Last Updated: 16/03/2026
 
 Options:
 -n | --dry-run		Run a dry run of the script (default: off)
