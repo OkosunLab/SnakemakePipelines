@@ -54,7 +54,7 @@ bwa_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.bwa.yaml
 cnvkit_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.cnvkit.yaml
 fgbio_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.fgbio.yaml
 gatk4_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.gatk4.yaml
-gridss_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.gridss.yaml
+gridss_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.03.16.gridss.yaml
 manta_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.manta.yaml
 multiqc_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.multiqc.yaml
 pysam_ENV: /data/BCI-OkosunLab/SnakemakePipelines/envs/2026.02.09.pysam.yaml

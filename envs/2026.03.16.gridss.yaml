@@ -1,0 +1,4 @@
+channels:
+        - bioconda
+dependencies:
+        - gridss==2.13.2
