@@ -4,7 +4,7 @@
 
 OkosunLab pipelines built using the snakemake workflow management system.
 
-**WARNING**: the cluster will switch from SGE to Slurm in the new year. I am in the process of adapting these pipelines to work on either system but let me know if you notice any issues.
+**WARNING**: the cluster has switched from SGE to Slurm in the 2026. If you haven't yet done so, update to the latest snakemake anaconda environment to ensure you have the slurm cluster addin installed.
 
 ## Contents
 
@@ -65,15 +65,6 @@ Pipeline | info
 ### Setup
 
 First you will need to create a copy of the snakemake environment. You only need to do this once and it will be able to handle all your snakemake pipelines.
-
-```bash
-ml miniforge
-mamba env create -n snakemake -f /data/BCI-OkosunLab/Environments/anaconda3/20240513.snakemake.8.11.3.yml
-```
-
-**NB**
-
-In preparation to move to slurm there is a new version of the environment stored in the envs folder. Use the following code to create that environment
 
 ```bash
 ml miniforge
