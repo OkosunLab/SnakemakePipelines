@@ -154,21 +154,3 @@ Otherwise you can use the full path to the wrapper like this:
 ```
 
 **N.B. snakemake will complain about your conda priority not being set to strict. For now ignore this. Setting the priority to strict causes issues with installing the software that I haven't been able to resolve yet.**
-
-#### Job Submission Setup
-
-For those interested we are dymanically creating job scripts using this command:
-
-```bash
-"qsub -V -l h_rt=24:0:0 -l h_vmem={params.mem} -pe smp {threads} -j y -cwd -o {log}.jobscript"
-```
-Args | Notes
---- | ---
--V | Is vital as this preserves the loaded conda module - without this you cannont use conda to load software (I have not been able to find another way to submit jobs with a module automatically loaded yet).
--l h_rt | Currently I am asking for 1 day, I am in the process of turning this into a parameter than can be set per rule.
--l h_vmem | we set the required memory in the params section of the rule using the key mem (hence {params.mem})
--pe smp {threads} | take the number of threads from the rule.
--j y | join stdev and sterr
--cwd | work on the current working directory
--o {log}.jobscript | store the output of stdev and sterr in the same place as the snakemake log just with the suffix .jobscript
-
