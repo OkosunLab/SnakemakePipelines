@@ -4,7 +4,7 @@
 
 OkosunLab pipelines built using the snakemake workflow management system.
 
-**WARNING**: the cluster has switched from SGE to Slurm in the 2026. If you haven't yet done so, update to the latest snakemake anaconda environment to ensure you have the slurm cluster addin installed.
+**WARNING**: the cluster has switched from SGE to Slurm in 2026. If you haven't yet done so, update to the latest snakemake anaconda environment to ensure you have the slurm cluster addin installed.
 
 ## Contents
 
