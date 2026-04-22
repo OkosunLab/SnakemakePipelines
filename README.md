@@ -16,6 +16,7 @@ OkosunLab pipelines built using the snakemake workflow management system.
    1. [Setup](#Setup)
    2. [Running A Pipeline](#Running-A-Pipeline)
       1. [Job Submission Setup](#Job-Submission-Setup)
+4. [Troubleshooting](#Troubleshooting)
 
 ## Quick Start
 
@@ -154,3 +155,16 @@ Otherwise you can use the full path to the wrapper like this:
 ```
 
 **N.B. snakemake will complain about your conda priority not being set to strict. For now ignore this. Setting the priority to strict causes issues with installing the software that I haven't been able to resolve yet.**
+
+## Troubleshooting
+
+The snakemake logging is quite basic but it will tell you when a job has failed and point you to the log. However the logs aren't always all that useful and often don't contain any output at all. In these instances you want to view the slurm job logs directly. These are handily stored in the .snakemake/slurm_jobs/ directory which you will find in the root location where your ran the pipeline.
+
+You can also use jobstats to monitor resource usage, though this doesn't always seem to follow the resource usage exactly within Slurm. You can also use the sacct command to get a more granual look at the jobs.
+
+```bash
+## Get an estimate of resource usage for job 1
+jobstats -j 1
+## get a little more info for the job
+sacct --format="JobID,JobName,Start, End,CPUTime,NNodes,Timelimit,ReqMem,MaxRSS,AveCPU" -j 1
+```
