@@ -65,7 +65,7 @@ def get_UMI(wildcards):
 	files = glob.glob('{}/{}_*R2*.fastq.gz'.format(config["rawFolder"], wildcards.sample))
 	files.sort()
 	return files
- 
+
 ## Find all FASTQ files given the sample ID and read ID
 
 def get_fastq_from_sample_read(wildcards):
@@ -82,7 +82,7 @@ rule multiQC:
 	input:
 		rawBam=expand("QC/samtools_stats/{sample}.raw.txt", sample = SAMPLES),
 		conBam=expand("QC/samtools_stats/{sample}.con.txt", sample = SAMPLES),
-		picard=expand("QC/depth/picard/{sample}.txt", sample = SAMPLES),		
+		picard=expand("QC/depth/picard/{sample}.txt", sample = SAMPLES),
 		fastp=expand("QC/fastp/{sample}.html", sample = SAMPLES),
 		UMIQC=expand("QC/fgbio/{sample}.family_size_histogram.txt", sample = SAMPLES),
 		txt=expand("QC/fastq_screen/{sample}.{read}.fastq_screen.txt", sample = SAMPLES, read = READS),
@@ -102,7 +102,7 @@ rule multiQC:
 		runtime = config["multiqcTime"],
 	log:
 		"logs/multiqc/multiqc.log",
-	threads: 
+	threads:
 		config["multiqcThreads"]
 	shell:
 		"""
@@ -135,20 +135,20 @@ rule combine_fastqs:
 		runtime = config["combineTime"],
 	log:
 		"logs/combine_fastq/{sample}.log"
-	threads: 
+	threads:
 		config["combineThreads"]
 	shell:
 		"""
 		cat {input.R1} > {output.R1_out}
 		cat {input.R2} > {output.R2_out}
-		cat {input.UMI} > {output.UMI_out} 
+		cat {input.UMI} > {output.UMI_out}
 		"""
 
 ## FASTQ screen does a little alignment with a small number of reads from numerous genomes
 ## tests for contaminants
 
 rule fastq_screen:
-	input: 
+	input:
 		"FASTQ_Raw/Combined/{sample}.{read}.combined.fastq.gz"
 	output:
 		txt="QC/fastq_screen/{sample}.{read}.fastq_screen.txt",
@@ -189,7 +189,7 @@ rule fastp:
 	resources:
 		mem_mb_per_cpu = config["fastpMemMB"],
 		runtime = config["fastpTime"],
-	threads: 
+	threads:
 		config["fastpThreads"]
 	wrapper:
 		"v4.0.0/bio/fastp"
@@ -217,7 +217,7 @@ rule bwa_mem:
 	resources:
 		mem_mb_per_cpu = config["bwaMemMB"],
 		runtime = config["bwaTime"],
-	threads: 
+	threads:
 		config["bwaThreads"]
 	conda:
 		config["bwa_ENV"]
@@ -242,7 +242,7 @@ rule samtools_stats_raw:
 	resources:
 		mem_mb_per_cpu = config["samtoolsStatMemMB"],
 		runtime = config["samtoolsStatTime"],
-	threads: 
+	threads:
 		config["samtoolsStatThreads"]
 	log:
 		"logs/samtools_stats/{sample}.log",
@@ -294,7 +294,7 @@ rule sort_UMI_bam:
 		runtime = config["fgbioTime"],
 	conda:
 		config["fgbio_ENV"]
-	threads: 
+	threads:
 		config["fgbioThreads"]
 	shell:
 		"""
@@ -371,7 +371,7 @@ rule call_consensus:
 	resources:
 		mem_mb_per_cpu = config["fgbioMemMB"],
 		runtime = config["fgbioTime"],
-	threads: 
+	threads:
 		config["fgbioThreads"]
 	shell:
 		"""
@@ -400,10 +400,10 @@ rule consensus_fastq:
 	resources:
 		mem_mb_per_cpu = config["consensusFastqMemMB"],
 		runtime = config["consensusFastqTime"],
-	## Remember, this is the number of samtools' additional threads. 
-	## At least 2 threads have to be requested on cluster sumbission. 
+	## Remember, this is the number of samtools' additional threads.
+	## At least 2 threads have to be requested on cluster sumbission.
 	## This value - 2 will be sent to samtools sort -@ argument.
-	threads: 
+	threads:
 		config["consensusFastqThreads"]
 	wrapper:
 		"v4.0.0/bio/samtools/fastq/separate"
@@ -426,7 +426,7 @@ rule bwa_mem_consensus:
 	resources:
 		mem_mb_per_cpu = config["bwaMemMB"],
 		runtime = config["bwaTime"],
-	threads: 
+	threads:
 		config["bwaThreads"]
 	conda:
 		config["bwa_ENV"]
@@ -451,11 +451,11 @@ rule samtools_index:
 	resources:
 		mem_mb_per_cpu = config["samtoolsIdxMemMB"],
 		runtime = config["samtoolsIdxTime"],
-	threads: 
+	threads:
 		config["samtoolsIdxThreads"]# This value - 1 will be sent to -@
 	wrapper:
 		"v4.0.0/bio/samtools/index"
-	
+
 
 ##########################################################
 ## Bam file stats
@@ -472,7 +472,7 @@ rule samtools_stats_con:
 	resources:
 		mem_mb_per_cpu = config["samtoolsStatMemMB"],
 		runtime = config["samtoolsStatTime"],
-	threads: 
+	threads:
 		config["samtoolsStatThreads"]
 	log:
 		"logs/samtools_stats/{sample}.con.log",
@@ -546,7 +546,7 @@ rule somalier_extract:
 	resources:
 		mem_mb_per_cpu = config["somMemMB"],
 		runtime = config["somTime"],
-	params:																	    
+	params:
 		mem = config["somMem"],
 	threads:
 		config["somThreads"],
@@ -572,20 +572,20 @@ rule somalier_relate:
 				 ".groups.tsv",
 				 ".html")
 	resources:
-		mem_mb_per_cpu = config["somMemMB"],												       
-		runtime = config["somTime"],													       
-	params:																	    
+		mem_mb_per_cpu = config["somMemMB"],
+		runtime = config["somTime"],
+	params:
 		mem = config["somMem"],
-		extra = config["somExtra"],														
-	threads:																	   
-		config["somThreads"],														      
-	log:																	       
-		"logs/somalier/relate.log"														 
-	conda:																	     
-		config["som_ENV"]															  
-	shell:																	     
-		"""																	
+		extra = config["somExtra"],
+	threads:
+		config["somThreads"],
+	log:
+		"logs/somalier/relate.log"
+	conda:
+		config["som_ENV"]
+	shell:
+		"""
 		somalier relate {params.extra} \
 			{input.files} \
-			-o QC/somalier/somalier													    
-		"""		  
+			-o QC/somalier/somalier
+		"""

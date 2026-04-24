@@ -98,7 +98,7 @@ rule multiQC:
 		runtime = config["multiqcTime"],
 	log:
 		"logs/multiqc/multiqc.log",
-	threads: 
+	threads:
 		config["multiqcThreads"]
 	shell:
 		"""
@@ -130,8 +130,8 @@ rule combine_fastqs:
 		runtime = config["combineTime"],
 	log:
 		"logs/combine_fastq/{sample}.log"
-	threads: 
-		config["combineThreads"] 
+	threads:
+		config["combineThreads"]
 	shell:
 		"""
 		cat {input.R1} > {output.R1_out}
@@ -142,7 +142,7 @@ rule combine_fastqs:
 ## tests for contaminants
 
 rule fastq_screen:
-	input: 
+	input:
 		"FASTQ_Raw/Combined/{sample}.{read}.combined.fastq.gz"
 	output:
 		txt="QC/fastq_screen/{sample}.{read}.fastq_screen.txt",
@@ -156,7 +156,7 @@ rule fastq_screen:
 	resources:
 		mem_mb_per_cpu = config["fastqScreenMemMB"],
 		runtime = config["fastqScreenTime"],
-	threads: 
+	threads:
 		config["fastqScreenThreads"]
 	log:
 		"logs/fastq_screen/{sample}.{read}.log"
@@ -192,7 +192,7 @@ rule fastp:
 		mem_mb_per_cpu = config["fastpMemMB"],
 		runtime = config["fastpTime"],
 	threads:
-		config["fastpThreads"] 
+		config["fastpThreads"]
 	wrapper:
 		"v4.0.0/bio/fastp"
 
@@ -220,7 +220,7 @@ rule bwa_mem:
 	resources:
 		mem_mb_per_cpu = config["bwaMemMB"],
 		runtime = config["bwaTime"],
-	threads: 
+	threads:
 		config["bwaThreads"]
 	conda:
 		config["bwa_ENV"]
@@ -241,7 +241,7 @@ rule markduplicates_bam:
 		metrics="QC/markDups/{sample}.metrics.txt",
 	log:
 		"logs/dedup_bam/{sample}.log",
-	threads: 
+	threads:
 		config["markDupsThreads"]
 	params:
 		mem=config["markDupsMem"],
@@ -273,7 +273,7 @@ rule gatk_baserecalibrator:
 		mem_mb=config["gatkRunMem"],
 		mem_mb_per_cpu = config["gatkMemMB"],
 		runtime = config["gatkTime"],
-	threads: 
+	threads:
 		config["gatkThreads"]
 	wrapper:
 		"v4.0.0/bio/gatk/baserecalibrator"
@@ -299,7 +299,7 @@ rule gatk_applybqsr:
 		mem_mb=config["gatkRunMem"],
 		mem_mb_per_cpu = config["gatkMemMB"],
 		runtime = config["gatkTime"],
-	threads: 
+	threads:
 		config["gatkThreads"]
 	wrapper:
 		"v4.0.0/bio/gatk/applybqsr"
@@ -319,11 +319,11 @@ rule samtools_index:
 	resources:
 		mem_mb_per_cpu = config["samtoolsStatMemMB"],
 		runtime = config["samtoolsStatTime"],
-	threads: 
+	threads:
 		config["samtoolsIdxThreads"] # This value - 1 will be sent to -@
 	wrapper:
 		"v4.0.0/bio/samtools/index"
-	
+
 ## Generate flagstat report for the bam files
 rule samtools_stats:
 	input:

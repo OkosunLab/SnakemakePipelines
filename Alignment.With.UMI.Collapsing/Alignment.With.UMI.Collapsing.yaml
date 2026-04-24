@@ -149,7 +149,6 @@ somMemMB: 8000
 somMem: 8G
 somTime: 4:0:0
 somThreads: 1
-som_ENV: "envs/2026.02.13.somalier.yaml"
 somExtra: ""
 ## If you want to provide a pedegree file
 # somExtra: "--ped /path/to/pedigree"

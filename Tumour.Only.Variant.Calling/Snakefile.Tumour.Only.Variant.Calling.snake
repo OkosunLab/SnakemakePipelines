@@ -543,7 +543,7 @@ rule annotate_with_cosmic_vcf:
 ## Generate stats for the VCF files
 rule bcf_stats:
 	input:
-		"VCF/{caller}/BCFtools/{sample}.{caller}.annotated.vcf",
+		"VCF/{caller}/BCFtools/{sample}.{caller}.annotated.vcf.gz",
 	output:
 		"QC/vcf/{sample}.{caller}.final.stats.txt",
 	log:
