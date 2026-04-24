@@ -4,7 +4,7 @@
 
 OkosunLab pipelines built using the snakemake workflow management system.
 
-**WARNING**: the cluster will switch from SGE to Slurm in the new year. I am in the process of adapting these pipelines to work on either system but let me know if you notice any issues.
+**WARNING**: the cluster has switched from SGE to Slurm in 2026. If you haven't yet done so, update to the latest snakemake anaconda environment to ensure you have the slurm cluster addin installed.
 
 ## Contents
 
@@ -16,6 +16,7 @@ OkosunLab pipelines built using the snakemake workflow management system.
    1. [Setup](#Setup)
    2. [Running A Pipeline](#Running-A-Pipeline)
       1. [Job Submission Setup](#Job-Submission-Setup)
+4. [Troubleshooting](#Troubleshooting)
 
 ## Quick Start
 
@@ -65,15 +66,6 @@ Pipeline | info
 ### Setup
 
 First you will need to create a copy of the snakemake environment. You only need to do this once and it will be able to handle all your snakemake pipelines.
-
-```bash
-ml miniforge
-mamba env create -n snakemake -f /data/BCI-OkosunLab/Environments/anaconda3/20240513.snakemake.8.11.3.yml
-```
-
-**NB**
-
-In preparation to move to slurm there is a new version of the environment stored in the envs folder. Use the following code to create that environment
 
 ```bash
 ml miniforge
@@ -164,20 +156,15 @@ Otherwise you can use the full path to the wrapper like this:
 
 **N.B. snakemake will complain about your conda priority not being set to strict. For now ignore this. Setting the priority to strict causes issues with installing the software that I haven't been able to resolve yet.**
 
-#### Job Submission Setup
+## Troubleshooting
 
-For those interested we are dymanically creating job scripts using this command:
+The snakemake logging is quite basic but it will tell you when a job has failed and point you to the log. However the logs aren't always all that useful and often don't contain any output at all. In these instances you want to view the slurm job logs directly. These are handily stored in the .snakemake/slurm_jobs/ directory which you will find in the root location where your ran the pipeline.
+
+You can also use jobstats to monitor resource usage, though this doesn't always seem to follow the resource usage exactly within Slurm. You can also use the sacct command to get a more granual look at the jobs.
 
 ```bash
-"qsub -V -l h_rt=24:0:0 -l h_vmem={params.mem} -pe smp {threads} -j y -cwd -o {log}.jobscript"
+## Get an estimate of resource usage for job 1
+jobstats -j 1
+## get a little more info for the job
+sacct --format="JobID,JobName,Start, End,CPUTime,NNodes,Timelimit,ReqMem,MaxRSS,AveCPU" -j 1
 ```
-Args | Notes
---- | ---
--V | Is vital as this preserves the loaded conda module - without this you cannont use conda to load software (I have not been able to find another way to submit jobs with a module automatically loaded yet).
--l h_rt | Currently I am asking for 1 day, I am in the process of turning this into a parameter than can be set per rule.
--l h_vmem | we set the required memory in the params section of the rule using the key mem (hence {params.mem})
--pe smp {threads} | take the number of threads from the rule.
--j y | join stdev and sterr
--cwd | work on the current working directory
--o {log}.jobscript | store the output of stdev and sterr in the same place as the snakemake log just with the suffix .jobscript
-
