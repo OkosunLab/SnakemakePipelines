@@ -139,7 +139,7 @@ vepThreads: 4
 vepMem: 8G
 vepMemMB: 8000
 vepTime: 4:0:0
-vepPlugins: ["FATHMM", "LoFtool"]
+vepPlugins: ["LoFtool"]
 
 #Vardict
 vardictMem: 24G

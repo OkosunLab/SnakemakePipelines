@@ -463,4 +463,6 @@ rule somalier_relate:
 		somalier relate {params.extra} \
 			{input.files} \
 			-o QC/somalier/somalier
+		## groups isn't always created causing problems - this should bodge this for now
+		if [ $? -eq 0 ] && [ ! -f QC/somalier/somalier.groups.tsv ]; then touch QC/somalier/somalier.groups.tsv; fi
 		"""
