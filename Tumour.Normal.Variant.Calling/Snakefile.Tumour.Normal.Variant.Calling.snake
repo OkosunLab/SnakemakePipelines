@@ -914,8 +914,10 @@ rule annotate_variants_vep:
 	threads: 
 		config["vepThreads"]
 	wrapper:
-		## Updated to fix SV annotations
-		"v8.0.0/bio/vep/annotate"
+		## This will fix SV annotations
+		## "v8.0.0/bio/vep/annotate"
+		## Remain on v4.0.0 for now for consistency
+		"v4.0.0/bio/vep/annotate"
 
 ## Annotate variants with COSMIC vcf file (VEP doesn't do allele matching)
 rule annotate_with_cosmic_vcf:
