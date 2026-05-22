@@ -91,7 +91,7 @@ GATKs LeftAlignAndTrimVariants is run on each VCF from the callers above to esur
 
 ### Annotation
 
-*VEP version: 115.2*
+*VEP version: 111*
 
 Annotation is carried out using Ensembl's [Variant Effect Predictor (VEP)](https://www.ensembl.org/info/docs/tools/vep/index.html). By default this will use the data for Homo Sapiens GRCh38, release 112, though this can be changed in the config options. 
 
