@@ -1,3 +1,3 @@
-sample	tumour	tumourID  sex
-SampleA	Alignment/SampleA.bam	SampleA  XX
-SampleB	Alignment/SampleB.bam	SampleB  XX
+sample	tumour	tumourID	sex
+SampleA	Alignment/SampleA.bam	SampleA	XX
+SampleB	Alignment/SampleB.bam	SampleB	XX
