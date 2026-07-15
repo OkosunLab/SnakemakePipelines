@@ -1,3 +1,3 @@
-sample	tumour	tumourID	normal	normalID
-SampleA	Alignment/SampleA_T.con.bam	SampleA_T	Alignment/SampleA_N.con.bam	SampleA_N
-SampleB	Alignment/SampleB_T.con.bam	SampleB_T	Alignment/SampleB_N.con.bam	SampleB_N
+sample	tumour	tumourID	normal	normalID  sex
+SampleA	Alignment/SampleA_T.con.bam	SampleA_T	Alignment/SampleA_N.con.bam	SampleA_N  XX
+SampleB	Alignment/SampleB_T.con.bam	SampleB_T	Alignment/SampleB_N.con.bam	SampleB_N  XX
